@@ -238,6 +238,9 @@ public class MetrixWatch extends Thread{
 		if(kind == ENTRY_CREATE){
 			if((child+"").matches("^.+?RTAComplete.txt$")){
 				ml.finishRun(child.getParent()+"");
+                                // Remove keys from watch hash.
+                                keys.remove(watchKey);
+                                waitMap.remove(watchKey);
 			}
 		}
 
@@ -291,7 +294,7 @@ public class MetrixWatch extends Thread{
 	private boolean checkPollTime(WatchKey localKey){
 		long currentTime = System.currentTimeMillis();
 
-		checkForceTime();
+//		checkForceTime();
 
 		if(waitMap.get(localKey) == 0){
 			return true;	// Parse in first pass.
