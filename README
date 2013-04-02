@@ -1,4 +1,4 @@
-Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+Metrix - A server / client interface for Illumina Sequencing Metrics.
 Metrics are collected by parsing the binary InterOp sequencer statistics.
 
 Currently supports Illumina's HiSeq 2000 and MiSeq formats. 
