@@ -17,6 +17,7 @@ import nki.objects.ClusterDensity;
 import nki.objects.ErrorRate;
 import nki.objects.Phasing;
 import nki.objects.Reads;
+import nki.objects.QualityScores;
 
 public class Summary implements Serializable {
 
@@ -51,10 +52,12 @@ public class Summary implements Serializable {
 	private boolean		hasNotifyTurned	= false;
 
 	// Run Metrics
-	private HashMap<Object, ClusterDensity>		clusterDensity;		// Contains Cluster Density for all lanes
-	private HashMap<Object, ClusterDensity>		clusterDensityPF;	// Contains Cluster Density Passing Filter for all lanes
-	private Map<Integer, Map<Integer, Phasing>> phasingMap;			// Phasing values per lane
-	private Map<Integer, Map<Integer, Phasing>> prephasingMap;		// Prephasing values per lane
+	private Map<Object, ClusterDensity>		clusterDensity;		// Contains Cluster Density for all lanes
+	private Map<Object, ClusterDensity>		clusterDensityPF;	// Contains Cluster Density Passing Filter for all lanes
+	private Map<Integer, Map<Integer, Phasing>> 	phasingMap;			// Phasing values per lane
+	private Map<Integer, Map<Integer, Phasing>> 	prephasingMap;		// Prephasing values per lane
+
+	private QualityScores qScores;				// QualityScores per lane, per cycle, per tile,
 
 	private	HashMap<Object, ErrorRate>		errorRate;
 	private int 		firstCycleIntensity;
@@ -193,19 +196,19 @@ public class Summary implements Serializable {
 		return swathCount;
 	}
 	
-	public void setClusterDensity(HashMap<Object, ClusterDensity> cd){
+	public void setClusterDensity(Map<Object, ClusterDensity> cd){
 		this.clusterDensity = cd;
 	}
 
-	public HashMap<Object, ClusterDensity> getClusterDensity(){
+	public Map<Object, ClusterDensity> getClusterDensity(){
 		return clusterDensity;
 	}
 
-	public void setClusterDensityPF(HashMap<Object, ClusterDensity> cdPf){
+	public void setClusterDensityPF(Map<Object, ClusterDensity> cdPf){
                 this.clusterDensityPF = cdPf;
         }
 
-        public HashMap<Object, ClusterDensity> getClusterDensityPF(){
+        public Map<Object, ClusterDensity> getClusterDensityPF(){
                 return clusterDensityPF;
         }
 
@@ -317,6 +320,14 @@ public class Summary implements Serializable {
 	        format.setTimeZone(tz.getTimeZone(tz.getID()));
 	        String formatted = format.format(date);
 		return formatted;
+	}
+
+	public void setQScoreDist(QualityScores qScores){
+		this.qScores = qScores;
+	}
+
+	public QualityScores getQScoreDist(){
+		return qScores;
 	}
 }
 

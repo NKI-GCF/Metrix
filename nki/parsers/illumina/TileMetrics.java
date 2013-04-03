@@ -96,19 +96,35 @@ public class TileMetrics {
 		return cdMap;
 	}
 
+	public void setCDmap(Map<Object, ClusterDensity> cdMap){
+		this.cdMap = cdMap;
+	}
+
 	public Map<Object, ClusterDensity> getCDpfMap(){
 		return cdPFMap;
+	}
+
+	public void setCDpfMap(Map<Object, ClusterDensity> cdPFMap){
+		this.cdPFMap = cdPFMap;
 	}
 
 	public Map<Integer, Map<Integer, Phasing>> getPhasingMap(){
 		return pMap;
 	}
 
+	public void setPhasingMap(Map<Integer, Map<Integer, Phasing>> pMap){
+		this.pMap = pMap;
+	}
+
 	public Map<Integer, Map<Integer, Phasing>> getPrephasingMap(){
 		return preMap;
 	}
 
-	public void processData(){
+	public void setPrephasingMap(Map<Integer, Map<Integer, Phasing>> preMap){
+		this.preMap = preMap;
+	}
+
+	public void digestData(){
 		try{
 			setVersion(leis.readByte());
 			setRecordLength(leis.readByte());
@@ -116,10 +132,12 @@ public class TileMetrics {
 			System.out.println("Error in parsing version number and recordLength: " + Ex.toString());
 		}
 
+		boolean eofCheck = true;
+
 		try{
 			int record = 1;
 			int laneCheck = 0;
-			while(true){
+			while(eofCheck){
 				int laneNr = leis.readUnsignedShort();
 				int tileNr = leis.readUnsignedShort();
                                 int metricCode = leis.readUnsignedShort();
@@ -195,11 +213,18 @@ public class TileMetrics {
 				}	
 				
 				record++;
-			}	
+			}
+			
+			// Set the cikkectuib obhects.
+			setCDmap(cdMap);
+			setCDpfMap(cdPFMap);
+			setPhasingMap(pMap);
+			setPrephasingMap(preMap);
+
 		}catch(EOFException EOFEx){
-
+			eofCheck = false;
 		}catch(IOException Ex){
-
+			eofCheck = false;
 		}
 	}
 

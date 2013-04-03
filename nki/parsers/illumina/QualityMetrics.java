@@ -23,18 +23,28 @@ public class QualityMetrics {
 	private String source = "";
 	LittleEndianInputStream leis = null;
 
-	QualityScores qscores;
+	QualityScores qScores;
 
 	private int version = 0;
 	private int recordLength = 0;
+        private int sleepTime = 3000;
+	private boolean fileMissing = false;	
 
-	public QualityMetrics(String source){
-		try{
-			setSource(source);
-			leis = new LittleEndianInputStream(new FileInputStream(source));
-		}catch(IOException IO){
-			System.out.println("Parser Error - Quality Metrics: " + IO.toString());
-		}
+	public QualityMetrics(String source, int state){
+
+                try{
+                        setSource(source);
+                        if(state == 1){
+                                Thread.sleep(sleepTime);
+                        }
+                        leis = new LittleEndianInputStream(new FileInputStream(source));
+                }catch(IOException IO){
+                        // Set fileMissing = true. --> Parse again later.
+                        setFileMissing(true);
+			System.out.println("Parser Error - Quality Metrics : " + IO.toString());
+                }catch(InterruptedException IEX){
+
+                }
 	}
 
 	public void setSource(String source){
@@ -61,7 +71,15 @@ public class QualityMetrics {
 		return recordLength;
 	}
 
-	public QualityScores outputData(){
+	public void setFileMissing(boolean fileMissing){
+		this.fileMissing = fileMissing;
+	}
+
+	public boolean getFileMissing(){
+		return fileMissing;
+	}
+
+	public QualityScores digestData(){
                 qScores = new QualityScores();
 
 		try{
@@ -78,7 +96,6 @@ public class QualityMetrics {
 			qScores.setVersion(this.getVersion());
 			qScores.setRecordLength(this.getRecordLength());
 
-			//HashMap<Integer,int[]> qcMap = new HashMap<Integer, int[]>();
 			boolean qcFlag = false;
 			
 			while(true){
@@ -89,7 +106,6 @@ public class QualityMetrics {
 				qcFlag=true;
 				int qcRecord = 1;
 				int[] clusterScore = new int[51];
-			//	System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr);
 
 				QualityMap qMap = new QualityMap();
 				while(qcFlag){
@@ -99,14 +115,10 @@ public class QualityMetrics {
 					}
 					
 					qMap.addMapping(tileNr, qcRecord, leis.readInt());
-
-//					clusterScore[qcRecord] = leis.readInt();
-//					System.out.println("Record: " + qcRecord + "\tAssigned: " +  clusterScore[qcRecord]);
 					qcRecord++;
 				}
 				cycleMap.put(cycleNr, qMap);				
 				qScores.setLane(cycleMap, laneNr);
-//				qcMap.put(cycleNr, clusterScore); // Store in hashmap per cycle.
 			}
 		}catch(EOFException EOFEx){
 			System.out.println("Reached end of file");
@@ -114,7 +126,7 @@ public class QualityMetrics {
 			System.out.println("IO Error");
 		}
 	
-		// Return the qualityScores.
+		// Return the qualityScores and return QS object.
 		return qScores;
 	}
 

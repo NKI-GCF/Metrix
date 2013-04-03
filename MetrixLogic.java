@@ -20,6 +20,7 @@ import nki.parsers.illumina.*;
 import nki.io.DataStore;
 import nki.constants.Constants;
 import nki.objects.Summary;
+import nki.objects.QualityScores;
 import java.util.logging.*;
 import nki.parsers.xml.XmlDriver;
 import java.util.regex.*;
@@ -52,6 +53,7 @@ public class MetrixLogic {
 		boolean success = false;
                 String extractionMetrics = runDir.toString() + "/InterOp/" + Constants.EXTRACTION_METRICS;
                 String tileMetrics = runDir.toString() + "/InterOp/" + Constants.TILE_METRICS;
+		String qualityMetrics = runDir.toString() + "/InterOp/" + Constants.QMETRICS_METRICS; 
 
 		String path = runDir.toString();
 
@@ -90,8 +92,9 @@ public class MetrixLogic {
 		// Instantiate processing modules.
                 ExtractionMetrics em = new ExtractionMetrics(extractionMetrics, state);
                 TileMetrics tm = new TileMetrics(tileMetrics, state);
+		QualityMetrics qm = new QualityMetrics(qualityMetrics, state);
 
-		if(em.getFileMissing() || tm.getFileMissing()){ // Extraction or TileMetrics file missing. Parse again later.
+		if(em.getFileMissing() || tm.getFileMissing() || qm.getFileMissing()){ // Extraction or TileMetrics file missing. Parse again later.
 			return false;
 		}
 
@@ -121,9 +124,15 @@ public class MetrixLogic {
 				}
 			}
 
-                        tm.processData();                                       // Call data processing of tile metrics
+                        tm.digestData();                                       // Call data processing of tile metrics
+			
+			QualityScores qsOut = qm.digestData();
+
+			summary.setQScoreDist(qsOut);
                         summary.setCurrentCycle(currentCycle);
-                        summary.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
+                       	summary.setClusterDensity(tm.getCDmap());
+			summary.setClusterDensityPF(tm.getCDpfMap()); 	
+			summary.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
                         summary.setPrephasingMap(tm.getPrephasingMap());
                         summary.setLastUpdated();
 
