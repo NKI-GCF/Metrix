@@ -9,8 +9,10 @@ package nki.objects;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.HashMap;
 import nki.objects.QualityMap;
+import nki.objects.MutableLong;
 
 public class QualityScores implements Serializable{
 
@@ -19,6 +21,7 @@ public class QualityScores implements Serializable{
 	public int recordLength;
 	public String source;
 	public HashMap<Integer, HashMap<Integer, QualityMap>> qScores = new HashMap<Integer, HashMap<Integer, QualityMap>>();	
+        private HashMap<Integer, MutableLong> qScoreDist = new HashMap<Integer, MutableLong>();
 
 	public void setVersion(int version){
 		this.version = version;
@@ -62,5 +65,51 @@ public class QualityScores implements Serializable{
 
 	public Iterator getQScoreIterator(){
 		return qScores.entrySet().iterator();
+        }
+
+	public HashMap<Integer, MutableLong> getQScoreDistribution(){
+                Iterator qit = this.getQScoreIterator();
+	
+                while(qit.hasNext()){
+                        Map.Entry scorePairs = (Map.Entry) qit.next();
+                        int lane = (Integer) scorePairs.getKey();
+                        HashMap<Integer, QualityMap> laneScores = (HashMap<Integer, QualityMap>) scorePairs.getValue();
+
+                        for(Map.Entry<Integer, QualityMap> entry : laneScores.entrySet()){
+                                int cycle = (Integer) entry.getKey();
+                                QualityMap qmap = (QualityMap) entry.getValue();
+
+                                Iterator qmapIt = qmap.getScoreIterator();
+
+                                while(qmapIt.hasNext()){
+                                        Map.Entry qmapPairs = (Map.Entry) qmapIt.next();
+                                        int tile = (Integer) qmapPairs.getKey();
+                                        HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
+
+                                        for(Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()){
+						int qScore = (Integer) qmetric.getKey();
+						long metric = Long.valueOf(qmetric.getValue());
+	
+						if(metric == 0){
+							continue;
+						}					
+	
+						MutableLong val = qScoreDist.get(qScore);
+						if(val == null){
+							val.add(metric);
+							qScoreDist.put(qScore, val);
+						}else{
+							qScoreDist.get(qScore).add(metric);
+						}
+	
+       //System.out.println("Lane: " + lane + "\tCycle: " + cycle + "\tTile: " + tile + "\tQMetric: " + metric + "\t#Clust\\wScore: " + value);
+                                        }
+                                }
+                        }
+                }
+		
+	return qScoreDist;
+
+
         }
 }
