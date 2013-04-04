@@ -21,13 +21,21 @@ public class ErrorMetrics {
 
 	private int version = 0;
 	private int recordLength = 0;
+	private int sleepTime = 3000;
+	private boolean fileMissing = false;
 
-	public ErrorMetrics(String source){
-		try{
-			setSource(source);
-			leis = new LittleEndianInputStream(new FileInputStream(source));
+	public ErrorMetrics(String source, int state){
+                try{
+                        setSource(source);
+                        if(state == 1){
+                                Thread.sleep(sleepTime);
+                        }
+                        leis = new LittleEndianInputStream(new FileInputStream(source));
 		}catch(IOException IO){
+			setFileMissing(true);
 			System.out.println("Parser Error - Error Metrics: " + IO.toString());
+		}catch(InterruptedException IEX){
+			
 		}
 	}
 
@@ -55,7 +63,15 @@ public class ErrorMetrics {
 		return recordLength;
 	}
 
-	public void outputData(){
+        public void setFileMissing(boolean fileMissing){
+                this.fileMissing = fileMissing;
+        }
+
+        public boolean getFileMissing(){
+                return fileMissing;
+        }
+
+	public void digestData(){
 		try{
 			setVersion(leis.readByte());
 			setRecordLength(leis.readByte());		

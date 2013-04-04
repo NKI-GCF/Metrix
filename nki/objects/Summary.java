@@ -14,7 +14,7 @@ import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import nki.objects.ClusterDensity;
-import nki.objects.ErrorRate;
+//import nki.objects.ErrorRate;
 import nki.objects.Phasing;
 import nki.objects.Reads;
 import nki.objects.QualityScores;
@@ -59,7 +59,7 @@ public class Summary implements Serializable {
 
 	private QualityScores qScores;				// QualityScores per lane, per cycle, per tile,
 
-	private	HashMap<Object, ErrorRate>		errorRate;
+//	private	HashMap<Object, ErrorRate>		errorRate;
 	private int 		firstCycleIntensity;
 
 	public void setSumId(int id){
@@ -212,13 +212,13 @@ public class Summary implements Serializable {
                 return clusterDensityPF;
         }
 
-	public void setErrorRate(HashMap<Object, ErrorRate> er){
-		this.errorRate = er;
-	}
+//	public void setErrorRate(HashMap<Object, ErrorRate> er){
+//		this.errorRate = er;
+//	}
 
-	public HashMap<Object, ErrorRate> getErrorRate(){
-		return errorRate;
-	}
+//	public HashMap<Object, ErrorRate> getErrorRate(){
+//		return errorRate;
+//	}
 	
 	public void setFirstCycleIntensity(int fci){
 		this.firstCycleIntensity = fci;
