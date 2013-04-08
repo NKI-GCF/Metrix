@@ -55,7 +55,7 @@ public class QualityScores implements Serializable{
 			qScores.put(lanenr, content);
 		}else{	// Merge maps
 			HashMap<Integer, QualityMap> tmpMap = new HashMap<Integer, QualityMap>(content);
-			tmpMap.keySet().removeKeys(cycleMap.keySet());
+			tmpMap.keySet().removeAll(cycleMap.keySet());
 			cycleMap.putAll(content);
 		}
 
