@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -37,6 +37,5 @@ public class ErrorMap implements Serializable{
 	public Iterator getErrorIteratorForTiles(){
 		return eMap.entrySet().iterator();
 	}
-	
 	
 }

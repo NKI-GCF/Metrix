@@ -14,6 +14,8 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Collections;
+import nki.objects.ErrorCollection;
+import nki.object.ErrorMap;
 
 public class ErrorMetrics {
 	private String source = "";
@@ -23,6 +25,8 @@ public class ErrorMetrics {
 	private int recordLength = 0;
 	private int sleepTime = 3000;
 	private boolean fileMissing = false;
+
+	private ErrorCollection eScores;
 
 	public ErrorMetrics(String source, int state){
                 try{
@@ -72,27 +76,46 @@ public class ErrorMetrics {
         }
 
 	public void digestData(){
+		eScores = new ErrorCollection();
+		HashMap<Integer, ErrorMap> cycleMap;		
+
 		try{
-			setVersion(leis.readByte());
-			setRecordLength(leis.readByte());		
+			eScores.setVersion(leis.readByte());
+			eScores.setRecordLength(leis.readByte());		
 		}catch(IOException Ex){
 			System.out.println("Error in parsing version number and recordLength: " + Ex.toString());
 		}
 
 		try{
 			int record = 1;
+			int prevCycle = -1;
+			
+			// If errormap exists in cycle map retrieve. 
+			// Check cycle after parsing.
 
 			while(true){
+				ErrorMap eMap = new ErrorMap();
+
 				int laneNr = leis.readUnsignedShort();
 				int tileNr = leis.readUnsignedShort();
 				int cycleNr = leis.readUnsignedShort();
+
 				float errorRate = leis.readFloat();
 				int numPerfectReads = leis.readInt();
 				int numReads1E = leis.readInt();
 				int numReads2E = leis.readInt();
 				int numReads3E = leis.readInt();
 				int numReads4E = leis.readInt();
+			
+				eMap.addMetric(tilenr,-1, errorRate);
+				eMap.addMetric(tilenr,0, numPerfectReads);
+				eMap.addMetric(tilenr,1, numReads1E);
+				eMap.addMetric(tilenr,2, numReads2E);
+				eMap.addMetric(tilenr,3, numReads3E);
+				eMap.addMetric(tilenr,4, numReads4E);
 				
+								
+
 				System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr + "\t" + errorRate + "\t" + numPerfectReads + "\t" + numReads1E + "\t" + numReads2E + "\t" + numReads3E + "\t" + numReads4E);
 
 			}

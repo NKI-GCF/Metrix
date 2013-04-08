@@ -48,7 +48,18 @@ public class QualityScores implements Serializable{
 	}
 
 	public void setLane(HashMap<Integer, QualityMap> content, int lanenr){
-		qScores.put(lanenr, content);
+
+		HashMap<Integer, QualityMap> cycleMap = qScores.get(lanenr);
+
+		if(cycleMap == null){
+			qScores.put(lanenr, content);
+		}else{	// Merge maps
+			HashMap<Integer, QualityMap> tmpMap = new HashMap<Integer, QualityMap>(content);
+			tmpMap.keySet().removeKeys(cycleMap.keySet());
+			cycleMap.putAll(content);
+		}
+
+		qScores.put(lanenr, cycleMap);
 	}
 
         public HashMap<Integer, QualityMap> getLane(int lanenr){
