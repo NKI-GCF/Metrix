@@ -1,6 +1,6 @@
 -- Illumina Metrix Server 
 -- Netherlands Cancer Institute
--- Bernd van der Veen - 2012 / 2013
+-- Bernd van der Veen - 2013
 -- For license details please see LICENSE.TXT
 -- SQL Script for Metrix Server object table --
 
