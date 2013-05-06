@@ -50,6 +50,7 @@ public class Summary implements Serializable {
 	private Reads		reads;				// Read information
 	private boolean		hasTurned	= false;
 	private boolean		hasNotifyTurned	= false;
+	private String		runDirectory = "";		// RunDirectory path
 
 	// Run Metrics
 	private Map<Object, ClusterDensity>		clusterDensity;		// Contains Cluster Density for all lanes
@@ -57,7 +58,7 @@ public class Summary implements Serializable {
 	private Map<Integer, Map<Integer, Phasing>> 	phasingMap;			// Phasing values per lane
 	private Map<Integer, Map<Integer, Phasing>> 	prephasingMap;		// Prephasing values per lane
 
-	private QualityScores qScores;				// QualityScores per lane, per cycle, per tile,
+	private QualityScores qScores;						// QualityScores per lane, per cycle, per tile,
 
 //	private	HashMap<Object, ErrorRate>		errorRate;
 	private int 		firstCycleIntensity;
@@ -328,6 +329,34 @@ public class Summary implements Serializable {
 
 	public QualityScores getQScoreDist(){
 		return qScores;
+	}
+
+	public void setRunDirectory(String runDirectory){
+		this.runDirectory = runDirectory;
+	}
+
+	public String getRunDirectory(){
+		return runDirectory;
+	}
+
+	public boolean hasClusterDensity(){
+		return clusterDensity.isEmpty() ? false : true;
+	}
+
+	public boolean hasClusterDensityPF(){
+		return clusterDensityPF.isEmpty() ? false : true;
+	}
+
+	public boolean hasPrephasing(){
+		return prephasingMap.isEmpty() ? false : true;
+	}
+
+	public boolean hasPhasing(){
+		return phasingMap.isEmpty() ? false : true;
+	}
+
+	public boolean hasQScores(){
+		return qScores.isEmpty() ? false : true;
 	}
 }
 

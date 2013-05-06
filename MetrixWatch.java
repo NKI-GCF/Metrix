@@ -20,6 +20,7 @@ public class MetrixWatch extends Thread{
        	private Map<WatchKey, Long> waitMap;
 	private boolean recursive;
         private boolean trace = false;
+	public boolean logicInit = false;
 	private Path runDirPath;
 	private String runDirString;
 	private String illuDirRegex = "\\d*_.*_\\d*_\\d*.*";
@@ -79,6 +80,8 @@ public class MetrixWatch extends Thread{
                         File[] listOfFiles = folder.listFiles();
                         String file;
 			this.trace = true;
+			this.logicInit = true;
+
                         for(int i = 0; i < listOfFiles.length; i++){
 				if(!checkRegisterIllumina(listOfFiles[i], false)){
 					continue;
@@ -310,7 +313,7 @@ public class MetrixWatch extends Thread{
 		}
 	}
 
-	private void checkForceTime(){
+	public void checkForceTime(){
 		long currentTime = System.currentTimeMillis();
 		
 		Iterator it = waitMap.entrySet().iterator();

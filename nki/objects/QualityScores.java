@@ -30,6 +30,14 @@ public class QualityScores implements Serializable{
 	public int getVersion(){
 		return version;
 	}
+
+	public boolean isEmpty(){
+		if(qScores.size() == 0){
+			return true;
+		}else{
+			return false;
+		}
+	}
 	
 	public void setRecordLength(int recordLength){
 		this.recordLength = recordLength;

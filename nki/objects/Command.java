@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -16,18 +16,26 @@ public class Command implements Serializable{
 	
 	public static final long serialVersionUID = 42L;
 
-	private String commandString = "";
+	private String 	mode 	= "CALL";
+	private String 	type 	= "SIMPLE";
+	private String 	format 	= "XML";
+	private String 	command = "";
+	private int 	state 	= 12;
+	private Object  payload;
+
 	private Date dateTime;
-	private String command;				// 'GET' / 'FETCH'
-	private String commandDetail = "";
-	private String mode = "CALL"; 			// 'TIMED' or 'CALL' (default)
+	private String	runId = "";
+//	private String command;				// 'GET' / 'FETCH'
+//	private String commandDetail = "";
+//	private String mode = "CALL"; 			// 'TIMED' or 'CALL' (default)
 							// 'TIMED' executes command repetitively based on variable timedInterval in ms
 							// 'CALL' will execute command once and close the connection
+//	private String type = "SIMPLE";			// Data collection type: SIMPLE, DETAIL, METRIC
 	private long timedInterval 	= 10000;	// 10 seconds (use setTimedInterval() to change)
-	private String format		= "XML";	// 'XML' or 'OBJ'
+//	private String format		= "XML";	// 'XML' or 'OBJ'
 							// XML is a SummaryCollection XML format.
 							// OBJ is a SummaryCollection POJO.
-	private int state		= 12;		// 1 = Running
+//	private int state		= 12;		// 1 = Running
 							// 2 = Finished
 							// 3 = Halted
 							// 4 = Turn
@@ -36,18 +44,13 @@ public class Command implements Serializable{
 	private String info;
 	private String message;
 
+	
+
+
 	public Command(){
 		this.setDateTime();	// Set date time for instantiation of command object.
 	}
 
-	public void setCommandString(String command){
-		this.commandString = command;
-	}
-
-	public String getCommandString(){
-		return commandString;
-	}
-	
 	public void setDateTime(){
 		this.dateTime = new Date();
 	}
@@ -58,14 +61,6 @@ public class Command implements Serializable{
 
 	public String getCommand(){
 		return command;
-	}
-
-	public void setCommandDetail(String cd){
-		this.commandDetail = cd;
-	}
-
-	public String getCommandDetail(){
-		return commandDetail;
 	}
 
 	public Date getDateTime(){
@@ -96,6 +91,22 @@ public class Command implements Serializable{
 		}
 	}
 
+	public String getType(){
+		return type;
+	}
+
+	public void setType(String type){
+		if(!type.equals("SIMPLE") || 
+		   !type.equals("DETAIL") ||
+		   !type.equals("METRIC"))
+		{
+			setMessage("Invalid stat type ("+type+")");
+			type = null;
+		}else{
+			this.type = type;
+		}
+	}
+
 	public long getTimedInterval(){
 		return timedInterval;
 	}
@@ -113,8 +124,9 @@ public class Command implements Serializable{
 	}
 
 	public void setState(int st){
-		if(st != (0 | 2 | 3 | 4 | 5 | 12)){
+		if(st != (1 | 2 | 3 | 4 | 5 | 12)){
 			setMessage("Invalid state (" + st + ")");
+			state = 0;
 		}else{
 			this.state = st;
 		}
@@ -130,6 +142,22 @@ public class Command implements Serializable{
 		}else{
 			this.format = "XML";
 		}
+	}
+
+	public boolean checkParams(){
+		if(format == null || mode == null || type == null || state != (1|2|3|4|5|12)){
+			return false;
+		}
+
+		return true;
+	}
+
+	public void setRunId(String runId){
+		this.runId = runId;
+	}
+	
+	public String getRunId(){
+		return runId;
 	}
 }
 

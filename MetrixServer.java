@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -17,6 +17,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.logging.*;
 import java.util.Properties;
+import java.util.concurrent.*;
 import nki.io.DataStore;
 
 
@@ -24,9 +25,10 @@ public class MetrixServer{
 
 	static boolean listening = true;
 	private static final Logger metrixLogger = Logger.getLogger(MetrixServer.class.getName());
-
+        private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+ 
     public void run() throws IOException {
-	System.out.println("Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.");
+	System.out.println("Metrix - A server / client interface for Illumina Sequencing Metrics.");
 	System.out.println("Copyright (C) 2013 Bernd van der Veen\n");
 	System.out.println("This program comes with ABSOLUTELY NO WARRANTY;");
 	System.out.println("This is free software, and you are welcome to redistribute it");
@@ -57,7 +59,7 @@ public class MetrixServer{
 		
                 metrixLogger.log(Level.INFO, "Initializing Directory Watcher Service.");
 		// Start Watcher service
-		MetrixWatch mw = new MetrixWatch(runDir, false, ds);
+		final MetrixWatch mw = new MetrixWatch(runDir, false, ds);
                 mw.start();
 		metrixLogger.log(Level.INFO, "Directory Watcher Service started - Monitoring.");
 	
@@ -67,13 +69,26 @@ public class MetrixServer{
 	        ssChannel.socket().bind(new InetSocketAddress(port));	// Call server / Bind socket and port.
 	
         	metrixLogger.log(Level.INFO, "Metrix Thread Server initialized.");
+
+		metrixLogger.log(Level.INFO, "Initializing backlog folder iterator.");
+		final Runnable backlog = new Runnable() {
+	                public void run() {
+				mw.checkForceTime();
+			}
+        	};
+
+		final ScheduledFuture<?> backlogHandle = scheduler.scheduleAtFixedRate(backlog, 10, 20, TimeUnit.MINUTES);
+		       scheduler.schedule(new Runnable() {
+		       	public void run() { backlogHandle.cancel(true); }
+		       }, 365, TimeUnit.DAYS);
+		
 	
 		// While server is alive, accept new connections.
         	while (listening) {
                         new MetrixThread(ssChannel.accept()).start();
         	}
 	}catch(IOException Ex){
-		metrixLogger.log(Level.SEVERE, "Nullpointer Exception initializing server.", Ex.toString());
+		metrixLogger.log(Level.SEVERE, "IOException initializing server.", Ex.toString());
 		Ex.printStackTrace();
 		System.exit(1);	
 	}

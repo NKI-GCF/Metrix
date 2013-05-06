@@ -56,7 +56,6 @@ public class MetrixLogic {
 		String qualityMetrics = runDir.toString() + "/InterOp/" + Constants.QMETRICS_METRICS; 
 
 		String path = runDir.toString();
-
 		// Retrieve Summary if exists else create new instance.
 		this.checkSummary(path);
 
@@ -68,6 +67,7 @@ public class MetrixLogic {
 			summary.setState(5);
 			summary.setLastUpdated();
 			try{
+				
 				if(!summary.getXmlInfo()){
 					XmlDriver xmd = new XmlDriver(runDir + "", summary);
 					if(xmd.parseRunInfo()){
@@ -88,6 +88,8 @@ public class MetrixLogic {
 			saveEntry(path);
 			return false;
 		}
+
+		summary.setRunDirectory(path);
 
 		// Instantiate processing modules.
                 ExtractionMetrics em = new ExtractionMetrics(extractionMetrics, state);
@@ -124,16 +126,7 @@ public class MetrixLogic {
 				}
 			}
 
-                        tm.digestData();                                       // Call data processing of tile metrics
-			
-			QualityScores qsOut = qm.digestData();
-
-			summary.setQScoreDist(qsOut);
-                        summary.setCurrentCycle(currentCycle);
-                       	summary.setClusterDensity(tm.getCDmap());
-			summary.setClusterDensityPF(tm.getCDpfMap()); 	
-			summary.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
-                        summary.setPrephasingMap(tm.getPrephasingMap());
+	                summary.setCurrentCycle(currentCycle);
                         summary.setLastUpdated();
 
 			// Catch event for when the flowcell has turned and the sequencer has continued sequencing the other side.

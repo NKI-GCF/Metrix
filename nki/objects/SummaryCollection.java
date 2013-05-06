@@ -55,7 +55,7 @@ public class SummaryCollection implements Serializable {
 		return summaryStateMapping.entrySet().iterator();
 	}
 
-	public Document getSummaryCollectionAsXML(int state){
+	public Document getSummaryCollectionAsXML(Command com){
 		Document xmlDoc = null;
 		try{
 			// Build the XML document
@@ -80,21 +80,19 @@ public class SummaryCollection implements Serializable {
 				Summary sumObj = (Summary) litr.next();
 
 				// If state is 12, fetch all objects.
-				if(sumObj.getState() == state || state == 12){
+				if(sumObj.getState() == com.getState() || com.getState() == 12){
 					Element sumXml = xmlDoc.createElement("Summary");
 	
-					sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
-					sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
-					sumXml.appendChild(createElement(xmlDoc, "flowcellId", sumObj.getFlowcellID()));
-					sumXml.appendChild(createElement(xmlDoc, "runSide", sumObj.getSide()));
-					sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState()+""));
-					sumXml.appendChild(createElement(xmlDoc, "runPhase", sumObj.getPhase()));
-					sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated()+""));
-					sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate()+""));
-					sumXml.appendChild(createElement(xmlDoc, "currentCycle", sumObj.getCurrentCycle()+""));
-					sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles()+""));
-					sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));
-					
+					if(com.getType().equals("SIMPLE")){
+						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
+					}else if(com.getType().equals("DETAIL")){
+                                                sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
+					}else if(com.getType().equals("METRIC")){
+	                                        sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);			
+					}else{
+						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
+					}
+
 					root.appendChild(sumXml);
 				}
 			}			
@@ -106,6 +104,41 @@ public class SummaryCollection implements Serializable {
 
 		// Return in the form of a XML Document
 		return xmlDoc;
+	}
+
+	private Element summaryAsSimple(Summary sumObj, Element sumXml, Document xmlDoc){
+
+                sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
+                sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
+                sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState()+""));
+                sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated()+""));
+                sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate()+""));
+                sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles()+""));
+                sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));		
+
+		return sumXml;
+	}
+
+	private Element summaryAsDetailed(Summary sumObj, Element sumXml, Document xmlDoc){
+
+		sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
+		sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
+		sumXml.appendChild(createElement(xmlDoc, "flowcellId", sumObj.getFlowcellID()));
+		sumXml.appendChild(createElement(xmlDoc, "runSide", sumObj.getSide()));
+		sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState()+""));
+		sumXml.appendChild(createElement(xmlDoc, "runPhase", sumObj.getPhase()));
+		sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated()+""));
+		sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate()+""));
+		sumXml.appendChild(createElement(xmlDoc, "currentCycle", sumObj.getCurrentCycle()+""));
+		sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles()+""));
+		sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));
+
+		return sumXml;
+
+	}
+
+	private Element summaryAsMetric(Summary sumObj, Element sumXml, Document xmlDoc){
+		return sumXml;
 	}
 
 	private String convertStateInt(int mapping){
@@ -127,9 +160,9 @@ public class SummaryCollection implements Serializable {
 		return e;
 	}
 
-	public String getSummaryCollectionXMLAsString(int state){
+	public String getSummaryCollectionXMLAsString(Command com){
 		// Call getSummaryCollectionAsXML
-		Document xmlDoc = this.getSummaryCollectionAsXML(state);
+		Document xmlDoc = this.getSummaryCollectionAsXML(com);
 		StringWriter writer = new StringWriter();
 
 		try {
@@ -142,9 +175,9 @@ public class SummaryCollection implements Serializable {
 			DOMSource source = new DOMSource(xmlDoc);
 			trans.transform(source, result);
 		}catch(TransformerConfigurationException TCE){
-			System.out.println("HELP TCE!" + TCE.toString());
+			System.out.println("TransformerConfigurationException: " + TCE.toString());
 		}catch(TransformerException TE){
-			System.out.println("HELP TE" + TE.toString());
+			System.out.println("TransformerException: " + TE.toString());
 		}
 
 		return writer.toString();

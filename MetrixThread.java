@@ -102,25 +102,19 @@ public class MetrixThread extends Thread {
 	}
 
 	private void processCommand(ObjectOutputStream oos, ObjectInputStream ois, MetrixLogic ml, DataStore ds, Command commandClient) throws IOException, Exception{
-		
-		// Retrieve singular instance of Summary
-		if(commandClient.getCommand().equals("GET")){
-			metrixLogger.log(Level.INFO, "[CLIENT] Fetch single run" + commandClient.getCommandString());
-		}
-	
 		// Get active runs
 		if(commandClient.getCommand().equals("FETCH")){
 			int state = -1;
+
+                        metrixLogger.log(Level.INFO, "[CLIENT] Fetch runs.");
+
 			try{
 				state = commandClient.getState();
 			}catch(Exception Ex){
-				metrixLogger.log(Level.WARNING, "Missing CommandDetail property in provided command.");
 				Command errorCommand = new Command();
 				errorCommand.setCommand("ERROR");
-				errorCommand.setInfo("Missing CommandDetail property in provided command.");
 				oos.writeObject(errorCommand);
 			}
-			metrixLogger.log(Level.INFO, "[CLIENT] Fetch active runs.");
 										
 			// Retrieve set and return object.
 			SummaryCollection sc = ds.getSummaryCollections();
@@ -129,12 +123,10 @@ public class MetrixThread extends Thread {
 			if(sc.getCollectionCount() == 0){
 				Command serverAnswer = new Command();
 				serverAnswer.setCommand("ERROR");
-				serverAnswer.setCommandDetail("Currently there are no active runs.");
-				
 				oos.writeObject(serverAnswer);	
 			// If request format is in XML
 			}else if(commandClient.getFormat().equals("XML")){
-				String collectionString = sc.getSummaryCollectionXMLAsString(state);
+				String collectionString = sc.getSummaryCollectionXMLAsString(commandClient);
 				if(collectionString.equals("")){
 					oos.writeObject("");
 				}else{
@@ -145,10 +137,6 @@ public class MetrixThread extends Thread {
 			}
 			sc = null;
 		}
-
-		// Get failed runs
-
-		// Get runs with unknown status
 	}
 }	
 
