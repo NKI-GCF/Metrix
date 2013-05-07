@@ -138,6 +138,7 @@ public class SummaryCollection implements Serializable {
 	}
 
 	private Element summaryAsMetric(Summary sumObj, Element sumXml, Document xmlDoc){
+		sumXml.appendChild(createElement(xmlDoc, "TestLalal", sumObj.getRunId()));
 		return sumXml;
 	}
 

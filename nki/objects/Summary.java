@@ -51,6 +51,7 @@ public class Summary implements Serializable {
 	private boolean		hasTurned	= false;
 	private boolean		hasNotifyTurned	= false;
 	private String		runDirectory = "";		// RunDirectory path
+	private int		parseError	=	0;	// Number of parsing errors
 
 	// Run Metrics
 	private Map<Object, ClusterDensity>		clusterDensity;		// Contains Cluster Density for all lanes
@@ -357,6 +358,18 @@ public class Summary implements Serializable {
 
 	public boolean hasQScores(){
 		return qScores.isEmpty() ? false : true;
+	}
+
+	public void setParseError(int parseError){
+		this.parseError = parseError;
+	}
+
+	public void incParseError(){
+		this.parseError++;
+	}
+	
+	public int getParseError(){
+		return this.parseError;
 	}
 }
 

@@ -155,8 +155,6 @@ public class CommandProcessor {
 					}else if(recCom.getFormat().equals("POJO")){
 						oos.writeObject(sum); // Send as POJO
 					}
-
-
 				}else{
 					// Throw error
 				}

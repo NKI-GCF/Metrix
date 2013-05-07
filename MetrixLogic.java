@@ -97,6 +97,12 @@ public class MetrixLogic {
 		QualityMetrics qm = new QualityMetrics(qualityMetrics, state);
 
 		if(em.getFileMissing() || tm.getFileMissing() || qm.getFileMissing()){ // Extraction or TileMetrics file missing. Parse again later.
+			summary.incParseError();
+		}
+		
+		if(summary.getParseError() >= 15){
+			summary.setState(3);
+			metrixLogger.log(Level.INFO, "Run has failed to complete within the allotted time frame.");
 			return false;
 		}
 

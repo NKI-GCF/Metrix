@@ -297,8 +297,6 @@ public class MetrixWatch extends Thread{
 	private boolean checkPollTime(WatchKey localKey){
 		long currentTime = System.currentTimeMillis();
 
-//		checkForceTime();
-
 		if(waitMap.get(localKey) == 0){
 			return true;	// Parse in first pass.
 		}
