@@ -154,7 +154,9 @@ public class ExtractionMetrics {
 					leis.skipBytes(36);
 				}
 			}
-			leis.close();
+			if(leis != null){
+				leis.close();
+			}
 		}catch(IOException Ex){
 		
 		}

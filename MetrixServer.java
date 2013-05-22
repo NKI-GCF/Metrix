@@ -70,10 +70,12 @@ public class MetrixServer{
 	
         	metrixLogger.log(Level.INFO, "Metrix Thread Server initialized.");
 
-		metrixLogger.log(Level.INFO, "Initializing backlog folder iterator.");
+		metrixLogger.log(Level.INFO, "Initializing backlog service.");
 		final Runnable backlog = new Runnable() {
 	                public void run() {
-				mw.checkForceTime();
+				if(mw.watcher != null){
+					mw.checkForceTime();
+				}
 			}
         	};
 

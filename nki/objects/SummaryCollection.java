@@ -82,7 +82,7 @@ public class SummaryCollection implements Serializable {
 				// If state is 12, fetch all objects.
 				if(sumObj.getState() == com.getState() || com.getState() == 12){
 					Element sumXml = xmlDoc.createElement("Summary");
-	
+
 					if(com.getType().equals("SIMPLE")){
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}else if(com.getType().equals("DETAIL")){
@@ -97,7 +97,7 @@ public class SummaryCollection implements Serializable {
 				}
 			}			
 		}catch(Exception ex){
-			System.out.println("HELP! ERROR IN XML " + ex.toString());
+			ex.printStackTrace();
 		}
 		
 		setCollectionFormat("XML");		

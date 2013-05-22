@@ -120,10 +120,18 @@ public class DataStore {
 		pstmt.setString(1, runName);
 
 		ResultSet rs = pstmt.executeQuery();
-		rs.next();
-		Summary sum = (Summary) rs.getObject(1);
-		String className = sum.getClass().getName();
+		Summary sum = new Summary();
 
+		while(rs.next()){
+			byte[] buf = rs.getBytes(1);
+			ObjectInputStream objectIn = null;
+			if (buf != null){
+				objectIn = new ObjectInputStream(new ByteArrayInputStream(buf));
+			}
+			Object sumObject = objectIn.readObject();
+			sum = (Summary) sumObject;
+		}
+		
 		rs.close();
 		pstmt.close();
 

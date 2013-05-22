@@ -11,6 +11,7 @@ import java.net.*;
 import java.io.*;
 import java.lang.*;
 import java.util.Date;
+import java.util.Arrays;
 
 public class Command implements Serializable{
 	
@@ -43,9 +44,8 @@ public class Command implements Serializable{
 							// 12 = All
 	private String info;
 	private String message;
-
-	
-
+	public static final int[] STATES = {1,2,3,4,5,12};
+	public static final String[] TYPES = {"SIMPLE","DETAIL","METRIC"};
 
 	public Command(){
 		this.setDateTime();	// Set date time for instantiation of command object.
@@ -96,9 +96,7 @@ public class Command implements Serializable{
 	}
 
 	public void setType(String type){
-		if(!type.equals("SIMPLE") || 
-		   !type.equals("DETAIL") ||
-		   !type.equals("METRIC"))
+		if(!Arrays.asList(TYPES).contains(type))
 		{
 			setMessage("Invalid stat type ("+type+")");
 			type = null;
@@ -124,7 +122,10 @@ public class Command implements Serializable{
 	}
 
 	public void setState(int st){
-		if(st != (1 | 2 | 3 | 4 | 5 | 12)){
+
+		if(!checkState(st)){
+		//if(!Arrays.asList(STATES).contains(st)){
+		//
 			setMessage("Invalid state (" + st + ")");
 			state = 0;
 		}else{
@@ -158,6 +159,17 @@ public class Command implements Serializable{
 	
 	public String getRunId(){
 		return runId;
+	}
+
+	private boolean checkState(int st){
+
+		for (int i = 0; i < STATES.length; i++) {
+		    if (STATES[i] == st) {
+			        return true;
+		    }
+		}
+
+		return false;
 	}
 }
 

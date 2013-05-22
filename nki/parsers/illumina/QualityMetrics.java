@@ -41,7 +41,7 @@ public class QualityMetrics {
                 }catch(IOException IO){
                         // Set fileMissing = true. --> Parse again later.
                         setFileMissing(true);
-			System.out.println("Parser Error - Quality Metrics : " + IO.toString());
+						System.out.println("Quality Metrics file not available for " + source);
                 }catch(InterruptedException IEX){
 
                 }

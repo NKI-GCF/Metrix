@@ -43,19 +43,32 @@ public class MetrixLogic {
 
 
 	// Call inits
-        private HashMap<String, Summary> results = new HashMap<String, Summary>();
+    private HashMap<String, Summary> results = new HashMap<String, Summary>();
 	private Summary summary = null;
 
 	public MetrixLogic(){
+
 	}
 
 	public boolean processMetrics(Path runDir, int state, DataStore ds){
 		boolean success = false;
-                String extractionMetrics = runDir.toString() + "/InterOp/" + Constants.EXTRACTION_METRICS;
-                String tileMetrics = runDir.toString() + "/InterOp/" + Constants.TILE_METRICS;
-		String qualityMetrics = runDir.toString() + "/InterOp/" + Constants.QMETRICS_METRICS; 
 
+		String extractionMetrics = "";
+		String tileMetrics = "";
+		String qualityMetrics = "";
 		String path = runDir.toString();
+
+		if(!path.matches("(.*)InterOp(.*)")){
+                extractionMetrics = path + "/InterOp/" + Constants.EXTRACTION_METRICS;
+                tileMetrics = path + "/InterOp/" + Constants.TILE_METRICS;
+				qualityMetrics = path + "/InterOp/" + Constants.QMETRICS_METRICS; 
+		}else{
+                extractionMetrics = path + "/" + Constants.EXTRACTION_METRICS;
+                tileMetrics = path + "/" + Constants.TILE_METRICS;
+				qualityMetrics = path + "/" + Constants.QMETRICS_METRICS; 
+		}
+	
+//		String path = runDir.toString();
 		// Retrieve Summary if exists else create new instance.
 		this.checkSummary(path);
 
@@ -69,7 +82,7 @@ public class MetrixLogic {
 			try{
 				
 				if(!summary.getXmlInfo()){
-					XmlDriver xmd = new XmlDriver(runDir + "", summary);
+					XmlDriver xmd = new XmlDriver(path , summary);
 					if(xmd.parseRunInfo()){
 						summary = xmd.getSummary();
 					}else{
@@ -142,13 +155,13 @@ public class MetrixLogic {
 			}else{
 				summary.setState(state);
 			}
-                        results.put(path, summary);
-
+			
+			results.put(path, summary);
 			saveEntry(path);	// Store summary entry in SQL database
 	
 			metrixLogger.log(Level.INFO, "Finished processing: " + runDir + "\tState: "+state);
 			success = true;
-                }catch(NullPointerException NPE){
+        }catch(NullPointerException NPE){
 			NPE.printStackTrace();
 		}catch(SAXException SAX){
 			metrixLogger.log(Level.SEVERE, "Error parsing XML with SAX. " + SAX.toString());
@@ -213,7 +226,6 @@ public class MetrixLogic {
 	}
 
 	public boolean checkPaired(String path, DataStore ds){
-		System.out.println("Checking PATH: " + path);
 		this.checkSummary(path);
 		boolean check = false;
 		if(this.processMetrics(Paths.get(path), 4, ds)){

@@ -106,7 +106,7 @@ public class MetrixThread extends Thread {
 		if(commandClient.getCommand().equals("FETCH")){
 			int state = -1;
 
-                        metrixLogger.log(Level.INFO, "[CLIENT] Fetch runs.");
+            metrixLogger.log(Level.INFO, "[CLIENT] Fetch runs.");
 
 			try{
 				state = commandClient.getState();

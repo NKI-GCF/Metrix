@@ -14,13 +14,12 @@ import nki.objects.Summary;
 
 public class MetrixWatch extends Thread{
 	
-        // Variables
-        private WatchService watcher;
-        private Map<WatchKey,Path> keys;
-       	private Map<WatchKey, Long> waitMap;
+    // Variables
+    protected WatchService watcher;
+    private Map<WatchKey,Path> keys;
+    private Map<WatchKey, Long> waitMap;
 	private boolean recursive;
-        private boolean trace = false;
-	public boolean logicInit = false;
+    private boolean trace = false;
 	private Path runDirPath;
 	private String runDirString;
 	private String illuDirRegex = "\\d*_.*_\\d*_\\d*.*";
@@ -48,13 +47,13 @@ public class MetrixWatch extends Thread{
         * Creates a WatchService and registers the given run directory
         */
         public MetrixWatch(String dirN, boolean rec, DataStore ds) throws IOException {
-		this.runDirString = dirN;
-                this.runDirPath = Paths.get(dirN);
-                this.recursive = rec;
-                this.watcher = FileSystems.getDefault().newWatchService();
-                this.keys = new HashMap<WatchKey,Path>();
-		this.waitMap = new HashMap<WatchKey, Long>();
-		this.dataStore = ds;
+			this.runDirString = dirN;
+		   	this.runDirPath = Paths.get(dirN);
+      		this.recursive = rec;
+            this.watcher = FileSystems.getDefault().newWatchService();
+            this.keys = new HashMap<WatchKey,Path>();
+			this.waitMap = new HashMap<WatchKey, Long>();
+			this.dataStore = ds;
         }
 
 
@@ -74,19 +73,19 @@ public class MetrixWatch extends Thread{
 					System.out.println("Registering Illumina Run Directory.");
 					register(Paths.get(runDirString), false);
 				 }catch(IOException Ex){
-                                         metrixLogger.log(Level.SEVERE, "IOException traversing watch directory.", Ex.toString());
-                                 }
+                    metrixLogger.log(Level.SEVERE, "IOException traversing watch directory.", Ex.toString());
+                 }
 			}
-                        File[] listOfFiles = folder.listFiles();
-                        String file;
-			this.trace = true;
-			this.logicInit = true;
 
-                        for(int i = 0; i < listOfFiles.length; i++){
+			File[] listOfFiles = folder.listFiles();
+            String file;
+			this.trace = true;
+
+            for(int i = 0; i < listOfFiles.length; i++){
 				if(!checkRegisterIllumina(listOfFiles[i], false)){
 					continue;
 				}
-                        }
+            }
 		processEvents();
 	}
 	
@@ -316,26 +315,43 @@ public class MetrixWatch extends Thread{
 		
 		Iterator it = waitMap.entrySet().iterator();
 		while (it.hasNext()) {
-	        	Map.Entry watchPairs = (Map.Entry)it.next();
+
+			Map.Entry watchPairs = (Map.Entry)it.next();
 			long mapTime = (long) watchPairs.getValue();
 			
 			Path watchDir = keys.get(watchPairs.getKey());
-			Summary sum = new Summary();
-			try{
-				sum = dataStore.getSummaryByRunName(watchDir.toString());
-			}catch(Exception Ex){
-				metrixLogger.log(Level.SEVERE, "Error in retrieving summary for forced check.");
+
+
+			// Because the initial run directory watched is present in the waitMap as well,
+			// We need to skip this forced scan.
+			if(watchDir.toString().equals(runDirString)){
+				continue;
 			}
 
-			if(sum.getState() == 2){
+			if(watchDir.toString().matches("(.*)/InterOp(.*)")){
+				continue;
+			}
+
+			Summary sum = new Summary();
+
+			String nonInterOp = watchDir.toString().replace("/InterOp","");
+
+			try{
+				metrixLogger.log(Level.INFO, "Backlog parsing " + nonInterOp);
+				sum = (Summary) dataStore.getSummaryByRunName(nonInterOp);
+			}catch(Exception Ex){
+				metrixLogger.log(Level.SEVERE, "Error in retrieving summary for forced check. " + Ex.toString());
+			}
+
+			if(sum.getState() == 2 || sum.getState() == 3){
 				waitMap.remove(watchPairs.getKey());			// if watchkey is present, remove it from waitMap
 				keys.remove(watchPairs.getKey());			// Remove watchkeys from watch
 			}
 
 			if((currentTime - mapTime) > forceTime){
-				if(ml.processMetrics(watchDir, 1, dataStore)){
+				if(ml.processMetrics(Paths.get(nonInterOp), sum.getState(), dataStore)){
 					waitMap.put((WatchKey) watchPairs.getKey(), System.currentTimeMillis());
-					metrixLogger.log(Level.INFO, "Forcefully parsed " + watchDir.getFileName());
+					metrixLogger.log(Level.INFO, "Forcefully parsed " + nonInterOp);
 				}
 			}
 		}
