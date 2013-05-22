@@ -146,7 +146,11 @@ public class Command implements Serializable{
 	}
 
 	public boolean checkParams(){
-		if(format == null || mode == null || type == null || state != (1|2|3|4|5|12)){
+		if(format == null || mode == null || type == null){
+			return false;
+		}
+
+		if(!checkState(state)){
 			return false;
 		}
 

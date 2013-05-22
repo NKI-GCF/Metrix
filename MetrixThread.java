@@ -18,7 +18,11 @@ import java.util.logging.*;
 import nki.objects.Command;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
+import nki.exceptions.CommandValidityException;
+import nki.exceptions.InvalidCredentialsException;
+import nki.exceptions.UnimplementedCommandException;
 import nki.io.DataStore;
+import nki.parsers.metrix.CommandProcessor;
 import nki.constants.Constants;
 
 public class MetrixThread extends Thread {
@@ -62,19 +66,30 @@ public class MetrixThread extends Thread {
 					if(commandClient instanceof Command){
 						mode = commandClient.getMode();
 						
-						// Mode Check
-						if(mode.equals("TIMED")){	// Keep alive repetitive command
-							timedBool = true;
-							while(timedBool){
-								processCommand(oos, ois,ml, ds, commandClient);
-								Thread.sleep(commandClient.getTimedInterval());	
-							}
-						}
-
-						if(mode.equals("CALL")){	// Single call
-							processCommand(oos, ois, ml, ds, commandClient);
-						}
+						CommandProcessor cp;
 						
+						try{	
+							// Mode Check
+							if(mode.equals("TIMED")){	// Keep alive repetitive command
+								timedBool = true;
+								while(timedBool){
+						//			processCommand(oos, ois,ml, ds, commandClient);
+									cp = new CommandProcessor(commandClient, oos, ds);
+									Thread.sleep(commandClient.getTimedInterval());	
+								}
+							}
+	
+							if(mode.equals("CALL")){	// Single call
+//								processCommand(oos, ois, ml, ds, commandClient);
+								cp = new CommandProcessor(commandClient, oos, ds);			
+							}
+		
+
+						}catch(CommandValidityException CVE){
+							System.out.println("Command Validity Exception! " + CVE);
+						}catch(InvalidCredentialsException ICE){
+							System.out.println("Invalid Credentials Exception! " + ICE);
+						}
 					}else{
 						metrixLogger.log(Level.WARNING, "[SERVER] Command not understood [" + commandClient + "]");
 					}

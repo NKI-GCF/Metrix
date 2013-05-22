@@ -1,14 +1,18 @@
-package nki.parsers;
+package nki.parsers.metrix;
 
 import nki.objects.Command;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
 import nki.constants.Constants;
 import nki.io.DataStore;
-import nki.parsers.illumina.*;
+import nki.objects.QualityScores;
+import nki.parsers.illumina.QualityMetrics;
+import nki.parsers.illumina.TileMetrics;
 import nki.exceptions.InvalidCredentialsException;
 import nki.exceptions.CommandValidityException;
 import nki.exceptions.UnimplementedCommandException;
+import nki.exceptions.MissingCommandDetailException;
+import nki.exceptions.EmptyResultSetCollection;
 import java.net.*;
 import java.io.*;
 import java.lang.Exception;
@@ -26,32 +30,42 @@ public class CommandProcessor {
 
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
-	private MetrixLogic ml;
 	private DataStore ds;
 
-	public CommandProcessor(Command command, 
+	public CommandProcessor(
+				Command command, 
 				ObjectOutputStream oos,
-				MetrixLogic ml,
-				DataStore ds) 
-		throws 	CommandValidityException,
-			InvalidCredentialsException, 
-			UnimplementedCommandException
+				DataStore ds
+		)throws 	
+			CommandValidityException,
+			InvalidCredentialsException 
+//			UnimplementedCommandException
 		{
 		// Process command.
 		this.recCom = command;
 		this.oos = oos;
-		this.ml = ml;
 		this.ds = ds;
 
 		if(!checkAPI()){
-			throw new InvalidCredentialsException();
+			throw new InvalidCredentialsException("The supplied API key is incorrect for this user. Please check.");
 		}
 
 		// Perform validity checks
 		if(recCom.checkParams()){
 			// Set validity
 			setIsValid(true);
-//			execute();
+			try{
+				execute();
+			}catch(UnimplementedCommandException UCE){
+				// Create command and send back error.	
+			}catch(MissingCommandDetailException MCDE){
+				// Send back error over network in command.
+			}catch(EmptyResultSetCollection ERSC){
+				// Send back error over network in command.
+			}catch(Exception Ex){
+				// Send back error over network in command.
+			}
+
 		}else{
 			setIsValid(false);
 			throw new CommandValidityException("Command Parameters are invalid. Please check and try again.");
@@ -72,43 +86,44 @@ public class CommandProcessor {
 		return valCom;
 	}
 
-	public void execute(){
+	public void execute() throws 
+						UnimplementedCommandException, 
+						MissingCommandDetailException,
+						EmptyResultSetCollection,
+						Exception
+		{
 		// If true validity, start.
 		if(recCom.getCommand().equals("SET")){
-			throw new UnimplementedCommandException();
+			throw new UnimplementedCommandException("This command has not been implemented yet. ");
 		}
 
 		if(recCom.getCommand().equals("FETCH")){
 
 			if(recCom.getType().equals("SIMPLE") || recCom.getType().equals("DETAIL")){
 				int state = -1;
-	                        try{
-	                                state = recCom.getState();
-	                        }catch(Exception Ex){
-	                                Command errorCommand = new Command();
-	                                errorCommand.setCommand("ERROR");
-	                                oos.writeObject(errorCommand);
-	                        }
-	                        // Retrieve set and return object.
-	                        SummaryCollection sc = ds.getSummaryCollections();
-	
-	                        // If no active runs present return command with details.
-	                        if(sc.getCollectionCount() == 0){
-	                                Command serverAnswer = new Command();
-	                                serverAnswer.setCommand("ERROR");
-	                                oos.writeObject(serverAnswer);
-	                        // If request format is in XML
-	                        }else if(recCom.getFormat().equals("XML")){
-	                                String collectionString = sc.getSummaryCollectionXMLAsString(recCom);
-	                                if(collectionString.equals("")){
-	                                        oos.writeObject("");
-	                                }else{
-	                                        oos.writeObject(collectionString);
-	                                }
-	                        }else{ // Else return the SummaryCollection
-	                                oos.writeObject(sc);
-	                        }
-	                        sc = null;
+				try{
+						state = recCom.getState();
+				}catch(Exception Ex){
+					throw new MissingCommandDetailException("Summary State of received command is missing.");
+				}
+				// Retrieve set and return object.
+				SummaryCollection sc = ds.getSummaryCollections();
+
+				// If no active runs present return command with details.
+				if(sc.getCollectionCount() == 0){
+					throw new EmptyResultSetCollection("The argumented command did not produce results.");
+				// If request format is in XML
+				}else if(recCom.getFormat().equals("XML")){
+						String collectionString = sc.getSummaryCollectionXMLAsString(recCom);
+						if(collectionString.equals("")){
+								oos.writeObject("");
+						}else{
+								oos.writeObject(collectionString);
+						}
+				}else{ // Else return the SummaryCollection
+						oos.writeObject(sc);
+				}
+				sc = null;
 			}
 
 			if(recCom.getType().equals("METRIC")){
@@ -117,33 +132,24 @@ public class CommandProcessor {
 
 				if(!sum.equals(null)){
 					String runDir = sum.getRunDirectory();
-				        String extractionMetrics = runDir + "/InterOp/" + Constants.EXTRACTION_METRICS;
-		       		        String tileMetrics = runDir + "/InterOp/" + Constants.TILE_METRICS;
-			       	        String qualityMetrics = runDir + "/InterOp/" + Constants.QMETRICS_METRICS;
+				    String extractionMetrics = runDir + "/InterOp/" + Constants.EXTRACTION_METRICS;
+		       		String tileMetrics = runDir + "/InterOp/" + Constants.TILE_METRICS;
+			       	String qualityMetrics = runDir + "/InterOp/" + Constants.QMETRICS_METRICS;
 		
 					if(!sum.hasClusterDensity() || !sum.hasClusterDensityPF() || !sum.hasPhasing() || !sum.hasPrephasing()){
 						// Try parsing Tile Metrics.
-				                TileMetrics tm = new TileMetrics(tileMetrics, 0);
-						try{
+				            TileMetrics tm = new TileMetrics(tileMetrics, 0);
 							tm.digestData();
 							sum.setClusterDensity(tm.getCDmap());
-				                        sum.setClusterDensityPF(tm.getCDpfMap());
-                				        sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
-				                        sum.setPrephasingMap(tm.getPrephasingMap());
-						}catch(IOException Ex){
-							// Caught, dont print to log.
-							System.out.println("TileMetrics Parsing Error - CommandParser - RecCom\n");
-						}
+	                        sum.setClusterDensityPF(tm.getCDpfMap());
+      				        sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
+	                        sum.setPrephasingMap(tm.getPrephasingMap());
 					}
 
-					if(!sum.hasQScoreDist()){
-				                QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
-						try{
+					if(!sum.hasQScores()){
+				            QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
 							QualityScores qsOut = qm.digestData();
 							sum.setQScoreDist(qsOut);
-						}catch(IOException Ex){
-							System.out.println("IOException in QScoreDist Parse - CP\n");
-						}
 					}
 
 					// Check output formatting method and return.
