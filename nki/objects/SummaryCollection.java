@@ -86,9 +86,9 @@ public class SummaryCollection implements Serializable {
 					if(com.getType().equals("SIMPLE")){
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}else if(com.getType().equals("DETAIL")){
-                                                sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
+						sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
 					}else if(com.getType().equals("METRIC")){
-	                                        sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);			
+						sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);			
 					}else{
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}

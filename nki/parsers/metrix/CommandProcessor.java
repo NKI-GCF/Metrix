@@ -121,7 +121,7 @@ public class CommandProcessor {
 		       		        String tileMetrics = runDir + "/InterOp/" + Constants.TILE_METRICS;
 			       	        String qualityMetrics = runDir + "/InterOp/" + Constants.QMETRICS_METRICS;
 		
-					if(!sum.hasClusterDensity() || !sum.hasClusterDensityPF() || !sum.hasPhasingMap() || !has.prePhasingMap()){
+					if(!sum.hasClusterDensity() || !sum.hasClusterDensityPF() || !sum.hasPhasing() || !sum.hasPrephasing()){
 						// Try parsing Tile Metrics.
 				                TileMetrics tm = new TileMetrics(tileMetrics, 0);
 						try{
