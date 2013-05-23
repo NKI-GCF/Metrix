@@ -93,13 +93,13 @@ public class CommandProcessor {
 						Exception
 		{
 		// If true validity, start.
-		if(recCom.getCommand().equals("SET")){
+		if(recCom.getCommand().equals(Constants.COM_FUNCTION_SET)){
 			throw new UnimplementedCommandException("This command has not been implemented yet. ");
 		}
 
-		if(recCom.getCommand().equals("FETCH")){
+		if(recCom.getCommand().equals(Constants.COM_FUNCTION_FETCH)){
 
-			if(recCom.getType().equals("SIMPLE") || recCom.getType().equals("DETAIL")){
+			if(recCom.getType().equals(Constants.COM_TYPE_SIMPLE) || recCom.getType().equals(Constants.COM_TYPE_DETAIL)){
 				int state = -1;
 				try{
 						state = recCom.getState();
@@ -113,7 +113,7 @@ public class CommandProcessor {
 				if(sc.getCollectionCount() == 0){
 					throw new EmptyResultSetCollection("The argumented command did not produce results.");
 				// If request format is in XML
-				}else if(recCom.getFormat().equals("XML")){
+				}else if(recCom.getFormat().equals(Constants.COM_FORMAT_XML)){
 						String collectionString = sc.getSummaryCollectionXMLAsString(recCom);
 						if(collectionString.equals("")){
 								oos.writeObject("");
@@ -126,7 +126,7 @@ public class CommandProcessor {
 				sc = null;
 			}
 
-			if(recCom.getType().equals("METRIC")){
+			if(recCom.getType().equals(Constants.COM_TYPE_METRIC)){
 				// Retrieve summary from database and check metric availability.
 				Summary sum = ds.getSummaryByRunName(recCom.getRunId());
 
@@ -153,12 +153,12 @@ public class CommandProcessor {
 					}
 
 					// Check output formatting method and return.
-					if(recCom.getFormat().equals("XML")){
+					if(recCom.getFormat().equals(Constants.COM_FORMAT_XML)){
 						// Generate XML.
 						SummaryCollection sc = new SummaryCollection();					
 						sc.appendSummary(sum);
 						System.out.println(sc.getSummaryCollectionXMLAsString(recCom));
-					}else if(recCom.getFormat().equals("POJO")){
+					}else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
 						oos.writeObject(sum); // Send as POJO
 					}
 				}else{

@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import nki.objects.Summary;
 import nki.objects.MutableInt;
+import nki.constants.Constants;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
@@ -30,7 +31,7 @@ public class SummaryCollection implements Serializable {
 	private ArrayList<Summary> summaryCollection = new ArrayList<Summary>();
 	private HashMap<Integer, MutableInt> summaryStateMapping = new HashMap<Integer, MutableInt>();
 	private String xmlAsString = "";
-	private String collectionFormat = "OBJ";
+	private String collectionFormat = Constants.COM_FORMAT_OBJ;
 
 	public void appendSummary(Summary sum){
 		summaryCollection.add(sum);
@@ -67,11 +68,11 @@ public class SummaryCollection implements Serializable {
 			xmlDoc.appendChild(root);
 			
 			// Set run counts as root attributes
-			root.setAttribute("active", convertStateInt(1));
-			root.setAttribute("finished", convertStateInt(2));
-			root.setAttribute("error", convertStateInt(3));
-			root.setAttribute("turn", convertStateInt(4));
-			root.setAttribute("init", convertStateInt(5));
+			root.setAttribute("active", convertStateInt(Constants.STATE_RUNNING));
+			root.setAttribute("finished", convertStateInt(Constants.STATE_FINISHED));
+			root.setAttribute("error", convertStateInt(Constants.STATE_HANG));
+			root.setAttribute("turn", convertStateInt(Constants.STATE_TURN));
+			root.setAttribute("init", convertStateInt(Constants.STATE_INIT));
 
 			ListIterator litr = this.getSummaryIterator();
 		
@@ -80,14 +81,14 @@ public class SummaryCollection implements Serializable {
 				Summary sumObj = (Summary) litr.next();
 
 				// If state is 12, fetch all objects.
-				if(sumObj.getState() == com.getState() || com.getState() == 12){
+				if(sumObj.getState() == com.getState() || com.getState() == Constants.STATE_ALL_PSEUDO){
 					Element sumXml = xmlDoc.createElement("Summary");
 
-					if(com.getType().equals("SIMPLE")){
+					if(com.getType().equals(Constants.COM_TYPE_SIMPLE)){
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
-					}else if(com.getType().equals("DETAIL")){
+					}else if(com.getType().equals(Constants.COM_TYPE_DETAIL)){
 						sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
-					}else if(com.getType().equals("METRIC")){
+					}else if(com.getType().equals(Constants.COM_TYPE_METRIC)){
 						sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);			
 					}else{
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
@@ -100,7 +101,7 @@ public class SummaryCollection implements Serializable {
 			ex.printStackTrace();
 		}
 		
-		setCollectionFormat("XML");		
+		setCollectionFormat(Constants.COM_FORMAT_XML);		
 
 		// Return in the form of a XML Document
 		return xmlDoc;

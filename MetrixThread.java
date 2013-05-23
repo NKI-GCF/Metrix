@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -18,6 +18,7 @@ import java.util.logging.*;
 import nki.objects.Command;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
+import nki.constants.Constants;
 import nki.exceptions.CommandValidityException;
 import nki.exceptions.InvalidCredentialsException;
 import nki.exceptions.UnimplementedCommandException;
@@ -40,10 +41,7 @@ public class MetrixThread extends Thread {
 	public void run(){
 		
 		try{
-//		        final Logger metrixLogger = Logger.getLogger(MetrixThread.class.getName());
-
 			String clientSocketDetails = sChannel.socket().getRemoteSocketAddress().toString();
-
 			metrixLogger.log(Level.INFO, "[SERVER] Client connection accepted at: " + clientSocketDetails);
 
 			// Create OutputStream for sending objects.
@@ -52,9 +50,6 @@ public class MetrixThread extends Thread {
 			// Cteate Inputstream for receiving objects.
 			ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
 			
-			// MetrixLogic instantiation
-			MetrixLogic ml = new MetrixLogic();
-
 			// DataStore instantiation
 			DataStore ds = new DataStore();
 
@@ -70,17 +65,15 @@ public class MetrixThread extends Thread {
 						
 						try{	
 							// Mode Check
-							if(mode.equals("TIMED")){	// Keep alive repetitive command
+							if(mode.equals(Constants.COM_MODE_TIMED)){	// Keep alive repetitive command
 								timedBool = true;
 								while(timedBool){
-						//			processCommand(oos, ois,ml, ds, commandClient);
 									cp = new CommandProcessor(commandClient, oos, ds);
 									Thread.sleep(commandClient.getTimedInterval());	
 								}
 							}
 	
-							if(mode.equals("CALL")){	// Single call
-//								processCommand(oos, ois, ml, ds, commandClient);
+							if(mode.equals(Constants.COM_MODE_CALL)){	// Single call
 								cp = new CommandProcessor(commandClient, oos, ds);			
 							}
 		
@@ -89,20 +82,18 @@ public class MetrixThread extends Thread {
 							System.out.println("Command Validity Exception! " + CVE);
 						}catch(InvalidCredentialsException ICE){
 							System.out.println("Invalid Credentials Exception! " + ICE);
+						}finally{
+							// Close all channels and client streams.
+							ds = null;
+							sChannel.socket().close();
+							sChannel.close();
+							ois.close();
+							oos.close();
 						}
 					}else{
 						metrixLogger.log(Level.WARNING, "[SERVER] Command not understood [" + commandClient + "]");
 					}
 					
-					if(mode.equals("CALL")){
-			                        // Close all channels and client streams.
-						ml = null;
-						ds = null;
-						sChannel.socket().close();
-						sChannel.close();
-						ois.close();
-						oos.close();
-					}
 					metrixLogger.log(Level.INFO, "[SERVER] Finished processing command");
 				}
 			}catch(ClassNotFoundException CNFE){
@@ -114,44 +105,7 @@ public class MetrixThread extends Thread {
 		}catch(IOException Ex){
 			System.err.println("[Log] Client disconnected or IOException " + Ex.toString());
 		}
-	}
 
-	private void processCommand(ObjectOutputStream oos, ObjectInputStream ois, MetrixLogic ml, DataStore ds, Command commandClient) throws IOException, Exception{
-		// Get active runs
-		if(commandClient.getCommand().equals("FETCH")){
-			int state = -1;
-
-            metrixLogger.log(Level.INFO, "[CLIENT] Fetch runs.");
-
-			try{
-				state = commandClient.getState();
-			}catch(Exception Ex){
-				Command errorCommand = new Command();
-				errorCommand.setCommand("ERROR");
-				oos.writeObject(errorCommand);
-			}
-										
-			// Retrieve set and return object.
-			SummaryCollection sc = ds.getSummaryCollections();
-		
-			// If no active runs present return command with details.
-			if(sc.getCollectionCount() == 0){
-				Command serverAnswer = new Command();
-				serverAnswer.setCommand("ERROR");
-				oos.writeObject(serverAnswer);	
-			// If request format is in XML
-			}else if(commandClient.getFormat().equals("XML")){
-				String collectionString = sc.getSummaryCollectionXMLAsString(commandClient);
-				if(collectionString.equals("")){
-					oos.writeObject("");
-				}else{
-					oos.writeObject(collectionString);
-				}
-			}else{ // Else return the SummaryCollection
-				oos.writeObject(sc);
-			}
-			sc = null;
-		}
 	}
 }	
 

@@ -130,11 +130,11 @@ public class MetrixWatch extends Thread{
 			        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
 			    } });
 			
-                        long difference = (System.currentTimeMillis() - files[files.length-1].lastModified());
+			long difference = (System.currentTimeMillis() - files[files.length-1].lastModified());
 
-                        if(difference > 18000000){ // If no updates for 5 hours. (18000000 milliseconds)
-                                 metrixLogger.log(Level.INFO, "[CHECK] Illumina Run stopped. Parsing available data for: " + file, file);
-				 if(!ml.checkPaired(file, dataStore)){	// Check if run is paired and at turn cycle.
+            if(difference > 18000000){ // If no updates for 5 hours. (18000000 milliseconds)
+				metrixLogger.log(Level.INFO, "[CHECK] Illumina Run stopped. Parsing available data for: " + file, file);
+				if(!ml.checkPaired(file, dataStore)){	// Check if run is paired and at turn cycle.
 					// Call MetrixLogic for parsing
 					ml.processMetrics(Paths.get(file), 3, dataStore); 
   				 }else{
@@ -145,16 +145,16 @@ public class MetrixWatch extends Thread{
 						metrixLogger.log(Level.SEVERE, "IOException traversing watch directory", Ex.toString());
 					}
 				}
-                        }else{
-                                 try{
-                                         metrixLogger.log(Level.INFO, "[CHECK] Illumina Run detected: " + file, file);
-                                        // Register rundir
-                                         register(Paths.get(file+"/InterOp/"), false);
-                                         register(Paths.get(file),newRun);
-                                 }catch(IOException Ex){
-                                         metrixLogger.log(Level.SEVERE, "IOException traversing watch directory.", Ex.toString());
-                                 }
-                        }
+			}else{
+				try{
+					metrixLogger.log(Level.INFO, "[CHECK] Illumina Run detected: " + file, file);
+                    	// Register rundir
+                    register(Paths.get(file+"/InterOp/"), false);
+					register(Paths.get(file),newRun);
+				}catch(IOException Ex){
+					metrixLogger.log(Level.SEVERE, "IOException traversing watch directory.", Ex.toString());
+				}
+			}
 		}else{
 			metrixLogger.log(Level.INFO, "Directory: " + file + " does not comply with the Illumina run directory format. RunInfo.xml is missing.");
 		}
@@ -182,7 +182,7 @@ public class MetrixWatch extends Thread{
 	                }
 	            }
 	        }
-                waitMap.put(key, pollTime);
+            waitMap.put(key, pollTime);
 	        keys.put(key, dir);
     	}
 
@@ -214,78 +214,79 @@ public class MetrixWatch extends Thread{
 
             // Cycle through the events
             final List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
-            for (WatchEvent<?> event : watchEvents) {
+       for (WatchEvent<?> event : watchEvents) {
 		 	
                 // Context for directory entry event is the file name of entry
                 WatchEvent<Path> ev = cast(event);
                 Path name = ev.context();
 
-		if(name == null){
-			continue;
-		}
-
-                Path child = dir.resolve(name);
-		
-		if(child.equals(prev)){
-			continue;
-		}
-	
-		WatchEvent.Kind<?> kind = event.kind();
-		
-		if(kind == OVERFLOW){
-			continue;
-		}	
-
-		// Once RTAComplete has been created, set run to finish.	
-		if(kind == ENTRY_CREATE){
-			if((child+"").matches("^.+?RTAComplete.txt$")){
-				ml.finishRun(child.getParent()+"");
-                                // Remove keys from watch hash.
-                                keys.remove(watchKey);
-                                waitMap.remove(watchKey);
+			if(name == null){
+				continue;
 			}
-		}
-
-		// If a new run gets started, register for monitoring. Wait for 5 seconds whilst files are being created.
-		if(kind == ENTRY_CREATE){
-			File send = new File(child+"");
-			try{
-				Thread.sleep(30000);
-			}catch(InterruptedException IEX){
-				metrixLogger.log(Level.SEVERE,"Sleeping of thread while creating a new run failed!");
+					Path child = dir.resolve(name);
+			
+			if(child.equals(prev)){
+				continue;
 			}
-			if(checkRegisterIllumina(send, true)){
-				metrixLogger.log(Level.INFO, "New run with path: " + send+" registered");
-			}else{
+		
+			WatchEvent.Kind<?> kind = event.kind();
+			
+			if(kind == OVERFLOW){
 				continue;
 			}	
-		}
 
-		if(!checkPollTime(watchKey)){
-			// Skip event -- Still waiting for polling time. Do not parse.
-			continue;
-		}else{
-			if((child+"").matches("^.+?Out\\.bin")){
-				Path procFold = (child.getParent()).getParent();
-	                        // Parse summary object
-				if(ml.processMetrics(procFold, 1, dataStore)){
-					// Successfuly processed, continue watching.
-					metrixLogger.log(Level.INFO, "Parsed " + procFold  + " successfully. ");
-				}else{
-					//      metrixLogger.log(Level.SEVERE, "Processing failed for " + procFold + ".");
+			// Once RTAComplete has been created, set run to finish.	
+			if(kind == ENTRY_CREATE){
+				if((child+"").matches("^.+?RTAComplete.txt$")){
+					ml.finishRun(child.getParent()+"");
+									// Remove keys from watch hash.
+									keys.remove(watchKey);
+									waitMap.remove(watchKey);
 				}
 			}
-			waitMap.put(watchKey, System.currentTimeMillis());
-		}
+
+			// If a new run gets started, register for monitoring. Wait for 5 seconds whilst files are being created.
+			if(kind == ENTRY_CREATE){
+				File send = new File(child+"");
+				try{
+					Thread.sleep(30000);
+				}catch(InterruptedException IEX){
+					metrixLogger.log(Level.SEVERE,"Sleeping of thread while creating a new run failed!");
+				}
+				if(checkRegisterIllumina(send, true)){
+					metrixLogger.log(Level.INFO, "New run with path: " + send+" registered");
+				}else{
+					continue;
+				}	
+			}
+
+			if(!checkPollTime(watchKey)){
+				// Skip event -- Still waiting for polling time. Do not parse.
+				continue;
+			}else{
+				if((child+"").matches("^.+?Out\\.bin")){
+					Path procFold = (child.getParent()).getParent();
+								// Parse summary object
+					if(ml.processMetrics(procFold, 1, dataStore)){
+						// Successfuly processed, continue watching.
+						metrixLogger.log(Level.INFO, "Parsed " + procFold  + " successfully. ");
+					}else{
+						//      metrixLogger.log(Level.SEVERE, "Processing failed for " + procFold + ".");
+					}
+				}
+				waitMap.put(watchKey, System.currentTimeMillis());
+			}
         }
-	boolean valid = watchKey.reset();
-	if(!valid){
-		keys.remove(watchKey);
-	}
+	
+		boolean valid = watchKey.reset();
+		if(!valid){
+			keys.remove(watchKey);
+		}
 
         watchKey.reset();	// Reset the watchkey to put it back for monitoring.
  
-        }
+    }	// End while loop line 198
+
 	try{ 
 	        watcher.close();
 	}catch(IOException ex){
@@ -343,7 +344,7 @@ public class MetrixWatch extends Thread{
 				metrixLogger.log(Level.SEVERE, "Error in retrieving summary for forced check. " + Ex.toString());
 			}
 
-			if(sum.getState() == 2 || sum.getState() == 3){
+			if(sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG){
 				waitMap.remove(watchPairs.getKey());			// if watchkey is present, remove it from waitMap
 				keys.remove(watchPairs.getKey());			// Remove watchkeys from watch
 			}

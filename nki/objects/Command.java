@@ -5,6 +5,26 @@
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
 
+	// MODES:	
+			// 'TIMED' executes command repetitively based on variable timedInterval in ms
+			// 'CALL' will execute command once and close the connection
+		
+	// TYPES:
+			// 	SIMPLE
+			// 	DETAIL
+			// 	METRIC
+			// 	FULL
+	// FORMATS: 
+			// XML is a SummaryCollection XML format.
+			// OBJ is a SummaryCollection POJO.
+	// STATES: 
+			// 1 = Running
+			// 2 = Finished
+			// 3 = Halted
+			// 4 = Turn
+			// 5 = Init-phase
+			// 12 = All
+
 package nki.objects;
 
 import java.net.*;
@@ -13,39 +33,39 @@ import java.lang.*;
 import java.util.Date;
 import java.util.Arrays;
 
+import nki.constants.Constants;
+
 public class Command implements Serializable{
 	
 	public static final long serialVersionUID = 42L;
 
-	private String 	mode 	= "CALL";
-	private String 	type 	= "SIMPLE";
-	private String 	format 	= "XML";
+	private String 	mode 	= Constants.COM_MODE_CALL;
+	private String 	type 	= Constants.COM_TYPE_SIMPLE;
+	private String 	format 	= Constants.COM_FORMAT_XML;
 	private String 	command = "";
-	private int 	state 	= 12;
+	private int 	state 	= Constants.STATE_ALL_PSEUDO;
 	private Object  payload;
 
 	private Date dateTime;
 	private String	runId = "";
-//	private String command;				// 'GET' / 'FETCH'
-//	private String commandDetail = "";
-//	private String mode = "CALL"; 			// 'TIMED' or 'CALL' (default)
-							// 'TIMED' executes command repetitively based on variable timedInterval in ms
-							// 'CALL' will execute command once and close the connection
-//	private String type = "SIMPLE";			// Data collection type: SIMPLE, DETAIL, METRIC
-	private long timedInterval 	= 10000;	// 10 seconds (use setTimedInterval() to change)
-//	private String format		= "XML";	// 'XML' or 'OBJ'
-							// XML is a SummaryCollection XML format.
-							// OBJ is a SummaryCollection POJO.
-//	private int state		= 12;		// 1 = Running
-							// 2 = Finished
-							// 3 = Halted
-							// 4 = Turn
-							// 5 = Init-phase
-							// 12 = All
+	private long timedInterval = 10000;	
 	private String info;
 	private String message;
-	public static final int[] STATES = {1,2,3,4,5,12};
-	public static final String[] TYPES = {"SIMPLE","DETAIL","METRIC"};
+	public static final int[] STATES = {
+			Constants.STATE_RUNNING,
+			Constants.STATE_FINISHED,
+			Constants.STATE_HANG,
+			Constants.STATE_TURN,
+			Constants.STATE_INIT,
+			Constants.STATE_ALL_PSEUDO
+		};
+
+	public static final String[] TYPES = {
+			Constants.COM_TYPE_SIMPLE,
+			Constants.COM_TYPE_DETAIL,
+			Constants.COM_TYPE_METRIC,
+			Constants.COM_TYPE_FULL
+		};
 
 	public Command(){
 		this.setDateTime();	// Set date time for instantiation of command object.
@@ -84,10 +104,10 @@ public class Command implements Serializable{
 	}
 
 	public void setMode(String modeSet){
-		if(modeSet == "TIMED"){
-			this.mode = "TIMED";
+		if(modeSet == Constants.COM_MODE_TIMED){
+			this.mode = Constants.COM_MODE_TIMED;
 		}else{
-			this.mode = "CALL";
+			this.mode = Constants.COM_MODE_CALL;
 		}
 	}
 
@@ -124,8 +144,6 @@ public class Command implements Serializable{
 	public void setState(int st){
 
 		if(!checkState(st)){
-		//if(!Arrays.asList(STATES).contains(st)){
-		//
 			setMessage("Invalid state (" + st + ")");
 			state = 0;
 		}else{
@@ -138,10 +156,10 @@ public class Command implements Serializable{
 	}
 
 	public void setFormat(String form){
-		if(form.equals("OBJ")){
+		if(form.equals(Constants.COM_FORMAT_OBJ)){
 			this.format = form;
 		}else{
-			this.format = "XML";
+			this.format = Constants.COM_FORMAT_XML;
 		}
 	}
 
