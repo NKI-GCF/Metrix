@@ -16,8 +16,11 @@ import nki.objects.Threshold;
 public class MetricFilter implements Serializable{
 	public static final long serialVersionUID = 42L;
 	private ArrayList<String> runIds = new ArrayList<String>();
-	private HashMap<String, Threshold> thresHolds = new HashMap<String, Threshold>();
-
+	// Thresholds:
+	// Key: Constant value of requested metric threshold type
+	// Value: Threshold object setting boundaries.
+	
+	private HashMap<String, Threshold> thresholds = new HashMap<String, Threshold>();
 	
 	public void appendRunId(String runId){
 		runIds.add(runId);
@@ -31,7 +34,27 @@ public class MetricFilter implements Serializable{
 		this.runIds = runIds;
 	}
 
-	
+	public void setThreshold(String metricType, Threshold threshold){
+		thresholds.put(metricType, threshold);
+	}
+
+	public void getThreshold(String metricType){
+		return thresholds.get(metricType);
+	}
+
+	public HashMap<String, Threshold> getThresholdIterator(){
+		return thresholds.entrySet().iterator();
+	}
+
+	public boolean checkType(String metricType){
+		boolean check = false;
+
+		if(Arrays.asList(Constants.METRIC_TYPE_REQUEST).contains()){
+			check = true;	
+		}
+
+		return check;
+	}
 
 
 }

@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -12,35 +12,34 @@ import java.io.*;
 public class ClusterDensity implements Serializable{
 
 	private Float metric = 0.0f;
-        private int tiles = 0;
+	private int tiles = 0;
 	public static final long serialVersionUID = 42L;
 
+	public void setMetric(Float metricScore){
+		this.metric = metricScore;
+	}
 
-        public void setMetric(Float metricScore){
-        	this.metric = metricScore;
-        }
+	public Float getMetric(){
+		return metric;
+	}
 
-        public Float getMetric(){
-        	return metric;
-        }
+	public void setTiles(int tileCount){
+		this.tiles = tileCount;
+	}
 
-        public void setTiles(int tileCount){
-        	this.tiles = tileCount;
-        }
+	public int getTiles(){
+		return tiles;
+	}
 
-        public int getTiles(){
-        	return tiles;
-        }
+	public void incrementMetric(Float metricScore){
+		this.metric += metricScore;
+	}
 
-        public void incrementMetric(Float metricScore){
-        	this.metric += metricScore;
-        }
+	public void incrementTiles(){
+		this.tiles += 1;
+	}
 
-        public void incrementTiles(){
-        	this.tiles += 1;
-        }
-
-        public Float getAvg(){
-        	return (metric / tiles);
-        }
+	public Float getAvg(){
+		return (metric / tiles);
+	}
 }

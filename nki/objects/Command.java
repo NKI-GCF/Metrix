@@ -8,7 +8,6 @@
 	// MODES:	
 			// 'TIMED' executes command repetitively based on variable timedInterval in ms
 			// 'CALL' will execute command once and close the connection
-		
 	// TYPES:
 			// 	SIMPLE
 			// 	DETAIL
@@ -22,7 +21,7 @@
 			// 2 = Finished
 			// 3 = Halted
 			// 4 = Turn
-			// 5 = Init-phase
+			// 5 = Initialization
 			// 12 = All
 
 package nki.objects;
@@ -32,25 +31,25 @@ import java.io.*;
 import java.lang.*;
 import java.util.Date;
 import java.util.Arrays;
-
+import nki.objects.MetrixFilter;
 import nki.constants.Constants;
 
 public class Command implements Serializable{
 	
-	public static final long serialVersionUID = 42L;
+	public static 			final long serialVersionUID = 42L;
+	private String 			mode 	= Constants.COM_MODE_CALL;
+	private String 			type 	= Constants.COM_TYPE_SIMPLE;
+	private String 			format 	= Constants.COM_FORMAT_XML;
+	private String 			command = "";
+	private int 			state 	= Constants.STATE_ALL_PSEUDO;
+	private Object  		payload;
+	private MetrixFilter 	filter;
+	private Date 			dateTime;
+	private String			runId = "";
+	private long 			timedInterval = 10000;
+	private String 			info;
+	private String 			message;
 
-	private String 	mode 	= Constants.COM_MODE_CALL;
-	private String 	type 	= Constants.COM_TYPE_SIMPLE;
-	private String 	format 	= Constants.COM_FORMAT_XML;
-	private String 	command = "";
-	private int 	state 	= Constants.STATE_ALL_PSEUDO;
-	private Object  payload;
-
-	private Date dateTime;
-	private String	runId = "";
-	private long timedInterval = 10000;	
-	private String info;
-	private String message;
 	public static final int[] STATES = {
 			Constants.STATE_RUNNING,
 			Constants.STATE_FINISHED,
@@ -69,6 +68,7 @@ public class Command implements Serializable{
 
 	public Command(){
 		this.setDateTime();	// Set date time for instantiation of command object.
+		filter = new MetrixFilter();
 	}
 
 	public void setDateTime(){

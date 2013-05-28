@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -31,7 +31,7 @@ public class SummaryCollection implements Serializable {
 	private ArrayList<Summary> summaryCollection = new ArrayList<Summary>();
 	private HashMap<Integer, MutableInt> summaryStateMapping = new HashMap<Integer, MutableInt>();
 	private String xmlAsString = "";
-	private String collectionFormat = Constants.COM_FORMAT_OBJ;
+	private String collectionFormat = Constants.COM_FORMAT_OBJ;			// Default
 
 	public void appendSummary(Summary sum){
 		summaryCollection.add(sum);

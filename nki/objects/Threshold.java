@@ -20,14 +20,6 @@ public class Threshold implements Serializable {
 	private int 	max;			// Maximum value
 	private int		exact;			// Exact value
 
-	public void setMetricType(String metricType){
-		this.metricType = metricType;
-	}
-
-	public String getMetricType(){
-		return metricType;
-	}
-
 	public void setMin(int min){
 		this.min = min;
 	}

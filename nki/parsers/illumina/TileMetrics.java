@@ -140,7 +140,7 @@ public class TileMetrics {
 			while(eofCheck){
 				int laneNr = leis.readUnsignedShort();
 				int tileNr = leis.readUnsignedShort();
-                                int metricCode = leis.readUnsignedShort();
+                int metricCode = leis.readUnsignedShort();
 				float metricValue = leis.readFloat();
 	
 				// Cluster Density Parsing

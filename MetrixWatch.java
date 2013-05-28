@@ -239,9 +239,9 @@ public class MetrixWatch extends Thread{
 			if(kind == ENTRY_CREATE){
 				if((child+"").matches("^.+?RTAComplete.txt$")){
 					ml.finishRun(child.getParent()+"");
-									// Remove keys from watch hash.
-									keys.remove(watchKey);
-									waitMap.remove(watchKey);
+					// Remove keys from watch hash.
+					keys.remove(watchKey);
+					waitMap.remove(watchKey);
 				}
 			}
 
