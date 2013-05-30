@@ -86,6 +86,7 @@ public class QualityScores implements Serializable{
 		return qScores.entrySet().iterator();
         }
 
+	@SuppressWarnings("unchecked")
 	public HashMap<Integer, MutableLong> getQScoreDistribution(){
                 Iterator qit = this.getQScoreIterator();
 	

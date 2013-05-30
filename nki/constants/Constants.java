@@ -54,7 +54,7 @@ public final class Constants {
 																	METRIC_TYPE_CD,
 																	METRIC_TYPE_PHASING,
 																	METRIC_TYPE_PREPHASING
-															}
+															};
 	private Constants(){
 	    //this prevents even the native class from 
 	    //calling this ctor as well :

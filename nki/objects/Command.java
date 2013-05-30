@@ -31,7 +31,7 @@ import java.io.*;
 import java.lang.*;
 import java.util.Date;
 import java.util.Arrays;
-import nki.objects.MetrixFilter;
+import nki.objects.MetricFilter;
 import nki.constants.Constants;
 
 public class Command implements Serializable{
@@ -43,7 +43,7 @@ public class Command implements Serializable{
 	private String 			command = "";
 	private int 			state 	= Constants.STATE_ALL_PSEUDO;
 	private Object  		payload;
-	private MetrixFilter 	filter;
+	private MetricFilter 	filter;
 	private Date 			dateTime;
 	private String			runId = "";
 	private long 			timedInterval = 10000;
@@ -68,7 +68,6 @@ public class Command implements Serializable{
 
 	public Command(){
 		this.setDateTime();	// Set date time for instantiation of command object.
-		filter = new MetrixFilter();
 	}
 
 	public void setDateTime(){
@@ -193,5 +192,22 @@ public class Command implements Serializable{
 
 		return false;
 	}
+
+	private boolean hasMetricFilter(){
+		if(filter != null){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	private void setMetricFilter(MetricFilter filter){
+		this.filter = filter;
+	}
+
+	private MetricFilter getMetricFilter(){
+		return filter;
+	}
+
 }
 

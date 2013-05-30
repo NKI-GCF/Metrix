@@ -129,7 +129,8 @@ public class QualityMetrics {
 		// Return the qualityScores and return QS object.
 		return qScores;
 	}
-
+	
+	@SuppressWarnings("unchecked")
 	public void iterateQS(QualityScores qscores){
 		
 		if(qscores != null) {

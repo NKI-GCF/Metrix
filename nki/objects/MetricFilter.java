@@ -10,6 +10,8 @@ package nki.objects;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Iterator;
 import nki.constants.Constants;
 import nki.objects.Threshold;
 
@@ -38,18 +40,18 @@ public class MetricFilter implements Serializable{
 		thresholds.put(metricType, threshold);
 	}
 
-	public void getThreshold(String metricType){
+	public Threshold getThreshold(String metricType){
 		return thresholds.get(metricType);
 	}
 
-	public HashMap<String, Threshold> getThresholdIterator(){
+	public Iterator getThresholdIterator(){
 		return thresholds.entrySet().iterator();
 	}
 
 	public boolean checkType(String metricType){
 		boolean check = false;
 
-		if(Arrays.asList(Constants.METRIC_TYPE_REQUEST).contains()){
+		if(Arrays.asList(Constants.METRIC_TYPE_REQUEST).contains(metricType)){
 			check = true;	
 		}
 
