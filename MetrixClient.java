@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import nki.objects.MutableInt;
 
-public class MetrixClientv2 {
+public class MetrixClient {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         final Logger metrixLogger = Logger.getLogger(MetrixClient.class.getName());
 	metrixLogger.log(Level.INFO, "[CLIENT] Initiated");
@@ -87,7 +87,7 @@ public class MetrixClientv2 {
 								Summary sum = (Summary) litr.next();
 
 								// The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
-                	                                        System.out.println(count + " - " + sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle());
+                	                                        System.out.println("- " + sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle());
 								listen = false;
 
 							}
