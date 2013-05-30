@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import nki.objects.MutableInt;
 
-public class MetrixClient {
+public class MetrixClientv2 {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         final Logger metrixLogger = Logger.getLogger(MetrixClient.class.getName());
 	metrixLogger.log(Level.INFO, "[CLIENT] Initiated");
@@ -40,70 +40,75 @@ public class MetrixClient {
         int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
 	String host = configFile.getProperty("HOST", "localhost");	
 
-	try{
+
+
+    	try{
 	        SocketChannel sChannel = SocketChannel.open();
 	        sChannel.configureBlocking(true);
-	        if (sChannel.connect(new InetSocketAddress(host, port))){
+	        
+	        if(sChannel.connect(new InetSocketAddress(host, port))){
 
-                        // Create OutputStream for sending objects.
-                        ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
+                // Create OutputStream for sending objects.
+                ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
 
-                        // Cteate Inputstream for receiving objects.
+                // Cteate Inputstream for receiving objects.
 		        ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
 
-			try{
-				Command sendCommand = new Command();
-				// Set a value for command
-				sendCommand.setFormat("XML");
-				sendCommand.setState(2); // Only fetch finished runs. 
-				sendCommand.setCommand("FETCH");
-				oos.writeObject(sendCommand);
-				oos.flush();
+				try{
+					nki.objects.Command sendCommand = new nki.objects.Command();
+					
+					// Set a value for command
+					sendCommand.setFormat("POJO");
+					sendCommand.setState(12); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
+					sendCommand.setCommand("FETCH");
+					sendCommand.setMode("CALL");
+					sendCommand.setType("DETAIL");
+					oos.writeObject(sendCommand);
+					oos.flush();
+					
+					boolean listen = true;
+	
+					Object serverAnswer = new Object();
+					serverAnswer = ois.readObject();
+	
+					while(listen){
+						if(serverAnswer instanceof Command){	// Answer is a Command with info message.
+							nki.objects.Command commandIn = (nki.objects.Command) serverAnswer;
+							if(commandIn.getCommand() != null){
+								System.out.println("[SERVER] " + commandIn.getCommand());
+							}
+						}
+	
+						if(serverAnswer instanceof SummaryCollection){
+							SummaryCollection sc = (SummaryCollection) serverAnswer;
+							ListIterator litr = sc.getSummaryIterator();
 
-				Object serverAnswer = new Object();
+							while(litr.hasNext()){
+								Summary sum = (Summary) litr.next();
 
-				while(( serverAnswer = ois.readObject()) != null){
-					if(serverAnswer instanceof Command){	// Answer is a Command with info message.
-						Command commandIn = (Command) serverAnswer;
-						if(commandIn.getCommand() != null){
-							System.out.println("[SERVER] " + commandIn.getCommand());
+								// The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
+                	                                        System.out.println(count + " - " + sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle());
+								listen = false;
+
+							}
+						}
+	
+						if(serverAnswer instanceof String){ 			// Server returned a XML String with results.
+							String srvResp = (String) serverAnswer;
+							System.out.println("response = " + srvResp );
+							listen = false;
 						}
 					}
-
-					if(serverAnswer instanceof HashMap){	// Answer is a Summary. Cast object here and use methods from Summary to access details. 
-						
-					}
-			
-					if(serverAnswer instanceof SummaryCollection){
-						SummaryCollection sc = (SummaryCollection) serverAnswer;
-						metrixLogger.log(Level.INFO, "[CLIENT] The server answered with a SummaryCollection.");
-						ListIterator litr = sc.getSummaryIterator();
-
-						int count = 1;
-						while(litr.hasNext()){
-							Summary sum = (Summary) litr.next();
-						//	System.out.println(count + " - " + sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle());
-							count++;
-						}
-
-					}
-
-					if(serverAnswer instanceof String){
-						String srvResp = (String) serverAnswer;
-						//System.out.println(srvResp);
-					}
+				}catch(IOException Ex){
+					System.out.println("Error" + Ex);
 				}
-
-			}catch(IOException Ex){
-				metrixLogger.log(Level.SEVERE, "IOException in Metrix Client.", Ex.toString());
-			}
 	        }
 	}catch(EOFException ex){
-		metrixLogger.log(Level.INFO, "Server has shutdown.");
+//		log.error("Server has shutdown.");
 	}catch(NoConnectionPendingException NCPE){
-		metrixLogger.log(Level.SEVERE, "Communication channel is not connection and no operation has been initiated.");
+//		log.error("Communication channel is not connection and no operation has been initiated.");
 	}catch(AsynchronousCloseException ACE){
-		metrixLogger.log(Level.SEVERE, "Another client has shutdown the server. Channel communication prohibited by issueing a direct command.");
+//		log.error("Another client has shutdown the server. Channel communication prohibited by issueing a direct command.");
 	}
 
 	
