@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -18,6 +18,7 @@ import nki.objects.ClusterDensity;
 import nki.objects.Phasing;
 import nki.objects.Reads;
 import nki.objects.QualityScores;
+import nki.objects.QScoreDist;
 
 public class Summary implements Serializable {
 
@@ -34,24 +35,24 @@ public class Summary implements Serializable {
 	private String		lastUpdated 	= "0";		// Last update time
 	private String		phase; 				// Phase of run :: Imaging / Basecalling / RTAComplete
 	private String		runType;			// Run Type: Single / Paired / Nextera
-	private int		indexLength;			// Length of index read
-        private int             tileCount;			// Number of Tiles
+	private int			indexLength;			// Length of index read
+	private int             tileCount;			// Number of Tiles
 	private int 		state		= 3;		// State 0: Hanging / State 1: Running / State 2: Complete / State 3: Unknown / State 4: Flowcell needs turning
-	private int		numReads;			// Total number of reads
+	private int			numReads;			// Total number of reads
 	private	boolean		isNextera	= false; 	// Is this a nextera run?
 	private boolean		isIndexed	= false;	// Is run indexed.
 	private boolean		xmlInfo		= false;	// Has xmlInfo been parsed?
 	private String		runId;				// Full run identifier
-	private int		date;				// Run date
-	private int		laneCount;			// Number of lanes
+	private int			date;				// Run date
+	private int			laneCount;			// Number of lanes
 	private int 		surfaceCount;			// Number of surface sides
-	private	int		swathCount;			// Number of swaths
-	private int		machineRunNumber;		// Nth number run on this machine
+	private	int			swathCount;			// Number of swaths
+	private int			machineRunNumber;		// Nth number run on this machine
 	private Reads		reads;				// Read information
 	private boolean		hasTurned	= false;
 	private boolean		hasNotifyTurned	= false;
 	private String		runDirectory = "";		// RunDirectory path
-	private int		parseError	=	0;	// Number of parsing errors
+	private int			parseError	=	0;	// Number of parsing errors
 
 	// Run Metrics
 	private Map<Object, ClusterDensity>		clusterDensity;		// Contains Cluster Density for all lanes
@@ -59,7 +60,9 @@ public class Summary implements Serializable {
 	private Map<Integer, Map<Integer, Phasing>> 	phasingMap;			// Phasing values per lane
 	private Map<Integer, Map<Integer, Phasing>> 	prephasingMap;		// Prephasing values per lane
 
-	private QualityScores qScores;						// QualityScores per lane, per cycle, per tile,
+	private QualityScores qScores;						// QualityScores per lane, per cycle, per tile
+	private QScoreDist qScoreDist;			// The stored distribution of num clusters / QScore
+
 
 //	private	HashMap<Object, ErrorRate>		errorRate;
 	private int 		firstCycleIntensity;
@@ -279,7 +282,6 @@ public class Summary implements Serializable {
 	}
 
 	public void setReads(Reads rds){
-//		System.out.println(rds.getTotalNumberOfReads());
 		this.reads = rds;
 	}
 
@@ -308,27 +310,35 @@ public class Summary implements Serializable {
 	}
 
 	public void setHasNotifyTurned(boolean setNotify){
-                this.hasNotifyTurned = setNotify;
-        }
+         this.hasNotifyTurned = setNotify;
+    }
 
-        public boolean getHasNotifyTurned(){
-                return hasNotifyTurned;
-        }
+    public boolean getHasNotifyTurned(){
+         return hasNotifyTurned;
+    }
 
 	private String convertEpochToTime(long epoch){
 		Date date = new Date(epoch);
-	        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	    DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		TimeZone tz = Calendar.getInstance().getTimeZone();
-	        format.setTimeZone(tz.getTimeZone(tz.getID()));
-	        String formatted = format.format(date);
+	    format.setTimeZone(tz.getTimeZone(tz.getID()));
+	    String formatted = format.format(date);
 		return formatted;
 	}
 
-	public void setQScoreDist(QualityScores qScores){
+	public void setQScoreDist(QScoreDist qScoreDist){
+		this.qScoreDist = qScoreDist;
+	}
+
+	public QScoreDist getQScoreDist(){
+		return qScoreDist;
+	}
+
+	public void setQScores(QualityScores qScores){
 		this.qScores = qScores;
 	}
 
-	public QualityScores getQScoreDist(){
+	public QualityScores getQScores(){
 		return qScores;
 	}
 
@@ -341,23 +351,27 @@ public class Summary implements Serializable {
 	}
 
 	public boolean hasClusterDensity(){
-		return clusterDensity.isEmpty() ? false : true;
+		return clusterDensity == null ? false : true;
 	}
 
 	public boolean hasClusterDensityPF(){
-		return clusterDensityPF.isEmpty() ? false : true;
+		return clusterDensityPF == null ? false : true;
 	}
 
 	public boolean hasPrephasing(){
-		return prephasingMap.isEmpty() ? false : true;
+		return prephasingMap == null ? false : true;
 	}
 
 	public boolean hasPhasing(){
-		return phasingMap.isEmpty() ? false : true;
+		return phasingMap == null ? false : true;
 	}
 
 	public boolean hasQScores(){
-		return qScores.isEmpty() ? false : true;
+		return qScores == null ? false : true;
+	}
+
+	public boolean hasQScoreDist(){
+		return qScoreDist == null ? false : true; 
 	}
 
 	public void setParseError(int parseError){
