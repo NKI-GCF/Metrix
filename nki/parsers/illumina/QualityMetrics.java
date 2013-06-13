@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -27,7 +27,7 @@ public class QualityMetrics {
 
 	private int version = 0;
 	private int recordLength = 0;
-        private int sleepTime = 3000;
+    private int sleepTime = 3000;
 	private boolean fileMissing = false;	
 
 	public QualityMetrics(String source, int state){
@@ -131,11 +131,11 @@ public class QualityMetrics {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void iterateQS(QualityScores qscores){
+	public void iterateQS(){
 		
-		if(qscores != null) {
+		if(qScores != null) {
 
-		Iterator qit = qscores.getQScoreIterator();
+		Iterator qit = qScores.getQScoreIterator();
 
 		while(qit.hasNext()){
 			Map.Entry scorePairs = (Map.Entry) qit.next();

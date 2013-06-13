@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.HashMap;
 import nki.objects.QualityMap;
 import nki.objects.MutableLong;
+import nki.objects.QScoreDist;
 
 public class QualityScores implements Serializable{
 
@@ -21,7 +22,7 @@ public class QualityScores implements Serializable{
 	public int recordLength;
 	public String source;
 	public HashMap<Integer, HashMap<Integer, QualityMap>> qScores = new HashMap<Integer, HashMap<Integer, QualityMap>>();	
-        private HashMap<Integer, MutableLong> qScoreDist = new HashMap<Integer, MutableLong>();
+	private QScoreDist qScoreDist = new QScoreDist();
 
 	public void setVersion(int version){
 		this.version = version;
@@ -61,7 +62,7 @@ public class QualityScores implements Serializable{
 
 		if(cycleMap == null){
 			qScores.put(lanenr, content);
-		}else{	// Merge maps
+		}else{	// Merge maps and replace existing entries
 			HashMap<Integer, QualityMap> tmpMap = new HashMap<Integer, QualityMap>(content);
 			tmpMap.keySet().removeAll(cycleMap.keySet());
 			cycleMap.putAll(content);
@@ -70,9 +71,9 @@ public class QualityScores implements Serializable{
 		qScores.put(lanenr, cycleMap);
 	}
 
-        public HashMap<Integer, QualityMap> getLane(int lanenr){
-                return qScores.get(lanenr);
-        }
+	public HashMap<Integer, QualityMap> getLane(int lanenr){
+		return qScores.get(lanenr);
+    }
 
 	public QualityMap getCycle(int lane, int cycle){
 		return (qScores.get(lane)).get(cycle);
@@ -87,7 +88,7 @@ public class QualityScores implements Serializable{
         }
 
 	@SuppressWarnings("unchecked")
-	public HashMap<Integer, MutableLong> getQScoreDistribution(){
+	public QScoreDist getQScoreDistribution(){
                 Iterator qit = this.getQScoreIterator();
 	
                 while(qit.hasNext()){
@@ -107,29 +108,20 @@ public class QualityScores implements Serializable{
                                         HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
 
                                         for(Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()){
-						int qScore = (Integer) qmetric.getKey();
-						long metric = Long.valueOf(qmetric.getValue());
+											int qScore = (Integer) qmetric.getKey();
+											long metric = Long.valueOf(qmetric.getValue());
+
+											if(metric == 0){
+												continue;
+											}					
+
+											qScoreDist.setScore(qScore, metric);	// Set the metric in the QScore Distribution
 	
-						if(metric == 0){
-							continue;
-						}					
-	
-						MutableLong val = qScoreDist.get(qScore);
-						if(val == null){
-							val.add(metric);
-							qScoreDist.put(qScore, val);
-						}else{
-							qScoreDist.get(qScore).add(metric);
-						}
-	
-       //System.out.println("Lane: " + lane + "\tCycle: " + cycle + "\tTile: " + tile + "\tQMetric: " + metric + "\t#Clust\\wScore: " + value);
+										//System.out.println("Lane: " + lane + "\tCycle: " + cycle + "\tTile: " + tile + "\tQMetric: " + metric + "\t#Clust\\wScore: " + value);
                                         }
                                 }
                         }
                 }
-		
-	return qScoreDist;
-
-
-        }
+			return qScoreDist;
+	}
 }

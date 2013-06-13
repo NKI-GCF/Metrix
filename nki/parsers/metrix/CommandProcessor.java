@@ -94,7 +94,7 @@ public class CommandProcessor {
 		{
 		// If true validity, start.
 		if(recCom.getCommand().equals(Constants.COM_FUNCTION_SET)){
-			throw new UnimplementedCommandException("This command has not been implemented yet. ");
+			throw new UnimplementedCommandException("This command ("+recCom.getCommand()+") has not been implemented. ");
 		}
 
 		if(recCom.getCommand().equals(Constants.COM_FUNCTION_FETCH)){
@@ -128,6 +128,9 @@ public class CommandProcessor {
 
 			if(recCom.getType().equals(Constants.COM_TYPE_METRIC)){
 				// Retrieve summary from database and check metric availability.
+				if(recCom.getRunId() == null){
+					throw new MissingCommandDetailException("Please supply a runID for the requested metrics.");
+				}
 				Summary sum = ds.getSummaryByRunName(recCom.getRunId());
 
 				if(!sum.equals(null)){
@@ -138,18 +141,26 @@ public class CommandProcessor {
 		
 					if(!sum.hasClusterDensity() || !sum.hasClusterDensityPF() || !sum.hasPhasing() || !sum.hasPrephasing()){
 						// Try parsing Tile Metrics.
-				            TileMetrics tm = new TileMetrics(tileMetrics, 0);
-							tm.digestData();
-							sum.setClusterDensity(tm.getCDmap());
-	                        sum.setClusterDensityPF(tm.getCDpfMap());
-      				        sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
-	                        sum.setPrephasingMap(tm.getPrephasingMap());
+				        TileMetrics tm = new TileMetrics(tileMetrics, 0);
+						tm.digestData();
+						sum.setClusterDensity(tm.getCDmap());
+                        sum.setClusterDensityPF(tm.getCDpfMap());
+				        sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
+           		        sum.setPrephasingMap(tm.getPrephasingMap());
 					}
 
 					if(!sum.hasQScores()){
 				            QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
 							QualityScores qsOut = qm.digestData();
-							sum.setQScoreDist(qsOut);
+							sum.setQScores(qsOut);
+							sum.setQScoreDist(qsOut.getQScoreDistribution());
+					}
+
+					if(sum.hasQScoreDist()){
+						System.out.println("QScore Distribution available.");
+						System.out.println(sum.getQScoreDist().toTab());
+					}else{
+						System.out.println("No Dist available.");
 					}
 
 					// Check output formatting method and return.
@@ -158,6 +169,7 @@ public class CommandProcessor {
 						SummaryCollection sc = new SummaryCollection();					
 						sc.appendSummary(sum);
 						System.out.println(sc.getSummaryCollectionXMLAsString(recCom));
+						oos.writeObject(sc.getSummaryCollectionXMLAsString(recCom));
 					}else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
 						oos.writeObject(sum); // Send as POJO
 					}

@@ -88,13 +88,21 @@ public class SummaryCollection implements Serializable {
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}else if(com.getType().equals(Constants.COM_TYPE_DETAIL)){
 						sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
-					}else if(com.getType().equals(Constants.COM_TYPE_METRIC)){
-						sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);			
+			//		}else if(com.getType().equals(Constants.COM_TYPE_METRIC)){
+			//			sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);			
 					}else{
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}
 
 					root.appendChild(sumXml);
+				}
+
+				if(com.getType().equals(Constants.COM_TYPE_METRIC)){
+					// create QScore element
+					Element sumXml = xmlDoc.createElement("QScoreDist");
+					sumXml.setAttribute("runId", sumObj.getRunId());
+					QScoreDist dist = sumObj.getQScoreDist();
+					sumXml = dist.toXML(sumXml,xmlDoc);
 				}
 			}			
 		}catch(Exception ex){
@@ -107,15 +115,20 @@ public class SummaryCollection implements Serializable {
 		return xmlDoc;
 	}
 
+	/*
+	 *	XML Builders
+	 */
+
+
 	private Element summaryAsSimple(Summary sumObj, Element sumXml, Document xmlDoc){
 
-                sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
-                sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
-                sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState()+""));
-                sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated()+""));
-                sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate()+""));
-                sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles()+""));
-                sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));		
+		sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
+		sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
+		sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState()+""));
+		sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated()+""));
+		sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate()+""));
+		sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles()+""));
+		sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));		
 
 		return sumXml;
 	}
@@ -139,6 +152,9 @@ public class SummaryCollection implements Serializable {
 	}
 
 	private Element summaryAsMetric(Summary sumObj, Element sumXml, Document xmlDoc){
+
+		
+
 		sumXml.appendChild(createElement(xmlDoc, "TestLalal", sumObj.getRunId()));
 		return sumXml;
 	}

@@ -120,7 +120,7 @@ public class MetrixLogic {
 			summary.incParseError();
 		}
 		
-		if(summary.getParseError() >= 15){
+		if(summary.getParseError() >= 15 && summary.getCurrentCycle() > 20){
 			summary.setState(3);
 			saveEntry(path);
 			metrixLogger.log(Level.INFO, "Run has failed to complete within the allotted time frame.");

@@ -87,7 +87,7 @@ public class MetrixClient {
 								Summary sum = (Summary) litr.next();
 
 								// The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
-                	                                        System.out.println("- " + sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle());
+                	            System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle());
 								listen = false;
 
 							}

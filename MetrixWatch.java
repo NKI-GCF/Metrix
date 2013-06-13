@@ -270,9 +270,9 @@ public class MetrixWatch extends Thread{
 					if(ml.processMetrics(procFold, 1, dataStore)){
 						// Successfuly processed, continue watching.
 						metrixLogger.log(Level.INFO, "Parsed " + procFold  + " successfully. ");
-					}else{
-						//      metrixLogger.log(Level.SEVERE, "Processing failed for " + procFold + ".");
 					}
+						// ELSE Processing failed
+					
 				}
 				waitMap.put(watchKey, System.currentTimeMillis());
 			}
@@ -297,8 +297,12 @@ public class MetrixWatch extends Thread{
 	private boolean checkPollTime(WatchKey localKey){
 		long currentTime = System.currentTimeMillis();
 
-		if(waitMap.get(localKey) == 0){
-			return true;	// Parse in first pass.
+		if(waitMap.get(localKey) != null){
+			if(waitMap.get(localKey) == 0){
+				return true;	// Parse in first pass.
+			}
+		}else{
+			return false;
 		}
 
 		long mapTime = waitMap.get(localKey);
