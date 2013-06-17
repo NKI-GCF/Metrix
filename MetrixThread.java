@@ -77,7 +77,7 @@ public class MetrixThread extends Thread {
 								cp = new CommandProcessor(commandClient, oos, ds);			
 							}
 		
-
+						// Server Exceptions and important logging.
 						}catch(CommandValidityException CVE){
 							System.out.println("Command Validity Exception! " + CVE);
 						}catch(InvalidCredentialsException ICE){

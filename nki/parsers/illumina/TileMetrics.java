@@ -215,7 +215,7 @@ public class TileMetrics {
 				record++;
 			}
 			
-			// Set the cikkectuib obhects.
+			// Set the collection objects.
 			setCDmap(cdMap);
 			setCDpfMap(cdPFMap);
 			setPhasingMap(pMap);

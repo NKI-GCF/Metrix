@@ -49,6 +49,7 @@ public class Command implements Serializable{
 	private long 			timedInterval = 10000;
 	private String 			info;
 	private String 			message;
+	private String			retType = Constants.COM_RET_TYPE_BYSTATE;	// Type of retrieval.
 
 	public static final int[] STATES = {
 			Constants.STATE_RUNNING,
@@ -141,11 +142,11 @@ public class Command implements Serializable{
 	}
 
 	public void setState(int st){
-
 		if(!checkState(st)){
 			setMessage("Invalid state (" + st + ")");
 			state = 0;
 		}else{
+			this.retType = Constants.COM_RET_TYPE_BYSTATE;
 			this.state = st;
 		}
 	}
@@ -175,6 +176,7 @@ public class Command implements Serializable{
 	}
 
 	public void setRunId(String runId){
+		this.retType = Constants.COM_RET_TYPE_BYRUN;
 		this.runId = runId;
 	}
 	
@@ -207,6 +209,18 @@ public class Command implements Serializable{
 
 	private MetricFilter getMetricFilter(){
 		return filter;
+	}
+
+	public String getRetType(){
+		return retType;
+	}
+
+	public void setRetType(String retType){
+		if(retType.equals(Constants.COM_RET_TYPE_BYSTATE)){
+			this.retType = Constants.COM_RET_TYPE_BYSTATE;
+		}else{
+			this.retType = Constants.COM_RET_TYPE_BYRUN;
+		}
 	}
 
 }

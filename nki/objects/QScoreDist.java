@@ -44,28 +44,16 @@ public class QScoreDist implements Serializable{
 	}
 
 	public Element toXML(Element sumXml, Document xmlDoc){
-/*		String out = "<qscores>\n";
-		
-//		List sortedKeys = new ArrayList<HashMap>(QScoreDist.keySet());
-//		Collections.sort(sortedKeys);
-		
-		for(int score : qScoreDist.keySet()){
-			MutableLong metric = this.getScore(score);
-			out += "<entry>\n\t<quality>"+score +"</quality>\n\t<numClusters>" + metric + "</numClusters>\n";
-		}
-
-		out += "\n</qscores>\n";
-		return out;
-
-*/
-//		Element sumXml = xmlDoc.createElement("Dist");
 		Element distXml = xmlDoc.createElement("QScores");
 		for(int scoreVal : qScoreDist.keySet()){
-			Element score = createElement(xmlDoc, "QScore", scoreVal+"");
+			Element scoreEle = xmlDoc.createElement("QScore");
+			Element score = createElement(xmlDoc, "Score", scoreVal+"");
 			MutableLong metric = this.getScore(scoreVal);
-			Element clusters = createElement(xmlDoc, "Clusters", metric+"");
-			distXml.appendChild(score);
-			distXml.appendChild(clusters);
+			Element clusters = createElement(xmlDoc, "Clusters", metric.get()+"");
+			scoreEle.appendChild(score);
+			scoreEle.appendChild(clusters);
+			distXml.appendChild(scoreEle);
+
 			sumXml.appendChild(distXml);
 		}
 
@@ -85,12 +73,9 @@ public class QScoreDist implements Serializable{
 	public String toTab(){
 		String out = "";
 
-//		List sortedKeys = new ArrayList(QScoreDist.keySet());
-//		Collections.sort(sortedKeys);
-		
 		for(int score : qScoreDist.keySet()){
 			MutableLong metric = this.getScore(score);
-			out += score +"\t" + metric + "\n";
+			out += score +"\t" + metric.get() + "\n";
 		}
 
 		return out;

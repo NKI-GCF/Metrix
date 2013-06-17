@@ -206,18 +206,18 @@ public class MetrixLogic {
                                       summary.setSumId(lastId+1);
                                       DataStore.appendedWrite(summary, path);
                              }catch(Exception Ex){
-                                      System.out.println("Exception in write statement lastID = " + lastId+ " Error: " + Ex.toString());
+                                      metrixLogger.log(Level.SEVERE, "Exception in write statement lastID = " + lastId+ " Error: " + Ex.toString());
                              }
                       }else{
                       // Run has been parsed before. Update instead of insert
                             try{
                                    DataStore.updateSummaryByRunName(summary, path);
                             }catch(Exception SEx){
-                                   System.out.println("Exception in update statement " + SEx.toString());
+                                   metrixLogger.log(Level.SEVERE, "Exception in update statement " + SEx.toString());
                             }
                       }
                }catch(Exception Ex){
-                      System.out.println("Run ID Checking error." + Ex.toString());
+                      metrixLogger.log(Level.SEVERE, "Run ID Checking error." + Ex.toString());
                }
 	}
 	

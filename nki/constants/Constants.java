@@ -44,6 +44,9 @@ public final class Constants {
 	public static final String		COM_MODE_CALL				= "CALL";
 	public static final String		COM_MODE_TIMED				= "TIMED";
 
+	public static final String		COM_RET_TYPE_BYSTATE		= "BYSTATE";
+	public static final String		COM_RET_TYPE_BYRUN			= "BYRUN";
+
 	public static final String		METRIC_TYPE_QSCORE			= "QSCORE";
 	public static final String 		METRIC_TYPE_CD				= "CLUSTER_DENSITY";
 	public static final String 		METRIC_TYPE_PHASING			= "PHASING";
