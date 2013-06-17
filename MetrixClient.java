@@ -67,7 +67,7 @@ public class MetrixClient {
 					sendCommand.setCommand("FETCH");
 					sendCommand.setMode("CALL");
 					sendCommand.setType("METRIC");
-//					sendCommand.setRunId("/net/RTAdumpII/HiSeq2000/130614_M00872_0048_000000000-A4CFV_M061");
+//					sendCommand.setRunId(""); // Use run directory path as string or if a State is desired, use setState and comment out setRunId() method.
 					oos.writeObject(sendCommand);
 					oos.flush();
 					
