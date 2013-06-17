@@ -66,9 +66,8 @@ public class QualityScores implements Serializable{
 			HashMap<Integer, QualityMap> tmpMap = new HashMap<Integer, QualityMap>(content);
 			tmpMap.keySet().removeAll(cycleMap.keySet());
 			cycleMap.putAll(content);
+			qScores.put(lanenr, cycleMap);
 		}
-
-		qScores.put(lanenr, cycleMap);
 	}
 
 	public HashMap<Integer, QualityMap> getLane(int lanenr){
@@ -89,38 +88,36 @@ public class QualityScores implements Serializable{
 
 	@SuppressWarnings("unchecked")
 	public QScoreDist getQScoreDistribution(){
-                Iterator qit = this.getQScoreIterator();
-	
+        Iterator qit = this.getQScoreIterator();
+
                 while(qit.hasNext()){
                         Map.Entry scorePairs = (Map.Entry) qit.next();
                         int lane = (Integer) scorePairs.getKey();
                         HashMap<Integer, QualityMap> laneScores = (HashMap<Integer, QualityMap>) scorePairs.getValue();
-
                         for(Map.Entry<Integer, QualityMap> entry : laneScores.entrySet()){
                                 int cycle = (Integer) entry.getKey();
                                 QualityMap qmap = (QualityMap) entry.getValue();
-
                                 Iterator qmapIt = qmap.getScoreIterator();
 
                                 while(qmapIt.hasNext()){
                                         Map.Entry qmapPairs = (Map.Entry) qmapIt.next();
                                         int tile = (Integer) qmapPairs.getKey();
                                         HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
-
+										
                                         for(Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()){
 											int qScore = (Integer) qmetric.getKey();
 											long metric = Long.valueOf(qmetric.getValue());
-
 											if(metric == 0){
 												continue;
 											}					
 
 											qScoreDist.setScore(qScore, metric);	// Set the metric in the QScore Distribution
 	
-										//System.out.println("Lane: " + lane + "\tCycle: " + cycle + "\tTile: " + tile + "\tQMetric: " + metric + "\t#Clust\\wScore: " + value);
                                         }
                                 }
                         }
+
+					
                 }
 			return qScoreDist;
 	}

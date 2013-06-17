@@ -16,6 +16,10 @@ import java.nio.channels.*;
 import nki.objects.Command;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
+import nki.exceptions.EmptyResultSetCollection;
+import nki.exceptions.MissingCommandDetailException;
+import nki.exceptions.UnimplementedCommandException;
+import nki.exceptions.InvalidCredentialsException;
 import java.util.logging.*;
 import java.util.*;
 import java.io.*;
@@ -58,11 +62,12 @@ public class MetrixClient {
 					nki.objects.Command sendCommand = new nki.objects.Command();
 					
 					// Set a value for command
-					sendCommand.setFormat("POJO");
-					sendCommand.setState(12); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
+					sendCommand.setFormat("XML");
+					sendCommand.setState(1); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
 					sendCommand.setCommand("FETCH");
 					sendCommand.setMode("CALL");
-					sendCommand.setType("DETAIL");
+					sendCommand.setType("METRIC");
+//					sendCommand.setRunId("/net/RTAdumpII/HiSeq2000/130614_M00872_0048_000000000-A4CFV_M061");
 					oos.writeObject(sendCommand);
 					oos.flush();
 					
@@ -96,6 +101,26 @@ public class MetrixClient {
 						if(serverAnswer instanceof String){ 			// Server returned a XML String with results.
 							String srvResp = (String) serverAnswer;
 							System.out.println("response = " + srvResp );
+							listen = false;
+						}
+
+						if(serverAnswer instanceof EmptyResultSetCollection){
+							System.out.println(serverAnswer.toString());
+							listen = false;
+						}
+
+						if(serverAnswer instanceof InvalidCredentialsException){
+							System.out.println(serverAnswer.toString());
+							listen = false;
+						}
+
+						if(serverAnswer instanceof MissingCommandDetailException){
+							System.out.println(serverAnswer.toString());
+							listen = false;
+						}
+
+						if(serverAnswer instanceof UnimplementedCommandException){
+							System.out.println(serverAnswer.toString());
 							listen = false;
 						}
 					}

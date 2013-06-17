@@ -105,7 +105,6 @@ public class QualityMetrics {
 				
 				qcFlag=true;
 				int qcRecord = 1;
-				int[] clusterScore = new int[51];
 
 				QualityMap qMap = new QualityMap();
 				while(qcFlag){
@@ -121,12 +120,12 @@ public class QualityMetrics {
 				qScores.setLane(cycleMap, laneNr);
 			}
 		}catch(EOFException EOFEx){
-			System.out.println("Reached end of file");
+			// Reached end of file
 		}catch(IOException Ex){
 			System.out.println("IO Error");
 		}
 	
-		// Return the qualityScores and return QS object.
+		// Return the qualityScores object.
 		return qScores;
 	}
 	

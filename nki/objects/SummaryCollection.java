@@ -88,8 +88,12 @@ public class SummaryCollection implements Serializable {
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}else if(com.getType().equals(Constants.COM_TYPE_DETAIL)){
 						sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
-			//		}else if(com.getType().equals(Constants.COM_TYPE_METRIC)){
-			//			sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);			
+					}else if(com.getType().equals(Constants.COM_TYPE_METRIC)){
+						sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);
+			//			sumXml = xmlDoc.createElement("QScoreDist");
+			//			sumXml.setAttribute("runId", sumObj.getRunId());
+			//			QScoreDist dist = sumObj.getQScoreDist();
+			//			sumXml = dist.toXML(sumXml,xmlDoc);
 					}else{
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}
@@ -97,13 +101,13 @@ public class SummaryCollection implements Serializable {
 					root.appendChild(sumXml);
 				}
 
-				if(com.getType().equals(Constants.COM_TYPE_METRIC)){
+/*				if(com.getType().equals(Constants.COM_TYPE_METRIC)){
 					// create QScore element
 					Element sumXml = xmlDoc.createElement("QScoreDist");
 					sumXml.setAttribute("runId", sumObj.getRunId());
 					QScoreDist dist = sumObj.getQScoreDist();
 					sumXml = dist.toXML(sumXml,xmlDoc);
-				}
+				}*/
 			}			
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -152,10 +156,12 @@ public class SummaryCollection implements Serializable {
 	}
 
 	private Element summaryAsMetric(Summary sumObj, Element sumXml, Document xmlDoc){
-
+		sumXml = xmlDoc.createElement("QScoreDist");
+		sumXml.setAttribute("runId", sumObj.getRunId());
+		QScoreDist dist = sumObj.getQScoreDist();
+		sumXml = dist.toXML(sumXml,xmlDoc);
 		
-
-		sumXml.appendChild(createElement(xmlDoc, "TestLalal", sumObj.getRunId()));
+	//	sumXml.appendChild(createElement(xmlDoc, "TestLalal", sumObj.getRunId()));
 		return sumXml;
 	}
 

@@ -25,7 +25,7 @@ public class QualityMap implements Serializable{
                         // Get subMap from hashmap.
                         qMap = sMap.get(tilenr);
                 }else{
-                        // Create new readnum entry and popup late with new hashmap
+                        // Create new readnum entry and populate with new hashmap
                         qMap = new HashMap<Integer, Integer>();
                 }
 
