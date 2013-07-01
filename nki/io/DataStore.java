@@ -81,9 +81,10 @@ public class DataStore {
 	public static long appendedWrite(Summary sum, String runId) throws Exception{
 		String className = sum.getClass().getName();
 		PreparedStatement pstmt = conn.prepareStatement(WRITE_OBJECT_SQL);
-	
+		
+		sum.setLastUpdated();
+
 		Object sum2 = (Object) sum;
-	
 		// Set input parameters
 		pstmt.setString(1, runId);
 		pstmt.setObject(2, sum2);
@@ -185,6 +186,7 @@ public class DataStore {
 
 	public static void updateSummaryByRunName(Summary sum, String runName) throws Exception {
 		PreparedStatement pstmt = conn.prepareStatement(UPDATE_OBJECT_SQL_RUNNAME);
+		sum.setLastUpdated();
 		pstmt.setObject(1, sum);
 		pstmt.setInt(2, sum.getState());
 		pstmt.setString(3, runName);
@@ -195,6 +197,7 @@ public class DataStore {
 	
 	public static void updateSummaryById(Summary sum, int id) throws Exception {
 		PreparedStatement pstmt = conn.prepareStatement(UPDATE_OBJECT_SQL_ID);
+		sum.setLastUpdated();
 		pstmt.setObject(1, sum);
 		pstmt.setInt(2, id);
 

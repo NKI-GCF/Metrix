@@ -24,10 +24,9 @@ import javax.xml.transform.stream.*;
 public class QScoreDist implements Serializable{
 
 	public static final long serialVersionUID = 42L;
-
+	
 	// QualityMap - Integer scores
 	private HashMap<Integer, MutableLong> qScoreDist = new HashMap<Integer, MutableLong>();
-	private long totalClusters = 0;
 
 	public MutableLong getScore(int qScore){
 		return qScoreDist.get(qScore);
@@ -42,16 +41,20 @@ public class QScoreDist implements Serializable{
 		}else{
 			qScoreDist.get(qScore).add(metric);
 		}
-		addTotalClusters(metric); // append to total
 	}
 
 	public Element toXML(Element sumXml, Document xmlDoc){
+		Element distXml = xmlDoc.createElement("QScores");
 		for(int scoreVal : qScoreDist.keySet()){
 			Element scoreEle = xmlDoc.createElement("QScore");
-			scoreEle.setAttribute("score", scoreVal+"");
+			Element score = createElement(xmlDoc, "Score", scoreVal+"");
 			MutableLong metric = this.getScore(scoreVal);
-			scoreEle.setAttribute("clusters", metric.get()+"");
-			sumXml.appendChild(scoreEle);
+			Element clusters = createElement(xmlDoc, "Clusters", metric.get()+"");
+			scoreEle.appendChild(score);
+			scoreEle.appendChild(clusters);
+			distXml.appendChild(scoreEle);
+
+			sumXml.appendChild(distXml);
 		}
 
 		return sumXml;
@@ -80,14 +83,6 @@ public class QScoreDist implements Serializable{
 
 	public HashMap<Integer, MutableLong> toObj(){
 		return qScoreDist;
-	}
-
-	public long getTotalClusters(){
-		return totalClusters;
-	}
-
-	public void addTotalClusters(long metric){
-		this.totalClusters += metric;
 	}
 
 }

@@ -19,6 +19,7 @@ import nki.objects.Phasing;
 import nki.objects.Reads;
 import nki.objects.QualityScores;
 import nki.objects.QScoreDist;
+import nki.objects.IntensityScores;
 
 public class Summary implements Serializable {
 
@@ -33,11 +34,12 @@ public class Summary implements Serializable {
 	private String		instrument;			// Name of instrument
 	private String		side;				// Side of flowcell
 	private String		lastUpdated 	= "0";		// Last update time
+	private long		lastUpdatedEpoch = 0;
 	private String		phase; 				// Phase of run :: Imaging / Basecalling / RTAComplete
 	private String		runType;			// Run Type: Single / Paired / Nextera
 	private int			indexLength;			// Length of index read
-	private int             tileCount;			// Number of Tiles
-	private int 		state		= 3;		// State 0: Hanging / State 1: Running / State 2: Complete / State 3: Unknown / State 4: Flowcell needs turning
+	private int         tileCount;				// Number of Tiles
+	private int 		state		= 5;		// State 0: Hanging / State 1: Running / State 2: Complete / State 3: Unknown / State 4: Flowcell needs turning
 	private int			numReads;			// Total number of reads
 	private	boolean		isNextera	= false; 	// Is this a nextera run?
 	private boolean		isIndexed	= false;	// Is run indexed.
@@ -55,14 +57,15 @@ public class Summary implements Serializable {
 	private int			parseError	=	0;	// Number of parsing errors
 
 	// Run Metrics
-	private Map<Object, ClusterDensity>		clusterDensity;		// Contains Cluster Density for all lanes
-	private Map<Object, ClusterDensity>		clusterDensityPF;	// Contains Cluster Density Passing Filter for all lanes
-	private Map<Integer, Map<Integer, Phasing>> 	phasingMap;			// Phasing values per lane
-	private Map<Integer, Map<Integer, Phasing>> 	prephasingMap;		// Prephasing values per lane
+	private ClusterDensity		clusterDensity;		// Contains Cluster Density for all lanes
+	private ClusterDensity		clusterDensityPF;			// Contains Cluster Density Passing Filter for all lanes
+	private HashMap<Integer, HashMap<Integer, Phasing>> 	phasingMap;			// Phasing values per lane
+	private HashMap<Integer, HashMap<Integer, Phasing>> 	prephasingMap;		// Prephasing values per lane
 
 	private QualityScores qScores;						// QualityScores per lane, per cycle, per tile
 	private QScoreDist qScoreDist;			// The stored distribution of num clusters / QScore
 
+	private IntensityScores iScores;
 
 //	private	HashMap<Object, ErrorRate>		errorRate;
 	private int 		firstCycleIntensity;
@@ -122,11 +125,16 @@ public class Summary implements Serializable {
 	}
 
 	public void setLastUpdated(){
+		this.lastUpdatedEpoch = System.currentTimeMillis();
 		this.lastUpdated = convertEpochToTime(System.currentTimeMillis());
 	}
 
 	public String getLastUpdated(){
 		return lastUpdated;
+	}
+
+	public long getLastUpdatedEpoch(){
+		return this.lastUpdatedEpoch;
 	}
 
 	public void setPhase(String phs){ // Change with constants
@@ -201,21 +209,23 @@ public class Summary implements Serializable {
 		return swathCount;
 	}
 	
-	public void setClusterDensity(Map<Object, ClusterDensity> cd){
+	public void setClusterDensity(ClusterDensity cd){
+		cd.setType("CD");
 		this.clusterDensity = cd;
 	}
 
-	public Map<Object, ClusterDensity> getClusterDensity(){
+	public ClusterDensity getClusterDensity(){
 		return clusterDensity;
 	}
 
-	public void setClusterDensityPF(Map<Object, ClusterDensity> cdPf){
-                this.clusterDensityPF = cdPf;
-        }
+	public void setClusterDensityPF(ClusterDensity cdPf){
+		cdPf.setType("PF");
+		this.clusterDensityPF = cdPf;
+	}
 
-        public Map<Object, ClusterDensity> getClusterDensityPF(){
-                return clusterDensityPF;
-        }
+	public ClusterDensity getClusterDensityPF(){
+		return clusterDensityPF;
+	}
 
 //	public void setErrorRate(HashMap<Object, ErrorRate> er){
 //		this.errorRate = er;
@@ -265,19 +275,19 @@ public class Summary implements Serializable {
 		return isIndexed;
 	}
 
-	public void setPhasingMap(Map<Integer, Map<Integer, Phasing>> map){
+	public void setPhasingMap(HashMap<Integer, HashMap<Integer, Phasing>> map){
 		this.phasingMap = map;
 	}
 
-	public Map<Integer, Map<Integer, Phasing>> getPhasingMap(){
+	public HashMap<Integer, HashMap<Integer, Phasing>> getPhasingMap(){
 		return phasingMap;
 	}
 	
-	public void setPrephasingMap(Map<Integer, Map<Integer, Phasing>> preMap){
+	public void setPrephasingMap(HashMap<Integer, HashMap<Integer, Phasing>> preMap){
 		this.prephasingMap = preMap;
 	}
 
-	public Map<Integer, Map<Integer, Phasing>> getPrephasingMap(){
+	public HashMap<Integer, HashMap<Integer, Phasing>> getPrephasingMap(){
 		return prephasingMap;
 	}
 
@@ -327,6 +337,7 @@ public class Summary implements Serializable {
 	}
 
 	public void setQScoreDist(QScoreDist qScoreDist){
+		qScoreDist.toTab();
 		this.qScoreDist = qScoreDist;
 	}
 
@@ -340,6 +351,14 @@ public class Summary implements Serializable {
 
 	public QualityScores getQScores(){
 		return qScores;
+	}
+
+	public void setIScores(IntensityScores iScores){
+		this.iScores = iScores;
+	}
+
+	public IntensityScores getIScores(){
+		return iScores;
 	}
 
 	public void setRunDirectory(String runDirectory){
@@ -372,6 +391,10 @@ public class Summary implements Serializable {
 
 	public boolean hasQScoreDist(){
 		return qScoreDist == null ? false : true; 
+	}
+
+	public boolean hasIScores(){
+		return iScores == null ? false : true;
 	}
 
 	public void setParseError(int parseError){

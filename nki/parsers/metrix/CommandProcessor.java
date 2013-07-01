@@ -7,8 +7,10 @@ import nki.constants.Constants;
 import nki.io.DataStore;
 import nki.objects.QualityScores;
 import nki.objects.QScoreDist;
+import nki.objects.IntensityScores;
 import nki.parsers.illumina.QualityMetrics;
 import nki.parsers.illumina.TileMetrics;
+import nki.parsers.illumina.CorrectedIntensityMetrics;
 import nki.exceptions.InvalidCredentialsException;
 import nki.exceptions.CommandValidityException;
 import nki.exceptions.UnimplementedCommandException;
@@ -53,7 +55,9 @@ public class CommandProcessor {
 		this.ds = ds;
 
 		if(!checkAPI()){
-			throw new InvalidCredentialsException("The supplied API key is incorrect for this user. Please check.");
+			InvalidCredentialsException ICE = new InvalidCredentialsException("The supplied API key is incorrect for this user. Please check.");
+			oos.writeObject(ICE);		// Write to client
+			throw ICE;					// Throw to server
 		}
 
 		// Perform validity checks
@@ -122,7 +126,16 @@ public class CommandProcessor {
 					throw new MissingCommandDetailException("Summary State of received command is missing.");
 				}
 				// Retrieve set and return object.
-				SummaryCollection sc = ds.getSummaryCollections();
+				SummaryCollection sc = new SummaryCollection();
+
+				if(recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)){
+					Summary sum = ds.getSummaryByRunName(recCom.getRunId());
+					sc.appendSummary(sum);
+				}else if(recCom.getState() == Constants.STATE_ALL_PSEUDO){
+					sc = ds.getSummaryCollections();
+				}else{
+					sc = ds.getSummaryCollectionByState(recCom.getState());
+				}
 
 				// If no active runs present return command with details.
 				if(sc.getCollectionCount() == 0){
@@ -157,7 +170,11 @@ public class CommandProcessor {
 					Summary sum = ds.getSummaryByRunName(recCom.getRunId());
 					sc.appendSummary(sum);
 				}else{
-					sc = ds.getSummaryCollectionByState(recCom.getState());
+					if(recCom.getState() == Constants.STATE_ALL_PSEUDO){
+						sc = ds.getSummaryCollections();
+					}else{
+						sc = ds.getSummaryCollectionByState(recCom.getState());
+					}
 				}
 				
 				if(sc.getCollectionCount() == 0){
@@ -168,54 +185,104 @@ public class CommandProcessor {
 
 				while(litr.hasNext()){
 					Summary sum = (Summary) litr.next();
-
+					System.out.println("Processing " + sum.getRunId());
 					if(!sum.equals(null)){
 						Boolean update = false;
 						String runDir = sum.getRunDirectory();
+						if(runDir.equals("")){continue;}
 						String extractionMetrics = runDir + "/InterOp/" + Constants.EXTRACTION_METRICS;
 						String tileMetrics = runDir + "/InterOp/" + Constants.TILE_METRICS;
 						String qualityMetrics = runDir + "/InterOp/" + Constants.QMETRICS_METRICS;
-		
-						if(!sum.hasClusterDensity() || !sum.hasClusterDensityPF() || !sum.hasPhasing() || !sum.hasPrephasing()){
-							// Try parsing Tile Metrics.
+						String intensityMetrics = runDir + "/InterOp/" + Constants.CORRECTED_INT_METRICS;
+						long currEpoch = System.currentTimeMillis();
+						boolean timeCheck = (currEpoch - sum.getLastUpdatedEpoch()) > Constants.METRIC_UPDATE_TIME;
+				
+						System.out.println("Current epoch: " + currEpoch + "\tDifference: " + (currEpoch - sum.getLastUpdatedEpoch()) + "\tUpdate Threshold: " + Constants.METRIC_UPDATE_TIME);
+
+						/*
+						 * Iterate over checks for metrics parsing.
+						 */
+
+						// Process Extraction Metrics
+
+						/*
+						 * 
+						 */
+
+						if(	!sum.hasClusterDensity() 	||
+							!sum.hasClusterDensityPF() 	||
+							!sum.hasPhasing() 			||
+							!sum.hasPrephasing() 		||
+							timeCheck
+						){
+							// Process Cluster Density and phasing / prephasing
 							TileMetrics tm = new TileMetrics(tileMetrics, 0);
-							tm.digestData();
-							sum.setClusterDensity(tm.getCDmap());
-							sum.setClusterDensityPF(tm.getCDpfMap());
-							sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
-							sum.setPrephasingMap(tm.getPrephasingMap());
-							update = true;
+							if(!tm.getFileMissing()){								// If TileMetrics File is present - process.
+								tm.digestData();
+								sum.setClusterDensity(tm.getCDmap());
+								sum.setClusterDensityPF(tm.getCDpfMap());
+								sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
+								sum.setPrephasingMap(tm.getPrephasingMap());
+								
+								// Distribution present in ClusterDensity Object.
+								update = true;
+							}
 						}
 						
-						if(!sum.hasQScores()){
+						// Process QScore Dist
+						if(!sum.hasQScores() || timeCheck){
 								QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
-								QualityScores qsOut = qm.digestData();
-								sum.setQScores(qsOut);
-								QScoreDist qScoreDist = qsOut.getQScoreDistribution();
-								sum.setQScoreDist(qScoreDist);
-								update = true;
+								if(!qm.getFileMissing()){
+									QualityScores qsOut = qm.digestData();
+									sum.setQScores(qsOut);
+									// Calculate distribution
+									QScoreDist qScoreDist = qsOut.getQScoreDistribution();
+									sum.setQScoreDist(qScoreDist);
+									update = true;
+								}
 						}
 
-						if(update == true){				
+						// Process Corrected Intensities
+						if(!sum.hasIScores() || timeCheck){
+							CorrectedIntensityMetrics im = new CorrectedIntensityMetrics(intensityMetrics, 0);
+							if(!im.getFileMissing()){
+								IntensityScores isOut = im.digestData();
+								sum.setIScores(isOut);
+								// Calculate distribution
+								isOut.getAvgCorIntDist();
+								update = true;
+							}
+						}
+
+						if(update == true){
 							try{
-                                   DataStore.updateSummaryByRunName(sum, runDir);
+								sum.setLastUpdated();
+								DataStore.updateSummaryByRunName(sum, runDir);
                             }catch(Exception SEx){
-                                   System.out.println("Exception in update statement " + SEx.toString());
+								System.out.println("Exception in update statement " + SEx.toString());
                             }
 						}
 					}else{
 						// Throw error
 					}
 				}// End SC While iterator
-
-				// Check output formatting method and return.
+				
+				/*
+				*  Check output formatting method and return.
+				*/
 				if(recCom.getFormat().equals(Constants.COM_FORMAT_XML)){
 					// Generate XML.
 					oos.writeObject(sc.getSummaryCollectionXMLAsString(recCom));
+				}else if(recCom.getFormat().equals(Constants.COM_FORMAT_TAB)){
+					// Generate TAB separated string
+					oos.writeObject(sc.toTab(recCom));
 				}else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
-					oos.writeObject(sc); // Send as POJO
+					// Send back the SummaryCollection POJO
+					oos.writeObject(sc); 
+				}else{
+					// Exception
+						throw new MissingCommandDetailException("Requested output format not understood (" + recCom.getFormat() + ")");
 				}
-
 			}
 		}
 

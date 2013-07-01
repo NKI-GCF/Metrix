@@ -157,7 +157,9 @@ public class Command implements Serializable{
 
 	public void setFormat(String form){
 		if(form.equals(Constants.COM_FORMAT_OBJ)){
-			this.format = form;
+			this.format = Constants.COM_FORMAT_OBJ;
+		}else if(form.equals(Constants.COM_FORMAT_TAB)){
+			this.format = Constants.COM_FORMAT_TAB;
 		}else{
 			this.format = Constants.COM_FORMAT_XML;
 		}

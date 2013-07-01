@@ -18,8 +18,10 @@ public class Metric implements Serializable {
 
         public void setMetric(Float metricScore){
                 this.metric = metricScore;
+				this.incrementTiles();
         }
 
+		// Total for whole lane
         public Float getMetric(){
                 return metric;
         }
@@ -34,14 +36,16 @@ public class Metric implements Serializable {
 
         public void incrementMetric(Float metricScore){
                 this.metric += metricScore;
+				this.incrementTiles();
         }
 
         public void incrementTiles(){
                 this.tiles += 1;
         }
 
-        public Float getAvg(){
-                return (metric / tiles);
+		// ClusterDensity averaged (metric value / #tiles) .
+        public Float getLaneAvg(){
+			return (metric / tiles);
         }
 	
 }

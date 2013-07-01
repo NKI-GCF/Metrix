@@ -24,7 +24,7 @@ public class MetrixWatch extends Thread{
 	private String runDirString;
 	private String illuDirRegex = "\\d*_.*_\\d*_\\d*.*";
 	private Pattern p = Pattern.compile(illuDirRegex);
-	private long waitTime =  300000;	// Update every 5 minutes.		       (ms)
+	private long waitTime =  1800000;	// Update every 5 minutes.		       (ms)
 	private long forceTime = 1200000;	// If no update for 20 minutes, force parsing. (ms)
 	private static final Logger metrixLogger = Logger.getLogger(MetrixWatch.class.getName());
 

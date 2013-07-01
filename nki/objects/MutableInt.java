@@ -11,9 +11,13 @@ import java.io.*;
 
 public class MutableInt implements Serializable{
 	public static final long serialVersionUID = 42L;
-	public int val = 1;
+	public int val = 0;
 
 	public MutableInt(){
+	}
+
+	public void add(Integer val){
+		this.val += val;
 	}
 
 	public void increment(){
@@ -22,6 +26,14 @@ public class MutableInt implements Serializable{
 	
 	public int get() {
 		return val;
+	}
+
+	public void avg(int numTiles){
+		this.val = val / numTiles;
+	}
+
+	public String toString(){
+		return val + "";
 	}
 
 }

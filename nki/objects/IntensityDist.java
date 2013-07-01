@@ -21,32 +21,32 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 
-public class QScoreDist implements Serializable{
+public class IntensityDist implements Serializable{
 
 	public static final long serialVersionUID = 42L;
 
 	// QualityMap - Integer scores
-	private HashMap<Integer, MutableLong> qScoreDist = new HashMap<Integer, MutableLong>();
+	private HashMap<Integer, MutableLong> intensityDist = new HashMap<Integer, MutableLong>();
 	private long totalClusters = 0;
 
 	public MutableLong getScore(int qScore){
-		return qScoreDist.get(qScore);
+		return intensityDist.get(qScore);
 	}
 
 	public void setScore(int qScore, long metric){
-		MutableLong val = qScoreDist.get(qScore);
+		MutableLong val = intensityDist.get(qScore);
 		if(val == null){
 			val = new MutableLong();
 			val.add(metric);
-			qScoreDist.put(qScore, val);
+			intensityDist.put(qScore, val);
 		}else{
-			qScoreDist.get(qScore).add(metric);
+			intensityDist.get(qScore).add(metric);
 		}
 		addTotalClusters(metric); // append to total
 	}
 
 	public Element toXML(Element sumXml, Document xmlDoc){
-		for(int scoreVal : qScoreDist.keySet()){
+		for(int scoreVal : intensityDist.keySet()){
 			Element scoreEle = xmlDoc.createElement("QScore");
 			scoreEle.setAttribute("score", scoreVal+"");
 			MutableLong metric = this.getScore(scoreVal);
@@ -70,7 +70,7 @@ public class QScoreDist implements Serializable{
 	public String toTab(){
 		String out = "";
 
-		for(int score : qScoreDist.keySet()){
+		for(int score : intensityDist.keySet()){
 			MutableLong metric = this.getScore(score);
 			out += score +"\t" + metric.get() + "\n";
 		}
@@ -79,7 +79,7 @@ public class QScoreDist implements Serializable{
 	}
 
 	public HashMap<Integer, MutableLong> toObj(){
-		return qScoreDist;
+		return intensityDist;
 	}
 
 	public long getTotalClusters(){

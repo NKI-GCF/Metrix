@@ -114,8 +114,6 @@ public class ErrorMetrics {
 				eMap.addMetric(tilenr,3, numReads3E);
 				eMap.addMetric(tilenr,4, numReads4E);
 				
-								
-
 				System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr + "\t" + errorRate + "\t" + numPerfectReads + "\t" + numReads1E + "\t" + numReads2E + "\t" + numReads3E + "\t" + numReads4E);
 
 			}

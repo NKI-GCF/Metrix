@@ -27,22 +27,18 @@ public class TileMetrics {
 	LittleEndianInputStream leis = null;
 	private int version = 0;
 	private int recordLength = 0;
-	private float clusterDensity = 0;
-	private float clusterDensityPF = 0;
-	private int cdTileCount = 0;
-	private int cdPFTileCount = 0;
 	private final static int 		CLUSTER_DENSITY 	= 100;
 	private final static int 		CLUSTER_DENSITY_PF 	= 101;
 	private boolean fileMissing = false;
 
 	// Lane --> ClusterDensities
-	private Map<Object, ClusterDensity> cdMap = new HashMap<Object, ClusterDensity>();
-	// Lane --> ClusterPassingFilterDensities
-	private Map<Object, ClusterDensity> cdPFMap = new HashMap<Object, ClusterDensity>();
+	private ClusterDensity cdMap = new ClusterDensity();
+	// Lane --> ClusterDensityPassingFilter
+	private ClusterDensity cdPFMap = new ClusterDensity();
 	// LANE --> READ --> PhasingScores
-	private Map<Integer, Map<Integer, Phasing>> pMap = new HashMap<Integer, Map<Integer, Phasing>>();
+	private HashMap<Integer, HashMap<Integer, Phasing>> pMap = new HashMap<Integer, HashMap<Integer, Phasing>>();
 	// LANE --> READ --> PrePhasingScores
-	private Map<Integer, Map<Integer, Phasing>> preMap = new HashMap<Integer, Map<Integer, Phasing>>();
+	private HashMap<Integer, HashMap<Integer, Phasing>> preMap = new HashMap<Integer, HashMap<Integer, Phasing>>();
 
 	ArrayList<Integer> cycles = new ArrayList<Integer>();
 
@@ -55,6 +51,7 @@ public class TileMetrics {
 			leis = new LittleEndianInputStream(new FileInputStream(source));
 		}catch(IOException IO){
 			setFileMissing(true);
+			System.out.println("Tile Metrics file not available for " + source);
 		}catch(InterruptedException IEX){
 
 		}
@@ -92,35 +89,35 @@ public class TileMetrics {
 		return recordLength;
 	}
 
-	public Map<Object, ClusterDensity> getCDmap(){
+	public ClusterDensity getCDmap(){
 		return cdMap;
 	}
 
-	public void setCDmap(Map<Object, ClusterDensity> cdMap){
+	public void setCDmap(ClusterDensity cdMap){
 		this.cdMap = cdMap;
 	}
 
-	public Map<Object, ClusterDensity> getCDpfMap(){
+	public ClusterDensity getCDpfMap(){
 		return cdPFMap;
 	}
 
-	public void setCDpfMap(Map<Object, ClusterDensity> cdPFMap){
+	public void setCDpfMap(ClusterDensity cdPFMap){
 		this.cdPFMap = cdPFMap;
 	}
 
-	public Map<Integer, Map<Integer, Phasing>> getPhasingMap(){
+	public HashMap<Integer, HashMap<Integer, Phasing>> getPhasingMap(){
 		return pMap;
 	}
 
-	public void setPhasingMap(Map<Integer, Map<Integer, Phasing>> pMap){
+	public void setPhasingMap(HashMap<Integer, HashMap<Integer, Phasing>> pMap){
 		this.pMap = pMap;
 	}
 
-	public Map<Integer, Map<Integer, Phasing>> getPrephasingMap(){
+	public HashMap<Integer, HashMap<Integer, Phasing>> getPrephasingMap(){
 		return preMap;
 	}
 
-	public void setPrephasingMap(Map<Integer, Map<Integer, Phasing>> preMap){
+	public void setPrephasingMap(HashMap<Integer, HashMap<Integer, Phasing>> preMap){
 		this.preMap = preMap;
 	}
 
@@ -144,25 +141,12 @@ public class TileMetrics {
 				float metricValue = leis.readFloat();
 	
 				// Cluster Density Parsing
-				ClusterDensity val = new ClusterDensity();
 				if(metricCode == CLUSTER_DENSITY){
-					if(cdMap.containsKey(laneNr)){
-						val = cdMap.get(laneNr);
-					}
-					val.incrementMetric(metricValue);
-					val.incrementTiles();
-					
-					cdMap.put(laneNr, val);
-					
+					cdMap.setMetric(laneNr, metricValue);
 				}else if(metricCode == CLUSTER_DENSITY_PF){
-					if(cdPFMap.containsKey(laneNr)){
-						val = cdPFMap.get(laneNr);
-					}
-					val.incrementMetric(metricValue);
-					val.incrementTiles();
-					
-					cdPFMap.put(laneNr, val);
+					cdPFMap.setMetric(laneNr, metricValue);
 				}
+				
 				//
 				// Possible catch number of clusters here (code 102 && 103)
 				//
@@ -170,9 +154,6 @@ public class TileMetrics {
 				List<Integer> codeMap = digits(metricCode);
 
 				// Next in loop because were not looking at phasing or prephasing.
-				if(codeMap.get(2) != 2){
-					continue;
-				}				
 
 				// Phasing / Pre-phasing Parsing
 				Phasing p = new Phasing();
@@ -186,7 +167,7 @@ public class TileMetrics {
 		
 				// Phasing
 				if(PHAPRE == 0){
-					Map<Integer, Phasing> phaseMap = new HashMap<Integer, Phasing>();
+					HashMap<Integer, Phasing> phaseMap = new HashMap<Integer, Phasing>();
 					if(pMap.containsKey(laneNr)){
 						phaseMap = pMap.get(laneNr);
 					}
@@ -200,7 +181,7 @@ public class TileMetrics {
 
 				// Prephasing				
 				if(PHAPRE == 1){ 
-					Map<Integer, Phasing> prephaseMap = new HashMap<Integer, Phasing>();
+					HashMap<Integer, Phasing> prephaseMap = new HashMap<Integer, Phasing>();
 					if(preMap.containsKey(laneNr)){
 						prephaseMap = preMap.get(laneNr);
 					}
@@ -216,7 +197,9 @@ public class TileMetrics {
 			}
 			
 			// Set the collection objects.
+			cdMap.setType("CD");
 			setCDmap(cdMap);
+			cdPFMap.setType("PF");
 			setCDpfMap(cdPFMap);
 			setPhasingMap(pMap);
 			setPrephasingMap(preMap);

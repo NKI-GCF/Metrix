@@ -44,7 +44,7 @@ public class ExtractionMetrics {
 			setFileMissing(true);
 		}catch(InterruptedException IEX){
 
-                }
+        }
 	}
 
 
@@ -102,12 +102,12 @@ public class ExtractionMetrics {
 				int laneNr = leis.readUnsignedShort();
 				int tileNr = leis.readUnsignedShort();
 				int cycleNr = leis.readUnsignedShort();
-					// create method to read FWHM score blocks of 4x4 float bytes.
+				
 				float fA = leis.readFloat();
 				float fC = leis.readFloat();
 				float fG = leis.readFloat();
 				float fT = leis.readFloat();
-					// create method to read intensity blocks of 2x4 uint16's
+				
 				int iA = leis.readUnsignedShort();
 				int iC = leis.readUnsignedShort();				
 				int iG = leis.readUnsignedShort();				

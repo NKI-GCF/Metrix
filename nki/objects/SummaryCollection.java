@@ -30,7 +30,6 @@ public class SummaryCollection implements Serializable {
 	// Object Collection
 	private ArrayList<Summary> summaryCollection = new ArrayList<Summary>();
 	private HashMap<Integer, MutableInt> summaryStateMapping = new HashMap<Integer, MutableInt>();
-	private String xmlAsString = "";
 	private String collectionFormat = Constants.COM_FORMAT_OBJ;			// Default
 
 	public void appendSummary(Summary sum){
@@ -42,18 +41,6 @@ public class SummaryCollection implements Serializable {
 		}else{
 			summaryStateMapping.get(sum.getState()).increment();
 		}
-	}
-
-	public ListIterator<Summary> getSummaryIterator(){
-		return summaryCollection.listIterator();
-	}
-
-	public int getCollectionCount(){
-		return summaryCollection.size();
-	}
-
-	public Iterator getStateCount(){
-		return summaryStateMapping.entrySet().iterator();
 	}
 
 	public Document getSummaryCollectionAsXML(Command com){
@@ -83,31 +70,19 @@ public class SummaryCollection implements Serializable {
 				// If state is 12, fetch all objects.
 				if(sumObj.getState() == com.getState() || com.getState() == Constants.STATE_ALL_PSEUDO){
 					Element sumXml = xmlDoc.createElement("Summary");
-
+					sumXml.setAttribute("runId", sumObj.getRunId());
 					if(com.getType().equals(Constants.COM_TYPE_SIMPLE)){
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}else if(com.getType().equals(Constants.COM_TYPE_DETAIL)){
 						sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
 					}else if(com.getType().equals(Constants.COM_TYPE_METRIC)){
 						sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);
-			//			sumXml = xmlDoc.createElement("QScoreDist");
-			//			sumXml.setAttribute("runId", sumObj.getRunId());
-			//			QScoreDist dist = sumObj.getQScoreDist();
-			//			sumXml = dist.toXML(sumXml,xmlDoc);
 					}else{
 						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
 					}
 
 					root.appendChild(sumXml);
 				}
-
-/*				if(com.getType().equals(Constants.COM_TYPE_METRIC)){
-					// create QScore element
-					Element sumXml = xmlDoc.createElement("QScoreDist");
-					sumXml.setAttribute("runId", sumObj.getRunId());
-					QScoreDist dist = sumObj.getQScoreDist();
-					sumXml = dist.toXML(sumXml,xmlDoc);
-				}*/
 			}			
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -122,7 +97,6 @@ public class SummaryCollection implements Serializable {
 	/*
 	 *	XML Builders
 	 */
-
 
 	private Element summaryAsSimple(Summary sumObj, Element sumXml, Document xmlDoc){
 
@@ -156,14 +130,31 @@ public class SummaryCollection implements Serializable {
 	}
 
 	private Element summaryAsMetric(Summary sumObj, Element sumXml, Document xmlDoc){
-		sumXml = xmlDoc.createElement("QScoreDist");
-		sumXml.setAttribute("runId", sumObj.getRunId());
-		QScoreDist dist = sumObj.getQScoreDist();
-		sumXml = dist.toXML(sumXml,xmlDoc);
+		if(sumObj.getParseError() == 0){
+			// QScore Dist
+			Element xml = xmlDoc.createElement("QScoreDist");
+			QScoreDist dist = sumObj.getQScoreDist();
+			xml.setAttribute("totalClusters", dist.getTotalClusters()+"");
+			xml = dist.toXML(xml,xmlDoc);
+			
+			// Cluster Density
+			sumXml = sumObj.getClusterDensity().toXML(sumXml, xmlDoc);
+
+			// Cluster Density Passing Filter
+			sumXml = sumObj.getClusterDensityPF().toXML(sumXml, xmlDoc);
+			sumXml.appendChild(xml);
+		}else{
+			
+			sumXml = xmlDoc.createElement("ParseError");
+			sumXml.setAttribute("runId", sumObj.getRunId());
+		}
 		
-	//	sumXml.appendChild(createElement(xmlDoc, "TestLalal", sumObj.getRunId()));
 		return sumXml;
 	}
+
+	/*
+	 *  Helpers
+	 */
 
 	private String convertStateInt(int mapping){
 
@@ -182,6 +173,24 @@ public class SummaryCollection implements Serializable {
 		e.appendChild(doc.createTextNode(text));
 
 		return e;
+	}
+
+	/*
+	 *	Converters 
+	 */
+
+
+	public String toTab(Command com){
+			ListIterator litr = this.getSummaryIterator();
+		
+			// Iterate over Summary Collection convert to tab separated format.
+			while(litr.hasNext()){
+				Summary sumObj = (Summary) litr.next();
+				
+				
+			}
+
+			return "";
 	}
 
 	public String getSummaryCollectionXMLAsString(Command com){
@@ -207,6 +216,10 @@ public class SummaryCollection implements Serializable {
 		return writer.toString();
 	}
 
+	/*
+	 *	Getters / Setters
+	 */ 
+
 	public void setCollectionFormat(String format){
 		this.collectionFormat = format;
 	}
@@ -214,4 +227,18 @@ public class SummaryCollection implements Serializable {
 	public String getCollectionFormat(){
 		return collectionFormat;
 	}
+
+	public ListIterator<Summary> getSummaryIterator(){
+		return summaryCollection.listIterator();
+	}
+
+	public int getCollectionCount(){
+		return summaryCollection.size();
+	}
+
+	public Iterator getStateCount(){
+		return summaryStateMapping.entrySet().iterator();
+	}
+
+
 }

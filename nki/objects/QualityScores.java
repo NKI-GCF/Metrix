@@ -90,35 +90,35 @@ public class QualityScores implements Serializable{
 	public QScoreDist getQScoreDistribution(){
         Iterator qit = this.getQScoreIterator();
 
-                while(qit.hasNext()){
-                        Map.Entry scorePairs = (Map.Entry) qit.next();
-                        int lane = (Integer) scorePairs.getKey();
-                        HashMap<Integer, QualityMap> laneScores = (HashMap<Integer, QualityMap>) scorePairs.getValue();
-                        for(Map.Entry<Integer, QualityMap> entry : laneScores.entrySet()){
-                                int cycle = (Integer) entry.getKey();
-                                QualityMap qmap = (QualityMap) entry.getValue();
-                                Iterator qmapIt = qmap.getScoreIterator();
+		while(qit.hasNext()){
+				Map.Entry scorePairs = (Map.Entry) qit.next();
+				int lane = (Integer) scorePairs.getKey();
+				HashMap<Integer, QualityMap> laneScores = (HashMap<Integer, QualityMap>) scorePairs.getValue();
+				for(Map.Entry<Integer, QualityMap> entry : laneScores.entrySet()){
+						int cycle = (Integer) entry.getKey();
+						QualityMap qmap = (QualityMap) entry.getValue();
+						Iterator qmapIt = qmap.getScoreIterator();
 
-                                while(qmapIt.hasNext()){
-                                        Map.Entry qmapPairs = (Map.Entry) qmapIt.next();
-                                        int tile = (Integer) qmapPairs.getKey();
-                                        HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
-										
-                                        for(Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()){
-											int qScore = (Integer) qmetric.getKey();
-											long metric = Long.valueOf(qmetric.getValue());
-											if(metric == 0){
-												continue;
-											}					
+						while(qmapIt.hasNext()){
+								Map.Entry qmapPairs = (Map.Entry) qmapIt.next();
+								int tile = (Integer) qmapPairs.getKey();
+								HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
+								
+								for(Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()){
+									int qScore = (Integer) qmetric.getKey();
+									long metric = Long.valueOf(qmetric.getValue());
+									if(metric == 0){
+										continue;
+									}					
 
-											qScoreDist.setScore(qScore, metric);	// Set the metric in the QScore Distribution
-	
-                                        }
-                                }
-                        }
+									qScoreDist.setScore(qScore, metric);	// Set the metric in the QScore Distribution
 
-					
-                }
-			return qScoreDist;
+								}
+						}
+				}
+
+			
+		}
+		return qScoreDist;
 	}
 }

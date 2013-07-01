@@ -119,15 +119,16 @@ public class MetrixLogic {
 		if(em.getFileMissing() || tm.getFileMissing() || qm.getFileMissing()){ // Extraction or TileMetrics file missing. Parse again later.
 			summary.incParseError();
 		}
-		
-		if(summary.getParseError() >= 15 && summary.getCurrentCycle() > 20){
+	
+		// If more than 15 parsing errors have been made and the current cycle of run is over 26; fail the run.
+		if(summary.getParseError() >= 15 && summary.getCurrentCycle() > 26){
 			summary.setState(3);
 			saveEntry(path);
 			metrixLogger.log(Level.INFO, "Run has failed to complete within the allotted time frame.");
 			return false;
 		}
 
-                try{
+        try{
 			if(summary.getState() != Constants.STATE_FINISHED){
                 summary.setState(state);
 			}
@@ -142,7 +143,12 @@ public class MetrixLogic {
 			}
 
             int currentCycle = em.getLastCycle(); 
-	
+
+			if(summary.getRunType() == "Paired End" && currentCycle == summary.getTurnCycle()){
+				summary.setState(4);
+				state = 4;
+			}
+
 			// If run == paired end. Check for FC turn at (numReads read 1 + index 1). Set state accordingly.
 			if(summary.getRunType() == "Paired End" && currentCycle == summary.getTurnCycle() && summary.getState() != Constants.STATE_HANG){
 				// State has not been set yet and user has not yet been notified for the turning of the flowcell.
@@ -183,11 +189,24 @@ public class MetrixLogic {
 	}
 
 	private void checkSummary(String path){
-		if(results.containsKey(path)){
+		// Check if run path is present in the database already. If so, retrieve; else instantiate new summary object;
+		try{
+			if(DataStore.checkSummaryByRunId(path)){
+				summary = DataStore.getSummaryByRunName(path);
+			}else{ 	
+				// Summary isnt present in database
+				summary = new Summary();
+			}
+		}catch(Exception SEx){	// SQL Exception - Generic catch
+			metrixLogger.log(Level.SEVERE, "Error checking for summary by runId in database. " + SEx.toString());
+		}
+
+/*		if(results.containsKey(path)){
 			summary = results.get(path);			// Path has a summary stored in hash.
 		}else{
 			summary = new Summary();				// New hashmap entry for path
 		}
+*/		
 	}
 
 	public void finishRun(String path){

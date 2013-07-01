@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.*;
+import nki.constants.Constants;
 import nki.objects.Command;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
@@ -42,9 +43,7 @@ public class MetrixClient {
         configFile.load(fin);
 
         int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
-	String host = configFile.getProperty("HOST", "localhost");	
-
-
+		String host = configFile.getProperty("HOST", "localhost");	
 
     	try{
 	        SocketChannel sChannel = SocketChannel.open();
@@ -62,12 +61,12 @@ public class MetrixClient {
 					nki.objects.Command sendCommand = new nki.objects.Command();
 					
 					// Set a value for command
-					sendCommand.setFormat("XML");
+					sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
 					sendCommand.setState(1); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
 					sendCommand.setCommand("FETCH");
 					sendCommand.setMode("CALL");
 					sendCommand.setType("METRIC");
-//					sendCommand.setRunId(""); // Use run directory path as string or if a State is desired, use setState and comment out setRunId() method.
+//					sendCommand.setRunId(""); // Use run directory path as string (no trailing slash) or if a State is desired, use setState and comment out setRunId() method.
 					oos.writeObject(sendCommand);
 					oos.flush();
 					
@@ -92,15 +91,35 @@ public class MetrixClient {
 								Summary sum = (Summary) litr.next();
 
 								// The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
-                	            System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle());
+								System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() );
 								listen = false;
+							
+								System.out.println("QScore Distribution");
+								if(sum.hasQScoreDist()){
+									System.out.println(sum.getQScoreDist().toTab());
+								}else{
+									System.out.println("No QScore Distribution available at this time.");
+								}
 
+								System.out.println("Cluster Density / Lane");
+								if(sum.hasClusterDensity()){
+									System.out.println(sum.getClusterDensity().toTab());
+								}else{
+									System.out.println("No Cluster Density metrics available at this time.");
+								}
+
+								System.out.println("Cluster Density Passing Filter / Lane");
+								if(sum.hasClusterDensityPF()){
+									System.out.println(sum.getClusterDensityPF().toTab());
+								}else{
+									System.out.println("No Cluster Density Passing Filter metrics available at this time.");
+								}
 							}
 						}
 	
 						if(serverAnswer instanceof String){ 			// Server returned a XML String with results.
 							String srvResp = (String) serverAnswer;
-							System.out.println("response = " + srvResp );
+							System.out.println(srvResp);
 							listen = false;
 						}
 
