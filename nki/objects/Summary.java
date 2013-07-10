@@ -14,12 +14,15 @@ import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import nki.objects.ClusterDensity;
+import nki.objects.PhasingCollection;
 //import nki.objects.ErrorRate;
 import nki.objects.Phasing;
 import nki.objects.Reads;
 import nki.objects.QualityScores;
 import nki.objects.QScoreDist;
 import nki.objects.IntensityScores;
+import nki.objects.IntensityDist;
+import nki.objects.Indices;
 
 public class Summary implements Serializable {
 
@@ -59,13 +62,17 @@ public class Summary implements Serializable {
 	// Run Metrics
 	private ClusterDensity		clusterDensity;		// Contains Cluster Density for all lanes
 	private ClusterDensity		clusterDensityPF;			// Contains Cluster Density Passing Filter for all lanes
-	private HashMap<Integer, HashMap<Integer, Phasing>> 	phasingMap;			// Phasing values per lane
-	private HashMap<Integer, HashMap<Integer, Phasing>> 	prephasingMap;		// Prephasing values per lane
+	private PhasingCollection 	phasingMap;			// Phasing values per lane
+	private PhasingCollection 	prephasingMap;		// Prephasing values per lane
 
 	private QualityScores qScores;						// QualityScores per lane, per cycle, per tile
 	private QScoreDist qScoreDist;			// The stored distribution of num clusters / QScore
 
 	private IntensityScores iScores;
+	private IntensityDist iDistAvg;
+	private IntensityDist iDistCCAvg;
+
+	private Indices sampleInfo;
 
 //	private	HashMap<Object, ErrorRate>		errorRate;
 	private int 		firstCycleIntensity;
@@ -275,19 +282,19 @@ public class Summary implements Serializable {
 		return isIndexed;
 	}
 
-	public void setPhasingMap(HashMap<Integer, HashMap<Integer, Phasing>> map){
+	public void setPhasingMap(PhasingCollection map){
 		this.phasingMap = map;
 	}
 
-	public HashMap<Integer, HashMap<Integer, Phasing>> getPhasingMap(){
+	public PhasingCollection getPhasingMap(){
 		return phasingMap;
 	}
 	
-	public void setPrephasingMap(HashMap<Integer, HashMap<Integer, Phasing>> preMap){
+	public void setPrephasingMap(PhasingCollection preMap){
 		this.prephasingMap = preMap;
 	}
 
-	public HashMap<Integer, HashMap<Integer, Phasing>> getPrephasingMap(){
+	public PhasingCollection getPrephasingMap(){
 		return prephasingMap;
 	}
 
@@ -337,7 +344,6 @@ public class Summary implements Serializable {
 	}
 
 	public void setQScoreDist(QScoreDist qScoreDist){
-		qScoreDist.toTab();
 		this.qScoreDist = qScoreDist;
 	}
 
@@ -359,6 +365,30 @@ public class Summary implements Serializable {
 
 	public IntensityScores getIScores(){
 		return iScores;
+	}
+	
+	public void setIntensityDistAvg(IntensityDist iDistAvg){
+		this.iDistAvg = iDistAvg;
+	}
+
+	public IntensityDist getIntensityDistAvg(){
+		return iDistAvg;
+	}
+
+	public void setIntensityDistCCAvg(IntensityDist iDistCCAvg){
+		this.iDistCCAvg = iDistCCAvg;
+	}
+
+	public IntensityDist getIntensityDistCCAvg(){
+		return iDistCCAvg;
+	}
+
+	public void setSampleInfo(Indices sampleInfo){
+		this.sampleInfo = sampleInfo;
+	}
+	
+	public Indices getSampleInfo(){
+		return sampleInfo;
 	}
 
 	public void setRunDirectory(String runDirectory){
@@ -395,6 +425,18 @@ public class Summary implements Serializable {
 
 	public boolean hasIScores(){
 		return iScores == null ? false : true;
+	}
+
+	public boolean hasIntensityDistAvg(){
+		return iDistAvg == null ? false : true;
+	}
+
+	public boolean hasIntensityDistCCAvg(){
+		return iDistCCAvg == null ? false : true;
+	}
+
+	public boolean hasSampleInfo(){
+		return sampleInfo == null ? false : true;
 	}
 
 	public void setParseError(int parseError){

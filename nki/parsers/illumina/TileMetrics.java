@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Collections;
 import java.util.*;
 import nki.objects.ClusterDensity;
+import nki.objects.PhasingCollection;
 import nki.objects.Phasing;
 
 public class TileMetrics {
@@ -36,9 +37,9 @@ public class TileMetrics {
 	// Lane --> ClusterDensityPassingFilter
 	private ClusterDensity cdPFMap = new ClusterDensity();
 	// LANE --> READ --> PhasingScores
-	private HashMap<Integer, HashMap<Integer, Phasing>> pMap = new HashMap<Integer, HashMap<Integer, Phasing>>();
+	private PhasingCollection pMap = new PhasingCollection();
 	// LANE --> READ --> PrePhasingScores
-	private HashMap<Integer, HashMap<Integer, Phasing>> preMap = new HashMap<Integer, HashMap<Integer, Phasing>>();
+	private PhasingCollection preMap = new PhasingCollection();
 
 	ArrayList<Integer> cycles = new ArrayList<Integer>();
 
@@ -105,19 +106,19 @@ public class TileMetrics {
 		this.cdPFMap = cdPFMap;
 	}
 
-	public HashMap<Integer, HashMap<Integer, Phasing>> getPhasingMap(){
+	public PhasingCollection getPhasingMap(){
 		return pMap;
 	}
 
-	public void setPhasingMap(HashMap<Integer, HashMap<Integer, Phasing>> pMap){
+	public void setPhasingMap(PhasingCollection pMap){
 		this.pMap = pMap;
 	}
 
-	public HashMap<Integer, HashMap<Integer, Phasing>> getPrephasingMap(){
+	public PhasingCollection getPrephasingMap(){
 		return preMap;
 	}
 
-	public void setPrephasingMap(HashMap<Integer, HashMap<Integer, Phasing>> preMap){
+	public void setPrephasingMap(PhasingCollection preMap){
 		this.preMap = preMap;
 	}
 
@@ -154,61 +155,51 @@ public class TileMetrics {
 				List<Integer> codeMap = digits(metricCode);
 
 				// Next in loop because were not looking at phasing or prephasing.
-
-				// Phasing / Pre-phasing Parsing
-				Phasing p = new Phasing();
-		
-				// Calc different metric codes here and call respective method.
+				if( metricCode == (102 |103)){
+					continue;
+				}
 	
 				// Calc Phasing code / Prephasing code	
 				int PHAPRE = (metricCode - 200) % 2; 
 				// Calc readnumber from metriccode
 				int readNum = (int) Math.floor((metricCode - 200) / 2) + 1;
-		
-				// Phasing
-				if(PHAPRE == 0){
-					HashMap<Integer, Phasing> phaseMap = new HashMap<Integer, Phasing>();
-					if(pMap.containsKey(laneNr)){
-						phaseMap = pMap.get(laneNr);
-					}
-
-					p.incrementMetric(metricValue);
-					p.incrementTiles();
-
-					phaseMap.put(readNum,p);
-					pMap.put(laneNr, phaseMap);
+				
+				if(metricValue == 0){
+					continue;
 				}
 
-				// Prephasing				
-				if(PHAPRE == 1){ 
-					HashMap<Integer, Phasing> prephaseMap = new HashMap<Integer, Phasing>();
-					if(preMap.containsKey(laneNr)){
-						prephaseMap = preMap.get(laneNr);
+				// Phasing / Pre-phasing Parsing
+				if(codeMap.get(2) == 2){	// Metric code starts with 2
+					// Phasing
+					if(PHAPRE == 0){
+						pMap.setPhasing(laneNr, readNum, metricValue);
 					}
-					
-					p.incrementMetric(metricValue);
-					p.incrementTiles();
 
-					prephaseMap.put(readNum,p);
-					preMap.put(laneNr, prephaseMap);
-				}	
-				
+					// Prephasing				
+					if(PHAPRE == 1){
+						preMap.setPhasing(laneNr, readNum, metricValue);
+					}	
+				}else{	// Skip the other codes
+					continue;
+				}
 				record++;
 			}
-			
-			// Set the collection objects.
-			cdMap.setType("CD");
-			setCDmap(cdMap);
-			cdPFMap.setType("PF");
-			setCDpfMap(cdPFMap);
-			setPhasingMap(pMap);
-			setPrephasingMap(preMap);
-
+		
 		}catch(EOFException EOFEx){
 			eofCheck = false;
 		}catch(IOException Ex){
 			eofCheck = false;
 		}
+
+			// Set the collection objects.
+			cdMap.setType("CD");
+			setCDmap(cdMap);
+			cdPFMap.setType("PF");
+			setCDpfMap(cdPFMap);
+			pMap.setType("PH");
+			setPhasingMap(pMap);
+			preMap.setType("PREPH");
+			setPrephasingMap(preMap);
 	}
 
 	private String parseMetricCode(int code){

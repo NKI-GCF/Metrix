@@ -86,10 +86,6 @@ public class CorrectedIntensityMetrics {
 				int tileNr = leis.readUnsignedShort();
 				int cycleNr = leis.readUnsignedShort();
 		
-			//	if(iScores.getLane(laneNr) == null){
-			//		cycleMap = new HashMap<Integer, IntensityMap>();
-			//	}
-
 				if(cycleMap.containsKey(cycleNr)){
 					iMap = cycleMap.get(cycleNr);
 				}else{

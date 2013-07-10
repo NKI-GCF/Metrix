@@ -134,8 +134,10 @@ public class SummaryCollection implements Serializable {
 			// QScore Dist
 			Element xml = xmlDoc.createElement("QScoreDist");
 			QScoreDist dist = sumObj.getQScoreDist();
-			xml.setAttribute("totalClusters", dist.getTotalClusters()+"");
-			xml = dist.toXML(xml,xmlDoc);
+			if(dist != null){
+				xml.setAttribute("totalClusters", dist.getTotalClusters()+"");
+				xml = dist.toXML(xml,xmlDoc);
+			}
 			
 			// Cluster Density
 			sumXml = sumObj.getClusterDensity().toXML(sumXml, xmlDoc);
@@ -143,6 +145,17 @@ public class SummaryCollection implements Serializable {
 			// Cluster Density Passing Filter
 			sumXml = sumObj.getClusterDensityPF().toXML(sumXml, xmlDoc);
 			sumXml.appendChild(xml);
+
+			// Intensities
+			sumXml = sumObj.getIntensityDistAvg().toXML(sumXml, xmlDoc);
+			
+			// Phasing Prephasing
+				// Prephasing
+				sumXml = sumObj.getPrephasingMap().toXML(sumXml, xmlDoc);
+
+				// Phasing
+				sumXml = sumObj.getPhasingMap().toXML(sumXml, xmlDoc);
+	
 		}else{
 			
 			sumXml = xmlDoc.createElement("ParseError");

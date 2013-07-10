@@ -8,9 +8,13 @@ import nki.io.DataStore;
 import nki.objects.QualityScores;
 import nki.objects.QScoreDist;
 import nki.objects.IntensityScores;
+import nki.objects.IntensityDist;
+import nki.objects.Indices;
+import nki.objects.Update;
 import nki.parsers.illumina.QualityMetrics;
 import nki.parsers.illumina.TileMetrics;
 import nki.parsers.illumina.CorrectedIntensityMetrics;
+import nki.parsers.illumina.IndexMetrics;
 import nki.exceptions.InvalidCredentialsException;
 import nki.exceptions.CommandValidityException;
 import nki.exceptions.UnimplementedCommandException;
@@ -77,6 +81,8 @@ public class CommandProcessor {
 				oos.writeObject(ERSC);
 			}catch(Exception Ex){
 				// Send back error over network in command.
+//				System.out.println("Errorr " + Ex.toString());
+				Ex.printStackTrace();
 				oos.writeObject(Ex);
 			}
 
@@ -182,6 +188,7 @@ public class CommandProcessor {
 				}
 
 				ListIterator litr = sc.getSummaryIterator();
+				int curCount = 1;
 
 				while(litr.hasNext()){
 					Summary sum = (Summary) litr.next();
@@ -194,36 +201,29 @@ public class CommandProcessor {
 						String tileMetrics = runDir + "/InterOp/" + Constants.TILE_METRICS;
 						String qualityMetrics = runDir + "/InterOp/" + Constants.QMETRICS_METRICS;
 						String intensityMetrics = runDir + "/InterOp/" + Constants.CORRECTED_INT_METRICS;
+						String indexMetrics = runDir + "/InterOp/" + Constants.INDEX_METRICS;
 						long currEpoch = System.currentTimeMillis();
 						boolean timeCheck = (currEpoch - sum.getLastUpdatedEpoch()) > Constants.METRIC_UPDATE_TIME;
 				
-						System.out.println("Current epoch: " + currEpoch + "\tDifference: " + (currEpoch - sum.getLastUpdatedEpoch()) + "\tUpdate Threshold: " + Constants.METRIC_UPDATE_TIME);
-
-						/*
-						 * Iterate over checks for metrics parsing.
-						 */
-
 						// Process Extraction Metrics
 
-						/*
-						 * 
-						 */
 
+						// Process Cluster Density and phasing / prephasing
 						if(	!sum.hasClusterDensity() 	||
 							!sum.hasClusterDensityPF() 	||
 							!sum.hasPhasing() 			||
 							!sum.hasPrephasing() 		||
 							timeCheck
 						){
-							// Process Cluster Density and phasing / prephasing
 							TileMetrics tm = new TileMetrics(tileMetrics, 0);
+
 							if(!tm.getFileMissing()){								// If TileMetrics File is present - process.
 								tm.digestData();
 								sum.setClusterDensity(tm.getCDmap());
 								sum.setClusterDensityPF(tm.getCDpfMap());
 								sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
 								sum.setPrephasingMap(tm.getPrephasingMap());
-								
+							
 								// Distribution present in ClusterDensity Object.
 								update = true;
 							}
@@ -242,18 +242,25 @@ public class CommandProcessor {
 								}
 						}
 
-						// Process Corrected Intensities
+						// Process Corrected Intensities (+ Avg Cor Int Called Clusters)
 						if(!sum.hasIScores() || timeCheck){
 							CorrectedIntensityMetrics im = new CorrectedIntensityMetrics(intensityMetrics, 0);
 							if(!im.getFileMissing()){
 								IntensityScores isOut = im.digestData();
 								sum.setIScores(isOut);
 								// Calculate distribution
-								isOut.getAvgCorIntDist();
+								sum.setIntensityDistAvg(isOut.getAvgCorIntDist());
+								sum.setIntensityDistCCAvg(isOut.getAvgCorIntCCDist());
 								update = true;
 							}
 						}
 
+						// Process Index metrics
+						// sum.hasIndexMetrics()
+						IndexMetrics im = new IndexMetrics(indexMetrics, 0);
+						Indices indices = im.digestData();
+						sum.setSampleInfo(indices);
+					
 						if(update == true){
 							try{
 								sum.setLastUpdated();
@@ -265,6 +272,17 @@ public class CommandProcessor {
 					}else{
 						// Throw error
 					}
+
+					// Generate and send update object.
+					Update update = new Update();
+					update.setMsg(sum.getRunId());
+					update.setCurrentProcessing(curCount);
+					update.setTotalProcessing(sc.getCollectionCount());
+					update.setChecksum(sum);
+					// Reset the stream to ensure proper update objects being sent - Prevent caching.
+					oos.reset();
+					oos.writeObject(update);
+					curCount++;
 				}// End SC While iterator
 				
 				/*
@@ -283,6 +301,7 @@ public class CommandProcessor {
 					// Exception
 						throw new MissingCommandDetailException("Requested output format not understood (" + recCom.getFormat() + ")");
 				}
+				oos.flush();
 			}
 		}
 

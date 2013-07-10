@@ -1,4 +1,4 @@
-// Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Phasings.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -13,15 +13,16 @@ import java.util.HashMap;
 public class Phasing implements Serializable {
 
 	public static final long serialVersionUID = 42L;
-	private Float metric = 0.0f;
+	private Float phasing = 0.0f;
 	private int tiles = 0;
 
-	public void setMetric(Float metricScore){
-                this.metric = metricScore;
+	public void setPhasing(Float phasingScore){
+                this.phasing = phasingScore;
+				this.incrementTiles();
         }
 
-        public Float getMetric(){
-                return metric;
+        public Float getPhasing(){
+                return phasing;
         }
 
         public void setTiles(int tileCount){
@@ -32,16 +33,17 @@ public class Phasing implements Serializable {
                 return tiles;
         }
 
-        public void incrementMetric(Float metricScore){
-                this.metric += metricScore;
+        public void incrementPhasing(Float phasingScore){
+                this.phasing += phasingScore;
+				this.incrementTiles();
         }
 
         public void incrementTiles(){
                 this.tiles += 1;
         }
 
-        public Float getAvg(){
-                return (metric / tiles);
+        public Float getLaneAvg(){
+                return (phasing / tiles);
         }	
 
 

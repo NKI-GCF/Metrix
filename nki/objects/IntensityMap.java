@@ -47,6 +47,7 @@ public class IntensityMap implements Serializable{
 		return sMap.entrySet().iterator();
 	}
 
+	@SuppressWarnings("unchecked")
 		// Calculate the average intensity for this cycle for each metric constant [A, C, G, T]
 	public HashMap<String, MutableInt> getCycleAverageInt(){
 		Iterator sMi = this.getScoreIterator();
@@ -73,13 +74,6 @@ public class IntensityMap implements Serializable{
 			avgOverTiles.get(Constants.METRIC_VAR_ACI_G).add(iG);
 			avgOverTiles.get(Constants.METRIC_VAR_ACI_T).add(iT);
 		}
-/*
-		Iterator avgIt = avgOverTiles.entrySet().iterator();
-		while(avgIt.hasNext()){
-			Map.Entry avgEntry = (Map.Entry) avgIt.next();
-			(avgEntry.getValue()).avg(this.getNumberOfTiles());
-		}
-*/
 
 		avgOverTiles.get(Constants.METRIC_VAR_ACI_A).avg(this.getNumberOfTiles());
 		avgOverTiles.get(Constants.METRIC_VAR_ACI_C).avg(this.getNumberOfTiles());
@@ -89,9 +83,40 @@ public class IntensityMap implements Serializable{
 		return avgOverTiles;
 	}
 
+	@SuppressWarnings("unchecked")
 		// Calculate the average intensity of called clusters for this cycle for each metric constant [A, C, G, T]
-//	public HashMap<String, Integer> getCycleAverageCCInt(){
-	public void getCycleAverageCCInt(){
+	public HashMap<String, MutableInt> getCycleAverageCCInt(){
+		Iterator sMi = this.getScoreIterator();
+		HashMap<String, MutableInt> avgOverTiles = new HashMap<String, MutableInt>();
+
+		avgOverTiles.put(Constants.METRIC_VAR_ACICC_A, new MutableInt());
+		avgOverTiles.put(Constants.METRIC_VAR_ACICC_C, new MutableInt());
+		avgOverTiles.put(Constants.METRIC_VAR_ACICC_G, new MutableInt());
+		avgOverTiles.put(Constants.METRIC_VAR_ACICC_T, new MutableInt());
+
+		while(sMi.hasNext()){
+			Map.Entry tileEntry = (Map.Entry) sMi.next();
+
+			int tile = (Integer) tileEntry.getKey();
+			HashMap<String, Object> tileMapping = (HashMap<String, Object>) tileEntry.getValue();
+			
+			Integer iA = (Integer) tileMapping.get(Constants.METRIC_VAR_ACICC_A);
+			Integer iC = (Integer) tileMapping.get(Constants.METRIC_VAR_ACICC_C);
+			Integer iG = (Integer) tileMapping.get(Constants.METRIC_VAR_ACICC_G);
+			Integer iT = (Integer) tileMapping.get(Constants.METRIC_VAR_ACICC_T);
+
+			avgOverTiles.get(Constants.METRIC_VAR_ACICC_A).add(iA);
+			avgOverTiles.get(Constants.METRIC_VAR_ACICC_C).add(iC);
+			avgOverTiles.get(Constants.METRIC_VAR_ACICC_G).add(iG);
+			avgOverTiles.get(Constants.METRIC_VAR_ACICC_T).add(iT);
+		}
+
+		avgOverTiles.get(Constants.METRIC_VAR_ACICC_A).avg(this.getNumberOfTiles());
+		avgOverTiles.get(Constants.METRIC_VAR_ACICC_C).avg(this.getNumberOfTiles());
+		avgOverTiles.get(Constants.METRIC_VAR_ACICC_G).avg(this.getNumberOfTiles());
+		avgOverTiles.get(Constants.METRIC_VAR_ACICC_T).avg(this.getNumberOfTiles());
+
+		return avgOverTiles;
 		
 	}
 	

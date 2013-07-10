@@ -15,6 +15,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.*;
 import nki.constants.Constants;
 import nki.objects.Command;
+import nki.objects.Update;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
 import nki.exceptions.EmptyResultSetCollection;
@@ -56,6 +57,7 @@ public class MetrixClient {
 
                 // Cteate Inputstream for receiving objects.
 		        ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
+				String prevUpdate = "";
 
 				try{
 					nki.objects.Command sendCommand = new nki.objects.Command();
@@ -66,16 +68,16 @@ public class MetrixClient {
 					sendCommand.setCommand("FETCH");
 					sendCommand.setMode("CALL");
 					sendCommand.setType("METRIC");
-//					sendCommand.setRunId(""); // Use run directory path as string (no trailing slash) or if a State is desired, use setState and comment out setRunId() method.
+			//		sendCommand.setRunId(""); // Use run directory path as string (no trailing slash) or if a State is desired, use setState and comment out setRunId() method.
 					oos.writeObject(sendCommand);
 					oos.flush();
 					
 					boolean listen = true;
 	
 					Object serverAnswer = new Object();
-					serverAnswer = ois.readObject();
 	
-					while(listen){
+					while(ois != null){
+						serverAnswer = ois.readObject();
 						if(serverAnswer instanceof Command){	// Answer is a Command with info message.
 							nki.objects.Command commandIn = (nki.objects.Command) serverAnswer;
 							if(commandIn.getCommand() != null){
@@ -83,6 +85,10 @@ public class MetrixClient {
 							}
 						}
 	
+						/*
+						 * Requested Data collection
+						 */
+
 						if(serverAnswer instanceof SummaryCollection){
 							SummaryCollection sc = (SummaryCollection) serverAnswer;
 							ListIterator litr = sc.getSummaryIterator();
@@ -90,8 +96,8 @@ public class MetrixClient {
 							while(litr.hasNext()){
 								Summary sum = (Summary) litr.next();
 
-								// The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
-								System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() );
+							// The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
+								System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
 								listen = false;
 							
 								System.out.println("QScore Distribution");
@@ -114,6 +120,35 @@ public class MetrixClient {
 								}else{
 									System.out.println("No Cluster Density Passing Filter metrics available at this time.");
 								}
+
+								System.out.println("Phasing / Lane");
+								if(sum.hasPhasing()){
+									System.out.println(sum.getPhasingMap().toTab());
+								}else{
+									System.out.println("No Phasing metrics available at this time.");
+								}
+
+								System.out.println("Prephasing / Lane");
+								if(sum.hasPhasing()){
+									System.out.println(sum.getPrephasingMap().toTab());
+								}else{
+									System.out.println("No Prephasing metrics available at this time.");
+								}
+
+								System.out.println("IntensityScore Avg");
+								if(sum.hasIntensityDistAvg()){
+									System.out.println(sum.getIntensityDistAvg().toTab());
+								}
+
+								System.out.println("IntensityScore CC Avg");
+								if(sum.hasIntensityDistCCAvg()){
+									System.out.println(sum.getIntensityDistCCAvg().toTab());
+								}
+
+								System.out.println("Project/Sample overview");
+								if(sum.hasSampleInfo()){
+									System.out.println(sum.getSampleInfo().toTab());
+								}
 							}
 						}
 	
@@ -122,6 +157,22 @@ public class MetrixClient {
 							System.out.println(srvResp);
 							listen = false;
 						}
+
+						/*
+						* Update
+						*/
+
+						if(serverAnswer instanceof Update){
+							Update up = (Update) serverAnswer;
+							if(!up.getChecksum().toString().equals(prevUpdate)){
+								System.out.println("Finished processing: " + up.getMsg() + "("+up.getCurrentProcessing() + "/" + up.getTotalProcessing() + ")");
+								prevUpdate = up.getChecksum().toString();	
+							}
+						}
+
+						/*
+						 *	Exceptions
+						 */
 
 						if(serverAnswer instanceof EmptyResultSetCollection){
 							System.out.println(serverAnswer.toString());
@@ -144,7 +195,7 @@ public class MetrixClient {
 						}
 					}
 				}catch(IOException Ex){
-					System.out.println("Error" + Ex);
+				//	System.out.println("Error" + Ex);
 				}
 	        }
 	}catch(EOFException ex){

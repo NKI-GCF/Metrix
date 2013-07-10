@@ -28,4 +28,7 @@ public class MutableLong implements Serializable{
 		val += addVal;
 	}
 
+	public String toString(){
+		return val + "";
+	}
 }

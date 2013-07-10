@@ -76,6 +76,13 @@ public final class Constants {
 															METRIC_TYPE_PREPHASING
 															};
 	
+	// Project and sample specification
+	public static final String		SAMPLE_READNUM				= "readNum";
+	public static final String		SAMPLE_NUM_CLUSTERS			= "numClusters";
+	public static final String		SAMPLE_LANE					= "laneNum";
+	public static final String		SAMPLE_INDEX				= "indexSeq";
+	public static final String		SAMPLE_NAME					= "sampleName";
+
 	// Command function types
 	public static final String 		COM_FUNCTION_SET			= "SET";
 	public static final String		COM_FUNCTION_FETCH			= "FETCH";

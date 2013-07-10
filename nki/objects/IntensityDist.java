@@ -8,12 +8,13 @@
 package nki.objects;
 
 import java.io.*;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
-import nki.objects.MutableLong;
+import nki.objects.IntensityMap;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
@@ -25,69 +26,116 @@ public class IntensityDist implements Serializable{
 
 	public static final long serialVersionUID = 42L;
 
-	// QualityMap - Integer scores
-	private HashMap<Integer, MutableLong> intensityDist = new HashMap<Integer, MutableLong>();
-	private long totalClusters = 0;
+	private HashMap<Integer, HashMap<Integer, HashMap<String, MutableInt>>> iDist = new HashMap<Integer, HashMap<Integer, HashMap<String, MutableInt>>>();
 
-	public MutableLong getScore(int qScore){
-		return intensityDist.get(qScore);
-	}
+	public void setIntensity(int lane, int cycle, HashMap<String, MutableInt> iMapM){
+		HashMap<Integer, HashMap<String, MutableInt>> oMap = iDist.get(lane);
 
-	public void setScore(int qScore, long metric){
-		MutableLong val = intensityDist.get(qScore);
-		if(val == null){
-			val = new MutableLong();
-			val.add(metric);
-			intensityDist.put(qScore, val);
+		if(oMap == null){
+			HashMap <Integer, HashMap<String, MutableInt>> cMap = new HashMap<Integer, HashMap<String, MutableInt>>();
+			cMap.put(cycle, iMapM);
+			iDist.put(lane, cMap);
 		}else{
-			intensityDist.get(qScore).add(metric);
+			if(oMap.get(cycle) == null){
+				oMap.put(cycle, iMapM);
+			}
+
+			iDist.put(lane, oMap);
 		}
-		addTotalClusters(metric); // append to total
 	}
 
+	@SuppressWarnings("unchecked")
 	public Element toXML(Element sumXml, Document xmlDoc){
-		for(int scoreVal : intensityDist.keySet()){
-			Element scoreEle = xmlDoc.createElement("QScore");
-			scoreEle.setAttribute("score", scoreVal+"");
-			MutableLong metric = this.getScore(scoreVal);
-			scoreEle.setAttribute("clusters", metric.get()+"");
-			sumXml.appendChild(scoreEle);
+		Iterator lit = iDist.entrySet().iterator();
+		/*
+		 * Key   = Lane			- Integer
+		 * Value = CycleMap 	- HashMap<Integer, HashMap<String, Object>>
+		 */
+		while(lit.hasNext()){
+			Element laneEle = xmlDoc.createElement("Lane");
+			Map.Entry lanePairs = (Map.Entry) lit.next();
+			int lane = (Integer) lanePairs.getKey();
+
+			HashMap<Integer, HashMap<String, MutableInt>> cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
+			// Cycle Iterator
+			Iterator cit = (Iterator) cycleContent.entrySet().iterator();
+
+			while(cit.hasNext()){
+				Element cycleEle = xmlDoc.createElement("Cycle");
+				Map.Entry cycleEntries = (Map.Entry) cit.next();
+				int cycle = (Integer) cycleEntries.getKey();
+				cycleEle.setAttribute("num", cycle+"");
+			
+				// Nested Intensities HashMap
+				HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
+
+				Iterator iit = (Iterator) cycleInt.entrySet().iterator();
+	
+				Element intEle = xmlDoc.createElement("Intensities");
+				while(iit.hasNext()){
+					Map.Entry intensityPairs = (Map.Entry) iit.next();
+					String constName = (String) intensityPairs.getKey();
+					MutableInt intValue = (MutableInt) intensityPairs.getValue();
+
+					if(intValue instanceof MutableInt){
+						MutableInt in = (MutableInt) intValue;
+						intEle.setAttribute(constName, in.get() + "");
+					}
+
+					cycleEle.appendChild(intEle);
+				}
+				laneEle.appendChild(cycleEle);
+			}
+			sumXml.appendChild(laneEle);
 		}
 
 		return sumXml;
 	}
 
-	private Element createElement(Document doc, String name, String text){
-		Element e = doc.createElement(name);
-		if(text == null){
-			text = "";
-		}
-		e.appendChild(doc.createTextNode(text));
-
-		return e;
-	}
-
+	@SuppressWarnings("unchecked")
 	public String toTab(){
 		String out = "";
 
-		for(int score : intensityDist.keySet()){
-			MutableLong metric = this.getScore(score);
-			out += score +"\t" + metric.get() + "\n";
-		}
+		Iterator lit = iDist.entrySet().iterator();
+		/*
+		 * Key   = Lane			- Integer
+		 * Value = CycleMap 	- HashMap<Integer, HashMap<String, Object>>
+		 */
+		while(lit.hasNext()){
+			Map.Entry lanePairs = (Map.Entry) lit.next();
+			int lane = (Integer) lanePairs.getKey();
 
+			HashMap<Integer, HashMap<String, MutableInt>> cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
+			// Cycle Iterator
+			Iterator cit = (Iterator) cycleContent.entrySet().iterator();
+
+			while(cit.hasNext()){
+				Map.Entry cycleEntries = (Map.Entry) cit.next();
+				int cycle = (Integer) cycleEntries.getKey();
+			
+				// Nested Intensities HashMap
+				HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
+
+				Iterator iit = (Iterator) cycleInt.entrySet().iterator();
+				out += lane + "\t" + cycle;
+				
+				while(iit.hasNext()){
+					Map.Entry intensityPairs = (Map.Entry) iit.next();
+					String constName = (String) intensityPairs.getKey();
+					MutableInt intValue = (MutableInt) intensityPairs.getValue();
+
+					out += "\t" +constName + ":" + intValue;
+				
+				}
+
+				out += "\n";
+			}
+		}
 		return out;
 	}
 
-	public HashMap<Integer, MutableLong> toObj(){
-		return intensityDist;
+/*	public HashMap<Integer, MutableLong> toObj(){
+		return iDist;
 	}
-
-	public long getTotalClusters(){
-		return totalClusters;
-	}
-
-	public void addTotalClusters(long metric){
-		this.totalClusters += metric;
-	}
-
+*/
 }

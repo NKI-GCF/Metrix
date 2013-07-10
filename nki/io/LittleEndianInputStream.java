@@ -96,6 +96,17 @@ public class LittleEndianInputStream extends FilterInputStream {
     
   }
 
+  public final String readUTF8String(int numBytes) throws IOException {
+    byte[] bytes = new byte[numBytes];
+
+	for(int i=0; i < numBytes; i++){
+		bytes[i] = (byte) in.read();
+	}
+
+	return new String(bytes, "UTF-8");
+
+  }
+
   public final double readDouble() throws IOException {
     return Double.longBitsToDouble(this.readLong());
   }
@@ -107,5 +118,6 @@ public class LittleEndianInputStream extends FilterInputStream {
   public final int skipBytes(int n) throws IOException { 
     for (int i = 0; i < n; i += (int) skip(n - i));
     return n;  
-  }  
+  } 
+
 }
