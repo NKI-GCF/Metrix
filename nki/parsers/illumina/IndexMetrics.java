@@ -78,6 +78,9 @@ public class IndexMetrics {
 	}
 
 	public Indices digestData(){
+		if(fileMissing){
+			return new Indices();
+		}
 		Indices indices = new Indices();
 
 		// First catch version of metrics file.

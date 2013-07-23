@@ -81,7 +81,6 @@ public class CommandProcessor {
 				oos.writeObject(ERSC);
 			}catch(Exception Ex){
 				// Send back error over network in command.
-//				System.out.println("Errorr " + Ex.toString());
 				Ex.printStackTrace();
 				oos.writeObject(Ex);
 			}
@@ -107,10 +106,10 @@ public class CommandProcessor {
 	}
 
 	public void execute() throws 
-						UnimplementedCommandException, 
-						MissingCommandDetailException,
-						EmptyResultSetCollection,
-						Exception
+			UnimplementedCommandException, 
+			MissingCommandDetailException,
+			EmptyResultSetCollection,
+			Exception
 		{
 		// If true validity, start.
 		if(recCom.getCommand().equals(Constants.COM_FUNCTION_SET)){
@@ -247,7 +246,13 @@ public class CommandProcessor {
 							CorrectedIntensityMetrics im = new CorrectedIntensityMetrics(intensityMetrics, 0);
 							if(!im.getFileMissing()){
 								IntensityScores isOut = im.digestData();
-								sum.setIScores(isOut);
+
+								/* If you would like to store the intensity object, increase the max_allowed_packet with:
+								* SET GLOBAL max_allowed_packet = 1024 * 1024 * 50 to prevent a PacketTooBigException for the SQL Update.
+								*/
+
+								//sum.setIScores(isOut);
+
 								// Calculate distribution
 								sum.setIntensityDistAvg(isOut.getAvgCorIntDist());
 								sum.setIntensityDistCCAvg(isOut.getAvgCorIntCCDist());

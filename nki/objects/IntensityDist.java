@@ -31,6 +31,8 @@ public class IntensityDist implements Serializable{
 	public void setIntensity(int lane, int cycle, HashMap<String, MutableInt> iMapM){
 		HashMap<Integer, HashMap<String, MutableInt>> oMap = iDist.get(lane);
 
+//		System.out.println("Setting Int for: " + lane + "\tCycle: " + cycle + "Avg: " + iMapp.getCycleAverageInt());
+
 		if(oMap == null){
 			HashMap <Integer, HashMap<String, MutableInt>> cMap = new HashMap<Integer, HashMap<String, MutableInt>>();
 			cMap.put(cycle, iMapM);
@@ -55,6 +57,7 @@ public class IntensityDist implements Serializable{
 			Element laneEle = xmlDoc.createElement("Lane");
 			Map.Entry lanePairs = (Map.Entry) lit.next();
 			int lane = (Integer) lanePairs.getKey();
+			laneEle.setAttribute("lane", Integer.toString(lane));
 
 			HashMap<Integer, HashMap<String, MutableInt>> cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
 			// Cycle Iterator
@@ -64,7 +67,7 @@ public class IntensityDist implements Serializable{
 				Element cycleEle = xmlDoc.createElement("Cycle");
 				Map.Entry cycleEntries = (Map.Entry) cit.next();
 				int cycle = (Integer) cycleEntries.getKey();
-				cycleEle.setAttribute("num", cycle+"");
+				cycleEle.setAttribute("num", Integer.toString(cycle));
 			
 				// Nested Intensities HashMap
 				HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
@@ -79,7 +82,7 @@ public class IntensityDist implements Serializable{
 
 					if(intValue instanceof MutableInt){
 						MutableInt in = (MutableInt) intValue;
-						intEle.setAttribute(constName, in.get() + "");
+						intEle.setAttribute(constName, Integer.toString(in.get()));
 					}
 
 					cycleEle.appendChild(intEle);

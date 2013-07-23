@@ -100,7 +100,6 @@ public class IntensityScores implements Serializable{
 				Map.Entry scorePairs = (Map.Entry) iit.next();
 				int lane = (Integer) scorePairs.getKey();
 				HashMap<Integer, IntensityMap> laneScores = (HashMap<Integer, IntensityMap>) scorePairs.getValue();
-
 				// Cycle -> IntensityMap
 				for(Map.Entry<Integer, IntensityMap> entry : laneScores.entrySet()){
 						int cycle = (Integer) entry.getKey();

@@ -85,7 +85,13 @@ public class CorrectedIntensityMetrics {
 				int laneNr = leis.readUnsignedShort();
 				int tileNr = leis.readUnsignedShort();
 				int cycleNr = leis.readUnsignedShort();
-		
+
+				if(iScores.getLane(laneNr) != null){
+					cycleMap = iScores.getLane(laneNr);
+				}else{
+					cycleMap = new HashMap<Integer, IntensityMap>();
+				}
+
 				if(cycleMap.containsKey(cycleNr)){
 					iMap = cycleMap.get(cycleNr);
 				}else{
@@ -137,16 +143,9 @@ public class CorrectedIntensityMetrics {
 				// Signal to noise ratio
 				iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_SIGNOISE, leis.readFloat());
 
-				cycleMap.put(cycleNr, iMap);				
-				if(procLane != laneNr){
-					iScores.setLane(cycleMap, laneNr);
+				cycleMap.put(cycleNr, iMap);
+				iScores.setLane(cycleMap, laneNr);
 					procLane = laneNr;
-					if(iScores.getLane(laneNr) != null){
-						cycleMap = iScores.getLane(laneNr);
-					}else{
-						cycleMap = new HashMap<Integer, IntensityMap>();
-					}
-				}
 			}
 		}catch(EOFException EOFEx){
 			// Reached end of file

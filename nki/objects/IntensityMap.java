@@ -25,7 +25,7 @@ public class IntensityMap implements Serializable{
 	private HashMap<Integer, HashMap<String,  Object>> sMap  = new HashMap<Integer, HashMap<String, Object>>();
 	
 	public void addMapping(int tilenr, String metricType, Object metricVal){ 		
-
+				
                 HashMap<String, Object> iMap;
                 if(sMap.containsKey(tilenr)){
                         // Get subMap from hashmap.
@@ -75,10 +75,10 @@ public class IntensityMap implements Serializable{
 			avgOverTiles.get(Constants.METRIC_VAR_ACI_T).add(iT);
 		}
 
-		avgOverTiles.get(Constants.METRIC_VAR_ACI_A).avg(this.getNumberOfTiles());
-		avgOverTiles.get(Constants.METRIC_VAR_ACI_C).avg(this.getNumberOfTiles());
-		avgOverTiles.get(Constants.METRIC_VAR_ACI_G).avg(this.getNumberOfTiles());
-		avgOverTiles.get(Constants.METRIC_VAR_ACI_T).avg(this.getNumberOfTiles());
+		avgOverTiles.get(Constants.METRIC_VAR_ACI_A).avg();
+		avgOverTiles.get(Constants.METRIC_VAR_ACI_C).avg();
+		avgOverTiles.get(Constants.METRIC_VAR_ACI_G).avg();
+		avgOverTiles.get(Constants.METRIC_VAR_ACI_T).avg();
 
 		return avgOverTiles;
 	}
@@ -111,13 +111,12 @@ public class IntensityMap implements Serializable{
 			avgOverTiles.get(Constants.METRIC_VAR_ACICC_T).add(iT);
 		}
 
-		avgOverTiles.get(Constants.METRIC_VAR_ACICC_A).avg(this.getNumberOfTiles());
-		avgOverTiles.get(Constants.METRIC_VAR_ACICC_C).avg(this.getNumberOfTiles());
-		avgOverTiles.get(Constants.METRIC_VAR_ACICC_G).avg(this.getNumberOfTiles());
-		avgOverTiles.get(Constants.METRIC_VAR_ACICC_T).avg(this.getNumberOfTiles());
+		avgOverTiles.get(Constants.METRIC_VAR_ACICC_A).avg();
+		avgOverTiles.get(Constants.METRIC_VAR_ACICC_C).avg();
+		avgOverTiles.get(Constants.METRIC_VAR_ACICC_G).avg();
+		avgOverTiles.get(Constants.METRIC_VAR_ACICC_T).avg();
 
 		return avgOverTiles;
-		
 	}
 	
 		// Return the number of called bases foreach channel [NC, A, C, G, T]

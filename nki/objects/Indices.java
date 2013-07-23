@@ -82,7 +82,47 @@ public class Indices implements Serializable{
 		this.totalClusters += metric;
 	}
 
-	public void toXML(Element sumXml, Document xmlDoc){
+	@SuppressWarnings("unchecked")
+	public Element toXML(Element sumXml, Document xmlDoc){
+		Iterator pit = indices.entrySet().iterator();
+
+		while(pit.hasNext()){
+			Map.Entry projects = (Map.Entry) pit.next();
+			String project = (String) projects.getKey();
+
+			Element projEle = xmlDoc.createElement("Project");
+			projEle.setAttribute("name", project);
+
+			HashMap<String, HashMap<String, Object>> samples = (HashMap<String, HashMap<String, Object>>) projects.getValue();
+			Iterator sit = samples.entrySet().iterator();
+
+			while(sit.hasNext()){
+				Map.Entry sample = (Map.Entry) sit.next();
+				String sampleName = (String) sample.getKey();
+
+				Element sampleEle = xmlDoc.createElement("Sample");
+				sampleEle.setAttribute("name", sampleName);
+
+				HashMap<String, Object> sampleProp = (HashMap<String, Object>) sample.getValue();
+				Iterator spit = sampleProp.entrySet().iterator();
+
+				while(spit.hasNext()){
+					Map.Entry prop = (Map.Entry) spit.next();
+
+					// Num Clusters
+					if(prop instanceof MutableLong){
+						MutableLong ml = (MutableLong) prop.getValue();
+						sampleEle.setAttribute(prop.getKey().toString(), ml.toString());
+					} // Other
+					else{
+						sampleEle.setAttribute(prop.getKey().toString(), prop.getValue().toString());
+					}
+				}
+				projEle.appendChild(sampleEle);
+			}
+			sumXml.appendChild(projEle);
+		}
+		return sumXml;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -95,12 +135,7 @@ public class Indices implements Serializable{
 			Map.Entry projects = (Map.Entry) pit.next();
 			String project = (String) projects.getKey();
 
-			HashMap<String, HashMap<String, Object>> samples;
-			HashMap<String, HashMap<String, Object>> val = (HashMap<String, HashMap<String, Object>>) projects.getValue();
-
-			samples = val;
-
-
+			HashMap<String, HashMap<String, Object>> samples = (HashMap<String, HashMap<String, Object>>) projects.getValue();
 			Iterator sit = samples.entrySet().iterator();
 
 			while(sit.hasNext()){

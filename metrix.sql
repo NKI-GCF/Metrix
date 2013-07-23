@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS `metrix_objects`;
 CREATE TABLE `metrix`.`metrix_objects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `run_id` varchar(512) DEFAULT NULL,
-  `object_value` blob,
+  `object_value` mediumblob,
   `state` enum('1','2','3','4','5') DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=UTF8;
