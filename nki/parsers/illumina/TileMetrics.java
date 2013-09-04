@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -22,15 +22,11 @@ import java.util.*;
 import nki.objects.ClusterDensity;
 import nki.objects.PhasingCollection;
 import nki.objects.Phasing;
+import nki.objects.Reads;
 
-public class TileMetrics {
-	private String source = "";
-	LittleEndianInputStream leis = null;
-	private int version = 0;
-	private int recordLength = 0;
+public class TileMetrics extends GenericIlluminaParser {
 	private final static int 		CLUSTER_DENSITY 	= 100;
 	private final static int 		CLUSTER_DENSITY_PF 	= 101;
-	private boolean fileMissing = false;
 
 	// Lane --> ClusterDensities
 	private ClusterDensity cdMap = new ClusterDensity();
@@ -44,50 +40,7 @@ public class TileMetrics {
 	ArrayList<Integer> cycles = new ArrayList<Integer>();
 
 	public TileMetrics(String source, int state){
-		try{
-			setSource(source);
-			if(state == 1){
-				Thread.sleep(3000);
-			}
-			leis = new LittleEndianInputStream(new FileInputStream(source));
-		}catch(IOException IO){
-			setFileMissing(true);
-			System.out.println("Tile Metrics file not available for " + source);
-		}catch(InterruptedException IEX){
-
-		}
-	}
-
-	public void setFileMissing(boolean set){
-		this.fileMissing = set;
-	}
-
-	public boolean getFileMissing(){
-		return fileMissing;
-	}
-
-	public void setSource(String source){
-		this.source = source;
-	}
-
-	public String getSource(){
-		return source;
-	}
-
-	private void setVersion(int version){
-		this.version = version;
-	}
-
-	public int getVersion(){
-		return version;
-	}
-
-	private void setRecordLength(int recordLength){
-		this.recordLength = recordLength;
-	}
-
-	public int getRecordLength(){
-		return recordLength;
+		super(TileMetrics.class, source, state);
 	}
 
 	public ClusterDensity getCDmap(){
@@ -122,7 +75,27 @@ public class TileMetrics {
 		this.preMap = preMap;
 	}
 
-	public void digestData(){
+	/*
+	 *	Binary structure:
+	 *	byte 0: file version number (2)
+	 *	byte 1: length of each record
+	 *	bytes (N * 10 + 2) - (N *10 + 11): record:
+	 *	2 bytes: lane number (uint16)
+	 *	2 bytes: tile number (uint16)
+	 *	2 bytes: metric code (uint16)
+	 *	4 bytes: metric value (float)
+		Where N is the record index and possible metric codes are:
+		code 100: cluster density (k/mm2)
+		code 101: cluster density passing filters (k/mm2)
+		code 102: number of clusters
+		code 103: number of clusters passing filters
+		code (200 + (N  1) * 2): phasing for read N
+		code (201 + (N  1) * 2): prephasing for read N
+		code (300 + N  1): percent aligned for read N
+		code 400: control lane
+	 */
+
+	public void digestData(Reads rds){
 		try{
 			setVersion(leis.readByte());
 			setRecordLength(leis.readByte());
@@ -163,10 +136,14 @@ public class TileMetrics {
 				int PHAPRE = (metricCode - 200) % 2; 
 				// Calc readnumber from metriccode
 				int readNum = (int) Math.floor((metricCode - 200) / 2) + 1;
-				
-				if(metricValue == 0){
-					continue;
-				}
+			
+		//		if(rds.isIndexedRead(readNum)){
+		//			continue;
+		//		}
+
+		//		if(metricValue == 0){
+		//			continue;
+		//		}
 
 				// Phasing / Pre-phasing Parsing
 				if(codeMap.get(2) == 2){	// Metric code starts with 2

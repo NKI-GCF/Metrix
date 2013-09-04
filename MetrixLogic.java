@@ -185,7 +185,7 @@ public class MetrixLogic {
 			metrixLogger.log(Level.SEVERE, "Parser Configuration Exception. " + PXE.toString());
 		}
 
-                return success;
+		return success;
 	}
 
 	private void checkSummary(String path){
@@ -200,13 +200,6 @@ public class MetrixLogic {
 		}catch(Exception SEx){	// SQL Exception - Generic catch
 			metrixLogger.log(Level.SEVERE, "Error checking for summary by runId in database. " + SEx.toString());
 		}
-
-/*		if(results.containsKey(path)){
-			summary = results.get(path);			// Path has a summary stored in hash.
-		}else{
-			summary = new Summary();				// New hashmap entry for path
-		}
-*/		
 	}
 
 	public void finishRun(String path){
@@ -218,26 +211,26 @@ public class MetrixLogic {
 
 	public void saveEntry(String path){
 		int lastId = 0;
-                try{
-                     if(!DataStore.checkSummaryByRunId(path)){
-                             try{
-                                      lastId = DataStore.getMaxId();
-                                      summary.setSumId(lastId+1);
-                                      DataStore.appendedWrite(summary, path);
-                             }catch(Exception Ex){
-                                      metrixLogger.log(Level.SEVERE, "Exception in write statement lastID = " + lastId+ " Error: " + Ex.toString());
-                             }
-                      }else{
-                      // Run has been parsed before. Update instead of insert
-                            try{
-                                   DataStore.updateSummaryByRunName(summary, path);
-                            }catch(Exception SEx){
-                                   metrixLogger.log(Level.SEVERE, "Exception in update statement " + SEx.toString());
-                            }
-                      }
-               }catch(Exception Ex){
-                      metrixLogger.log(Level.SEVERE, "Run ID Checking error." + Ex.toString());
-               }
+        try{
+        	if(!DataStore.checkSummaryByRunId(path)){
+				try{
+					lastId = DataStore.getMaxId();
+					summary.setSumId(lastId+1);
+					DataStore.appendedWrite(summary, path);
+				}catch(Exception Ex){
+					metrixLogger.log(Level.SEVERE, "Exception in write statement lastID = " + lastId+ " Error: " + Ex.toString());
+				}
+			}else{
+				// Run has been parsed before. Update instead of insert
+				try{
+					DataStore.updateSummaryByRunName(summary, path);
+				}catch(Exception SEx){
+					metrixLogger.log(Level.SEVERE, "Exception in update statement " + SEx.toString());
+				}
+			}
+		}catch(Exception Ex){
+			metrixLogger.log(Level.SEVERE, "Run ID Checking error." + Ex.toString());
+		}
 	}
 	
 	public boolean checkFinished(String path){
@@ -271,6 +264,11 @@ public class MetrixLogic {
 
 	public boolean checkTimeout(String file){
 			File lastModCheck = new File(file+"/InterOp/");
+			if(!lastModCheck.isFile()){
+				metrixLogger.log(Level.SEVERE, "File " + file + " does not exist.");
+				return false;
+			}
+
 			File[] files = lastModCheck.listFiles();
 
 			Arrays.sort(files, new Comparator<File>(){

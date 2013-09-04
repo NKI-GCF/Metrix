@@ -20,79 +20,31 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-public class ExtractionMetrics {
-	private String source = "";	
-	LittleEndianInputStream leis = null;
-	private int version = 0;
-	private int recordLength = 0;	
+public class ExtractionMetrics extends GenericIlluminaParser{
 	ArrayList<Integer> cycles = new ArrayList<Integer>();
-	boolean fileMissing = false;
-	int sleepTime = 3000;
 
 	public ExtractionMetrics(String source, int state){
-		
-		String tmpPath = ""; 
+		super(ExtractionMetrics.class, source, state);
+	}
 
+	/*
+	 * Binary structure:
+	 *	byte 0: file version number (2)
+	 *	byte 1: length of each record
+	 *	bytes (N * 38 + 2) - (N *38 + 39): record:
+	 *	2 bytes: lane number (uint16)
+	 *	2 bytes: tile number (uint16)
+	 *	2 bytes: cycle number (uint16)
+	 *	4 x 4 bytes: fwhm scores (float) for channel [A, C, G, T] respectively
+	 *	2 x 4 bytes: intensities (uint16) for channel [A, C, G, T] respectively
+	 *	8 bytes: date/time of CIF creation
+	 *
+	 */
+
+	public void digestData(){
 		try{
-			setSource(source);
-			if(state == 1){
-				Thread.sleep(sleepTime);
-			}
-			leis = new LittleEndianInputStream(new FileInputStream(source));	
-		}catch(IOException IO){
-			// Set fileMissing = true. --> Parse again later. 
-			setFileMissing(true);
-		}catch(InterruptedException IEX){
-
-        }
-	}
-
-
-	public void setSource(String source){
-		this.source = source;
-	}
-
-	public String getSource(){
-		return source;
-	}
-
-	private void setVersion(int version){
-		this.version = version;
-	}
-
-	public int getVersion(){
-		return version;
-	}
-
-	private void setRecordLength(int recordLength){
-		this.recordLength = recordLength;
-	}
-
-	public int getRecordLength(){
-		return recordLength;
-	}
-
-	public void setFileMissing(boolean set){
-		this.fileMissing = set;
-	}
-	
-	public boolean getFileMissing(){
-		return fileMissing;
-	}
-
-	public void setSleepTime(int st){
-		this.sleepTime = st;
-	}
-
-	public int getSleepTime(){
-		return sleepTime;
-	}
-
-	public void outputData(){
-			// First catch version and record length of metrics file.
-		try{
-			setVersion(leis.readByte());		// Set Version
-			setRecordLength(leis.readByte()); 	// Set Record Length
+			setVersion(leis.readByte());	
+			setRecordLength(leis.readByte()); 
 		}catch(IOException Ex){
 			System.out.println("Error in parsing version number and recordlength: " + Ex.toString());
 		}
@@ -118,8 +70,6 @@ public class ExtractionMetrics {
 		}catch(IOException ExMain){
 			System.out.println("Error in main parsing of metrics data: " + ExMain.toString());
 		}
-	
-		
 	}
 
 	public List<Integer> getUniqueCycles(){
@@ -140,7 +90,6 @@ public class ExtractionMetrics {
 		Collections.sort(newList);
 
 		return newList;
-		
 	}
 
 	public int getLastCycle(){

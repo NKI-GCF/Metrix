@@ -8,13 +8,15 @@
 package nki.objects;
 
 import java.io.*;
-
+import java.util.*;
+import nki.util.ArrayUtils;
 
 public class Metric implements Serializable {
 
 	public static final long serialVersionUID = 42L;	
         private Float metric = 0.0f;
         private int tiles = 0;
+		private List<Float> tileScores = new ArrayList<Float>();
 
         public void setMetric(Float metricScore){
                 this.metric = metricScore;
@@ -36,6 +38,7 @@ public class Metric implements Serializable {
 
         public void incrementMetric(Float metricScore){
                 this.metric += metricScore;
+				this.tileScores.add(metricScore);
 				this.incrementTiles();
         }
 
@@ -48,4 +51,19 @@ public class Metric implements Serializable {
 			return (metric / tiles);
         }
 	
+		public Float calcSum(){
+			return ArrayUtils.sum(tileScores);
+		}
+
+		public double calcMean(){
+			return ArrayUtils.mean(tileScores);
+		}
+
+		public double calcMedian(){
+			return ArrayUtils.median(tileScores);
+		}
+		
+		public double calcSD(){
+			return ArrayUtils.sd(tileScores);
+		}
 }

@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+import java.text.*;
 import nki.objects.MutableLong;
 
 import org.w3c.dom.*;
@@ -76,6 +77,21 @@ public class QScoreDist implements Serializable{
 		}
 
 		return out;
+	}
+
+	public double aboveQ(int qscore){
+		double percentage = 0;
+		double aboveClus = 0;
+		double totalClus = 0;		
+
+		for(int score : qScoreDist.keySet()){
+			MutableLong metric = this.getScore(score);
+			if(score >= qscore){
+				aboveClus += (double) metric.get();
+			}
+			totalClus += (double) metric.get();
+		}
+		return (double) ((aboveClus / totalClus) * 100);
 	}
 
 	public HashMap<Integer, MutableLong> toObj(){

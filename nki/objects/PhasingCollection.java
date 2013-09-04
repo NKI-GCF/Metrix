@@ -8,9 +8,11 @@
 package nki.objects;
 
 import java.io.*;
+import java.text.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import nki.objects.Phasing;
+import nki.objects.Reads;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
@@ -43,7 +45,6 @@ public class PhasingCollection implements Serializable{
 		}else{
 			lanePhaseMap = new HashMap<Integer, Phasing>();
 			m = new Phasing();
-//			m.setPhasing(phasingScore);
 			m.incrementPhasing(phasingScore);
 		}
 
@@ -54,6 +55,10 @@ public class PhasingCollection implements Serializable{
 
 	public Phasing getPhasing(int lane, int readNum){
 		return this.phasingPerLane.get(lane).get(readNum);
+	}
+
+	public Phasing getPhasing(int lane, int readNum, PhasingCollection pc){
+		return pc.phasingPerLane.get(lane).get(readNum);
 	}
 
 	public Iterator getLanePhasingIterator(){
@@ -96,14 +101,42 @@ public class PhasingCollection implements Serializable{
 	}
 
 	public String toTab(){
-		String out = "Lane\tRead\tPhasing-Score\n";
+		String out = "";
+		DecimalFormat df = new DecimalFormat("#.###");
 
 		for(int lane : phasingPerLane.keySet()){	// Lane
 			for(int readNum : phasingPerLane.get(lane).keySet()){
-				out += lane + "\t" + readNum + "\t" + getPhasing(lane, readNum).getPhasing().toString() + "\n";
+				out += lane + "\t" + readNum + "\t" + df.format(getPhasing(lane, readNum).getPhasing()) + "\n";
 			}
 		}
 
+		return out;
+	}
+
+	public String toTab(PhasingCollection ext, Reads rds){
+		String out = "";
+		DecimalFormat df = new DecimalFormat("#.###");
+
+		// Write merged prephasing / phasing collection
+		if(ext instanceof PhasingCollection){
+			if(phasingPerLane.size() != ext.phasingPerLane.size()){
+				return "Incompatible list size.";
+			}
+			for(int lane : phasingPerLane.keySet()){	// Lane
+				for(int readNum : phasingPerLane.get(lane).keySet()){
+					String idx = "";
+					if(rds.isIndexedRead(readNum)){
+						idx = "Index";
+					}else{
+						idx = Integer.toString(readNum);
+					}
+					Phasing extPhasing = getPhasing(lane, readNum, ext);
+					out += lane + "\t" + idx + "\t" + df.format(getPhasing(lane, readNum).getPhasing()) + " / " + df.format(extPhasing.getPhasing()) + "\n";
+				}
+			}	
+		}else{
+			return this.toTab();
+		}
 		return out;
 	}
 

@@ -18,69 +18,28 @@ import java.util.Iterator;
 import java.util.Collections;
 import nki.objects.QualityScores;
 import nki.objects.QualityMap;
+import nki.objects.Reads;
 
-public class QualityMetrics {
-	private String source = "";
-	LittleEndianInputStream leis = null;
-
+public class QualityMetrics extends GenericIlluminaParser{
 	QualityScores qScores;
 
-	private int version = 0;
-	private int recordLength = 0;
-    private int sleepTime = 3000;
-	private boolean fileMissing = false;	
-
 	public QualityMetrics(String source, int state){
-
-                try{
-                        setSource(source);
-                        if(state == 1){
-                                Thread.sleep(sleepTime);
-                        }
-                        leis = new LittleEndianInputStream(new FileInputStream(source));
-                }catch(IOException IO){
-                        // Set fileMissing = true. --> Parse again later.
-                        setFileMissing(true);
-						System.out.println("Quality Metrics file not available for " + source);
-                }catch(InterruptedException IEX){
-
-                }
+		super(QualityMetrics.class, source, state);
 	}
 
-	public void setSource(String source){
-		this.source = source;
-	}
+	/*
+	 * Binary structure:
+	 *	byte 0: file version number (4)
+	 *	byte 1: length of each record
+	 *	bytes (N * 206 + 2) - (N *206 + 207): record:
+	 *	2 bytes: lane number (uint16)
+	 *	2 bytes: tile number (uint16)
+	 *	2 bytes: cycle number (uint16)
+	 *	4 x 50 bytes: number of clusters assigned score (uint32) Q1 through Q50
+	 */
 
-	public String getSource(){
-		return source;
-	}
-
-	private void setVersion(int version){
-		this.version = version;
-	}
-
-	public int getVersion(){
-		return version;
-	}
-
-	private void setRecordLength(int recordLength){
-		this.recordLength = recordLength;
-	}
-
-	public int getRecordLength(){
-		return recordLength;
-	}
-
-	public void setFileMissing(boolean fileMissing){
-		this.fileMissing = fileMissing;
-	}
-
-	public boolean getFileMissing(){
-		return fileMissing;
-	}
-
-	public QualityScores digestData(){
-                qScores = new QualityScores();
+	public QualityScores digestData(Reads rds){
+       qScores = new QualityScores();
 
 		try{
 			setVersion(leis.readByte());
@@ -97,23 +56,37 @@ public class QualityMetrics {
 			qScores.setRecordLength(this.getRecordLength());
 
 			boolean qcFlag = false;
-			
+			QualityMap qMap = new QualityMap();
 			while(true){
 				int laneNr = leis.readUnsignedShort();
 				int tileNr = leis.readUnsignedShort();
 				int cycleNr = leis.readUnsignedShort();
-				
+
+				if(qScores.getLane(laneNr) != null){
+					cycleMap = qScores.getLane(laneNr);
+				}else{
+					cycleMap = new HashMap<Integer, QualityMap>();
+				}
+
+				if(cycleMap.containsKey(cycleNr)){
+					qMap = cycleMap.get(cycleNr);
+				}else{
+					qMap = new QualityMap();
+				}
+
 				qcFlag=true;
 				int qcRecord = 1;
 
-				QualityMap qMap = new QualityMap();
 				while(qcFlag){
 	
 					if(qcRecord == 50){
 						qcFlag = false;
 					}
-					
-					qMap.addMapping(tileNr, qcRecord, leis.readInt());
+					//if(!rds.cycleIsIndex(cycleNr)){
+						qMap.addMapping(tileNr, qcRecord, leis.readInt());
+					//}else{
+					//	leis.readInt();
+					//}
 					qcRecord++;
 				}
 				cycleMap.put(cycleNr, qMap);				
@@ -124,7 +97,7 @@ public class QualityMetrics {
 		}catch(IOException Ex){
 			System.out.println("IO Error");
 		}
-	
+
 		// Return the qualityScores object.
 		return qScores;
 	}

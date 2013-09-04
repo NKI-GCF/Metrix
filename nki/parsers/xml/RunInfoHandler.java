@@ -65,7 +65,7 @@ public class RunInfoHandler {
 
 		if(readNodes.getLength() == 3){		// Run Type = Paired End Run
 			sum.setRunType("Paired End");
-			sum.setIsIndexed(true);
+			sum.setIsIndexed(false);
 		}
 
 		if(readNodes.getLength() == 4){		// Run Type = Nextera Run

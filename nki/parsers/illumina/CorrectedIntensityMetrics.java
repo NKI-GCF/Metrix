@@ -8,6 +8,7 @@
 package nki.parsers.illumina;
 
 import nki.io.LittleEndianInputStream;
+import nki.parsers.illumina.GenericIlluminaParser;
 import java.io.IOException;
 import java.io.EOFException;
 import java.io.FileInputStream;
@@ -20,49 +21,33 @@ import nki.objects.IntensityScores;
 import nki.objects.IntensityMap;
 import nki.constants.Constants;
 
-public class CorrectedIntensityMetrics {
-	private String source = "";
-	LittleEndianInputStream leis = null;
-
-	IntensityScores iScores;
-
-	private int version = 0;
-	private int recordLength = 0;
-    private int sleepTime = 3000;
-	private boolean fileMissing = false;	
+public class CorrectedIntensityMetrics extends GenericIlluminaParser{
+	private IntensityScores iScores;
 
 	public CorrectedIntensityMetrics(String source, int state){
-
-		try{
-			setSource(source);
-			if(state == 1){
-				Thread.sleep(sleepTime);
-			}
-			leis = new LittleEndianInputStream(new FileInputStream(source));
-		}catch(IOException IO){
-			// Set fileMissing = true. --> Parse again later.
-			setFileMissing(true);
-			System.out.println("Corrected Intensity Metrics file not available for " + source);
-		}catch(InterruptedException IEX){
-
-		}
+		super(CorrectedIntensityMetrics.class, source, state);
 	}
 
-	public void setSource(String source){
-		this.source = source;
-	}
-
-	public String getSource(){
-		return source;
-	}
-
-	public void setFileMissing(boolean fileMissing){
-		this.fileMissing = fileMissing;
-	}
-
-	public boolean getFileMissing(){
-		return fileMissing;
-	}
+	/*
+	 * Binary structure:
+	 * 	byte 0: file version number (2)
+	 *	byte 1: length of each record
+	 *	bytes (N * 48 + 2) - (N *48 + 49): record:
+	 *	2 bytes: lane number (uint16)
+	 *	2 bytes: tile number (uint16)
+	 *	2 bytes: cycle number (uint16)
+	 *	2 bytes: average intensity (uint16)
+	 *	2 bytes: average corrected int for channel A (uint16)
+	 *	2 bytes: average corrected int for channel C (uint16)
+	 *	2 bytes: average corrected int for channel G (uint16)
+	 *	2 bytes: average corrected int for channel T (uint16)
+	 *	2 bytes: average corrected int for called clusters for base A (uint16)
+	 *	2 bytes: average corrected int for called clusters for base C (uint16)
+	 *	2 bytes: average corrected int for called clusters for base G (uint16)
+	 *	2 bytes: average corrected int for called clusters for base T (uint16)
+	 *	20 bytes: number of base calls (float) for No Call and channel [A, C, G, T] respectively
+	 *	4 bytes: signal to noise ratio (float)
+	 */
 
 	public IntensityScores digestData(){
         iScores = new IntensityScores();
@@ -78,7 +63,6 @@ public class CorrectedIntensityMetrics {
 		try{
 			HashMap<Integer, IntensityMap> cycleMap = new HashMap<Integer, IntensityMap>();
 			IntensityMap iMap = new IntensityMap();
-			int procLane = 0;
 			int cnt = 0;
 
 			while(true){
@@ -145,7 +129,6 @@ public class CorrectedIntensityMetrics {
 
 				cycleMap.put(cycleNr, iMap);
 				iScores.setLane(cycleMap, laneNr);
-					procLane = laneNr;
 			}
 		}catch(EOFException EOFEx){
 			// Reached end of file

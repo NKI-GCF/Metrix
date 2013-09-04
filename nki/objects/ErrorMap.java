@@ -14,18 +14,17 @@ import java.util.Iterator;
 public class ErrorMap implements Serializable{
 	public static final long serialVersionUID = 42L;
 
-	private HashMap<Integer, HashMap<Integer, Integer>> eMap = new HashMap<Integer, HashMap<Integer, Integer>>();
+	private HashMap<Integer, HashMap<Integer, Float>> eMap = new HashMap<Integer, HashMap<Integer, Float>>();
 	
-	public void addMetric(int tilenr, int numE, int eVal){
-                HashMap<Integer, Integer> eSubMap;
+	public void addMetric(int tilenr, int numE, float eVal){
+                HashMap<Integer, Float> eSubMap;
                 if(eMap.containsKey(tilenr)){
-                        // Get subMap from hashmap.
-                        eSubMap = sMap.get(tilenr);
+                    // Get subMap from hashmap.
+                    eSubMap = eMap.get(tilenr);
                 }else{
-                        // Create new readnum entry and popup late with new hashmap
-                        eSubMap = new HashMap<Integer, Integer>();
+                    // Create new readnum entry and popup late with new hashmap
+                	eSubMap = new HashMap<Integer, Float>();
                 }
-
 		eSubMap.put(numE, eVal);
 		eMap.put(tilenr, eSubMap);
 	}
@@ -34,7 +33,7 @@ public class ErrorMap implements Serializable{
 		return eMap.size();
 	}
 
-	public Iterator getErrorIteratorForTiles(){
+	public Iterator getErrorIterator(){
 		return eMap.entrySet().iterator();
 	}
 	

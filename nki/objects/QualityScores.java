@@ -21,6 +21,7 @@ public class QualityScores implements Serializable{
 	public int version;
 	public int recordLength;
 	public String source;
+	// Lane - QScore - QMap
 	public HashMap<Integer, HashMap<Integer, QualityMap>> qScores = new HashMap<Integer, HashMap<Integer, QualityMap>>();	
 	private QScoreDist qScoreDist = new QScoreDist();
 
@@ -84,7 +85,7 @@ public class QualityScores implements Serializable{
 
 	public Iterator getQScoreIterator(){
 		return qScores.entrySet().iterator();
-        }
+    }
 
 	@SuppressWarnings("unchecked")
 	public QScoreDist getQScoreDistribution(){
@@ -121,4 +122,43 @@ public class QualityScores implements Serializable{
 		}
 		return qScoreDist;
 	}
+
+	@SuppressWarnings("unchecked")
+	public HashMap<Integer,QScoreDist> getQScoreDistributionByLane(){
+        Iterator qit = this.getQScoreIterator();
+		HashMap<Integer, QScoreDist> laneDist = new HashMap<Integer, QScoreDist>();
+
+		while(qit.hasNext()){
+				Map.Entry scorePairs = (Map.Entry) qit.next();
+				int lane = (Integer) scorePairs.getKey();
+				HashMap<Integer, QualityMap> laneScores = (HashMap<Integer, QualityMap>) scorePairs.getValue();
+				QScoreDist qScoreDistLane = new QScoreDist();
+
+				for(Map.Entry<Integer, QualityMap> entry : laneScores.entrySet()){
+						int cycle = (Integer) entry.getKey();
+						QualityMap qmap = (QualityMap) entry.getValue();
+						Iterator qmapIt = qmap.getScoreIterator();
+
+						while(qmapIt.hasNext()){
+								Map.Entry qmapPairs = (Map.Entry) qmapIt.next();
+								int tile = (Integer) qmapPairs.getKey();
+								HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
+								
+								for(Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()){
+									int qScore = (Integer) qmetric.getKey();
+									long metric = Long.valueOf(qmetric.getValue());
+									if(metric == 0){
+										continue;
+									}					
+
+									qScoreDistLane.setScore(qScore, metric);	// Set the metric in the QScore Distribution
+
+								}
+						}
+				}
+
+			laneDist.put(lane, qScoreDistLane);
+		}
+		return laneDist;
+	}	
 }

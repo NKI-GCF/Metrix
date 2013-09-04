@@ -18,13 +18,29 @@ import java.util.Iterator;
 import java.util.Collections;
 
 public class GenericIlluminaParser {
-	private String source = "";
-	LittleEndianInputStream leis = null;
+	protected String source = "";
+	protected LittleEndianInputStream leis = null;
 
-	private int version = 0;
-	private int recordLength = 0;
-    private int sleepTime = 3000;
-	private boolean fileMissing = false;	
+	protected int version = 0;
+	protected int recordLength = 0;
+    protected int sleepTime = 3000;
+	protected boolean fileMissing = false;	
+	
+	public GenericIlluminaParser(Class<?> c, String source, int state){
+		try{
+			setSource(source);
+			if(state == 1){
+				Thread.sleep(sleepTime);
+			}
+			leis = new LittleEndianInputStream(new FileInputStream(source));	
+		}catch(IOException IO){
+			// Set fileMissing = true. --> Parse again later. 
+			setFileMissing(true);
+			System.out.println(c.getSimpleName() + " file not available for " + source);
+		}catch(InterruptedException IEX){
+
+        }
+	}
 
 	public void setSource(String source){
 		this.source = source;
@@ -34,7 +50,7 @@ public class GenericIlluminaParser {
 		return source;
 	}
 
-	private void setVersion(int version){
+	public void setVersion(int version){
 		this.version = version;
 	}
 
@@ -42,7 +58,7 @@ public class GenericIlluminaParser {
 		return version;
 	}
 
-	private void setRecordLength(int recordLength){
+	public void setRecordLength(int recordLength){
 		this.recordLength = recordLength;
 	}
 
@@ -56,25 +72,5 @@ public class GenericIlluminaParser {
 
 	public boolean getFileMissing(){
 		return fileMissing;
-	}
-	/*
-	* Override function
-	*/
-	public void digestData(){
-		try{
-			setVersion(leis.readByte());
-			setRecordLength(leis.readByte());
-		}catch(IOException Ex){
-			System.out.println("Error in parsing version number and recordLength: " + Ex.toString());
-		}
-
-		try{
-			// Parse structure here -- Override function
-		}catch(EOFException EOFEx){
-			// Reached end of file
-		}catch(IOException Ex){
-			System.out.println("IO Error");
-		}
-	
 	}
 }

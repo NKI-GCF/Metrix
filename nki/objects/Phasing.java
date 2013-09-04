@@ -8,13 +8,15 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.*;
+import nki.util.ArrayUtils;
 
 public class Phasing implements Serializable {
 
 	public static final long serialVersionUID = 42L;
 	private Float phasing = 0.0f;
 	private int tiles = 0;
+	private List<Float> tileScores = new ArrayList<Float>();
 
 	public void setPhasing(Float phasingScore){
                 this.phasing = phasingScore;
@@ -46,5 +48,19 @@ public class Phasing implements Serializable {
                 return (phasing / tiles);
         }	
 
+		public Float calcSum(){
+			return ArrayUtils.sum(tileScores);
+		}
 
+		public double calcMean(){
+			return ArrayUtils.mean(tileScores);
+		}
+
+		public double calcMedian(){
+			return ArrayUtils.median(tileScores);
+		}
+		
+		public double calcSD(){
+			return ArrayUtils.sd(tileScores);
+		}
 }

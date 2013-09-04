@@ -11,6 +11,7 @@ import nki.objects.IntensityScores;
 import nki.objects.IntensityDist;
 import nki.objects.Indices;
 import nki.objects.Update;
+import nki.objects.Reads;
 import nki.parsers.illumina.QualityMetrics;
 import nki.parsers.illumina.TileMetrics;
 import nki.parsers.illumina.CorrectedIntensityMetrics;
@@ -165,7 +166,7 @@ public class CommandProcessor {
 
 			if(recCom.getType().equals(Constants.COM_TYPE_METRIC)){
 				// Retrieve summary from database and check metric availability.
-				if(recCom.getRunId() == null && recCom.getState()+"" == ""){
+				if(recCom.getRunId() == null && Integer.toString(recCom.getState()) == ""){
 					throw new MissingCommandDetailException("Please supply parameters (Run State or Run Id) for the requested metrics.");
 				}
 
@@ -206,6 +207,7 @@ public class CommandProcessor {
 				
 						// Process Extraction Metrics
 
+						Reads rds = sum.getReads();
 
 						// Process Cluster Density and phasing / prephasing
 						if(	!sum.hasClusterDensity() 	||
@@ -217,7 +219,7 @@ public class CommandProcessor {
 							TileMetrics tm = new TileMetrics(tileMetrics, 0);
 
 							if(!tm.getFileMissing()){								// If TileMetrics File is present - process.
-								tm.digestData();
+								tm.digestData(rds);
 								sum.setClusterDensity(tm.getCDmap());
 								sum.setClusterDensityPF(tm.getCDpfMap());
 								sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
@@ -232,8 +234,8 @@ public class CommandProcessor {
 						if(!sum.hasQScores() || timeCheck){
 								QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
 								if(!qm.getFileMissing()){
-									QualityScores qsOut = qm.digestData();
-									sum.setQScores(qsOut);
+									QualityScores qsOut = qm.digestData(rds);
+								//	sum.setQScores(qsOut);
 									// Calculate distribution
 									QScoreDist qScoreDist = qsOut.getQScoreDistribution();
 									sum.setQScoreDist(qScoreDist);
@@ -307,6 +309,7 @@ public class CommandProcessor {
 						throw new MissingCommandDetailException("Requested output format not understood (" + recCom.getFormat() + ")");
 				}
 				oos.flush();
+				DataStore.closeAll();
 			}
 		}
 
@@ -316,9 +319,5 @@ public class CommandProcessor {
 		// return retCom with return value and potential error message
 	}
 
-	public void checkMetrics(){
-		// To prevent timer delay -- state = 0
-		// Check if 
-	}
 }
 

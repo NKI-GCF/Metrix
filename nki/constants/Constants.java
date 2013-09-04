@@ -36,6 +36,9 @@ public final class Constants {
 	public static final int 		METRIC_CD_AVG				= 600000;
 	public static final int 		METRIC_CD_HIGH				= 900000;
 
+	// Real-time scanning thresholds
+	public static final double		RT_THRES_SNR_MIN			= 1.5;
+
 	// Constants for the average corrected intensities metrics
 	public static final String		METRIC_VAR_ACI				= "AvgCorInt";
 	

@@ -10,6 +10,7 @@ package nki.objects;
 import java.net.*;
 import java.io.*;
 import java.lang.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -18,19 +19,34 @@ public class Reads implements Serializable{
 	
 	public static final long serialVersionUID = 42L;
 
-	private HashMap<Integer, ArrayList<String>> readMap = new HashMap<Integer, ArrayList<String>>();	
-
-	public void insertMapping(int readNum, String readDesc, String readVal){
+	private HashMap<Integer, ArrayList<String>> readMap = new HashMap<Integer, ArrayList<String>>();
+	private ArrayList<Integer> nonIndexList = new ArrayList<Integer>();
+	private int lastCycle = 1;
+	
+	public void insertMapping(int readNum, String cycles, String isIndexed){
 		ArrayList<String> subMap;
 		if(readMap.containsKey(readNum)){
 			// Get subMap from hashmap.
 			subMap = readMap.get(readNum);
 		}else{
-                        // Create new readnum entry and popup late with new hashmap
+            // Create new readnum entry and popup late with new hashmap
 			subMap = new ArrayList<String>();
 		}
-		subMap.add(readDesc);
-		subMap.add(readVal);
+		subMap.add(cycles);
+		subMap.add(isIndexed);
+
+		int cycleInt = Integer.parseInt(cycles);
+
+		if(subMap.get(1).equals("N")){
+			int cnt = lastCycle;
+			for(int i = cnt; i < cnt+cycleInt;i++){
+				nonIndexList.add(i);
+				lastCycle++;
+			}
+		}else{
+			lastCycle+=cycleInt;
+		}
+
 		readMap.put(readNum, subMap);
 	}
 
@@ -44,4 +60,22 @@ public class Reads implements Serializable{
 		return (readOneLength + readTwoLength);
 	}
 
+	public boolean cycleIsIndex(int cycle){
+		if(!Arrays.asList(nonIndexList).contains(cycle)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	public boolean isIndexedRead(int readNum){
+		if(!readMap.containsKey(readNum)){
+			return false;
+		}
+		if((readMap.get(readNum)).get(1).equals("Y")){
+			return true;
+		}else{
+			return false;
+		}
+	}
 }

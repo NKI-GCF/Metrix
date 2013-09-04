@@ -13,69 +13,35 @@ import java.io.EOFException;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Collections;
 import nki.objects.ErrorCollection;
-import nki.object.ErrorMap;
+import nki.objects.ErrorMap;
 
-public class ErrorMetrics {
-	private String source = "";
-	LittleEndianInputStream leis = null;
-
-	private int version = 0;
-	private int recordLength = 0;
-	private int sleepTime = 3000;
-	private boolean fileMissing = false;
-
+public class ErrorMetrics extends GenericIlluminaParser{
 	private ErrorCollection eScores;
 
 	public ErrorMetrics(String source, int state){
-                try{
-                        setSource(source);
-                        if(state == 1){
-                                Thread.sleep(sleepTime);
-                        }
-                        leis = new LittleEndianInputStream(new FileInputStream(source));
-		}catch(IOException IO){
-			setFileMissing(true);
-			System.out.println("Parser Error - Error Metrics: " + IO.toString());
-		}catch(InterruptedException IEX){
-			
-		}
+		super(ErrorMetrics.class, source, state);
 	}
 
-	public void setSource(String source){
-		this.source = source;
-	}
-
-	public String getSource(){
-		return source;
-	}
-
-	private void setVersion(int version){
-		this.version = version;
-	}
-
-	public int getVersion(){
-		return version;
-	}
-
-	private void setRecordLength(int recordLength){
-		this.recordLength = recordLength;
-	}
-
-	public int getRecordLength(){
-		return recordLength;
-	}
-
-        public void setFileMissing(boolean fileMissing){
-                this.fileMissing = fileMissing;
-        }
-
-        public boolean getFileMissing(){
-                return fileMissing;
-        }
-
-	public void digestData(){
+	/*
+	 * Binary structure:
+	 * 	byte 0: file version number (3)
+	 *	byte 1: length of each record (uint8)
+		bytes (N * 30 + 2) - (N *30 + 11): record: 
+	 *	2 bytes: lane number (uint16)
+	 *	2 bytes: tile number (uint16)
+	 *	2 bytes: cycle number (uint16)
+	 *	4 bytes: error rate (float) 
+	 *	4 bytes: number of perfect reads (uint32)
+	 *	4 bytes: number of reads with 1 error (uint32)
+	 *	4 bytes: number of reads with 2 errors (uint32)
+	 *	4 bytes: number of reads with 3 errors (uint32)
+	 *	4 bytes: number of reads with 4 errors (uint32)
+		Where N is the record index
+	 */
+	public ErrorCollection digestData(){
 		eScores = new ErrorCollection();
 		HashMap<Integer, ErrorMap> cycleMap;		
 
@@ -88,40 +54,51 @@ public class ErrorMetrics {
 
 		try{
 			int record = 1;
-			int prevCycle = -1;
-			
-			// If errormap exists in cycle map retrieve. 
-			// Check cycle after parsing.
+			ErrorMap eMap = new ErrorMap();
 
 			while(true){
-				ErrorMap eMap = new ErrorMap();
-
 				int laneNr = leis.readUnsignedShort();
 				int tileNr = leis.readUnsignedShort();
 				int cycleNr = leis.readUnsignedShort();
 
+				// If errormap exists in cycle map retrieve. 
+				// Check cycle after parsing.
+				if(eScores.getLane(laneNr) != null){
+					cycleMap = eScores.getLane(laneNr);
+				}else{
+					cycleMap = new HashMap<Integer, ErrorMap>();
+				}
+
+				if(cycleMap.containsKey(cycleNr)){
+					eMap = cycleMap.get(cycleNr);
+				}else{
+					eMap = new ErrorMap();
+				}
+
 				float errorRate = leis.readFloat();
-				int numPerfectReads = leis.readInt();
-				int numReads1E = leis.readInt();
-				int numReads2E = leis.readInt();
-				int numReads3E = leis.readInt();
-				int numReads4E = leis.readInt();
+				float numPerfectReads = (float) leis.readInt();
+				float numReads1E = (float) leis.readInt();
+				float numReads2E = (float) leis.readInt();
+				float numReads3E = (float) leis.readInt();
+				float numReads4E = (float) leis.readInt();
 			
-				eMap.addMetric(tilenr,-1, errorRate);
-				eMap.addMetric(tilenr,0, numPerfectReads);
-				eMap.addMetric(tilenr,1, numReads1E);
-				eMap.addMetric(tilenr,2, numReads2E);
-				eMap.addMetric(tilenr,3, numReads3E);
-				eMap.addMetric(tilenr,4, numReads4E);
-				
-				System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr + "\t" + errorRate + "\t" + numPerfectReads + "\t" + numReads1E + "\t" + numReads2E + "\t" + numReads3E + "\t" + numReads4E);
+				eMap.addMetric(tileNr,-1, errorRate);
+				eMap.addMetric(tileNr,0, numPerfectReads);
+				eMap.addMetric(tileNr,1, numReads1E);
+				eMap.addMetric(tileNr,2, numReads2E);
+				eMap.addMetric(tileNr,3, numReads3E);
+				eMap.addMetric(tileNr,4, numReads4E);
+	
+				cycleMap.put(cycleNr, eMap);
+				eScores.setLane(cycleMap, laneNr);
+	//			System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr + "\t" + errorRate + "\t" + numPerfectReads + "\t" + numReads1E + "\t" + numReads2E + "\t" + numReads3E + "\t" + numReads4E);
 
 			}
 		}catch(EOFException EOFEx){
-			System.out.println("Reached end of file");
+			// Reached end of file
 		}catch(IOException Ex){
 			System.out.println("IO Error");
 		}
-
+		return eScores;
 	}
 }

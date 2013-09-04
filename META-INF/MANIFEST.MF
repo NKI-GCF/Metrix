@@ -1,6 +1,3 @@
 Manifest-Version: 1.0
 Created-By: Bernd van der Veen (Netherlands Cancer Institute)
-Class-Path: lib/mysql-connector-java-5.1.6.jar
-Main-Class: MetrixDaemon
-
-
+Main-Class: metrix.Metrix

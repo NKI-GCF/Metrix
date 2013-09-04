@@ -21,61 +21,26 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import nki.objects.Indices;
 
-public class IndexMetrics {
-	private String source = "";	
-	LittleEndianInputStream leis = null;
-	private int version = 0;
-	private int recordLength = 0;	
-	boolean fileMissing = false;
-	int sleepTime = 3000;
-
+public class IndexMetrics extends GenericIlluminaParser {
 	public IndexMetrics(String source, int state){
-		
-		try{
-			setSource(source);
-			if(state == 1){
-				Thread.sleep(sleepTime);
-			}
-			leis = new LittleEndianInputStream(new FileInputStream(source));	
-		}catch(IOException IO){
-			// Set fileMissing = true. --> Parse again later. 
-			setFileMissing(true);
-		}catch(InterruptedException IEX){
-
-        }
+		super(IndexMetrics.class, source, state);
 	}
 
-	public void setSource(String source){
-		this.source = source;
-	}
-
-	public String getSource(){
-		return source;
-	}
-
-	private void setVersion(int version){
-		this.version = version;
-	}
-
-	public int getVersion(){
-		return version;
-	}
-
-	private void setRecordLength(int recordLength){
-		this.recordLength = recordLength;
-	}
-
-	public int getRecordLength(){
-		return recordLength;
-	}
-
-	public void setFileMissing(boolean set){
-		this.fileMissing = set;
-	}
-	
-	public boolean getFileMissing(){
-		return fileMissing;
-	}
+	/*
+	 * Binary structure
+	 * byte 0: file version number (1)
+	 * bytes (variable length): record:
+	 * 2 bytes: lane number (uint16)
+	 * 2 bytes: tile number (uint16)
+	 * 2 bytes: read number (uint16)
+	 * 2 bytes: number of bytes Y for index sequence (uint16)
+	 * Y bytes: index sequence (string encoded in UTF-8)
+	 * 4 bytes: number of clusters identified as index (uint32)
+	 * 2 bytes: number of bytes V for sample name (uint16)
+	 * V bytes: sample name string (string encoded in UTF-8)
+	 * 2 bytes: number of bytes W for sample project name (uint16)
+	 * W bytes: sample project name string (string encoded in UTF-8
+	 */
 
 	public Indices digestData(){
 		if(fileMissing){

@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import nki.objects.Metric;
+import java.text.*;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
@@ -93,13 +94,46 @@ public class ClusterDensity implements Serializable{
 
 	public String toTab(){
 		String out = "";
+		DecimalFormat df = new DecimalFormat("##");
 
 		for(int lane : clusterDensity.keySet()){
 			Metric metric = this.getDensity(lane);
-			out += lane +"\t" + metric.getLaneAvg() + "\n";
+			out += lane +"\t" + df.format(metric.calcMean()/1000) + " +/- " + df.format(metric.calcSD()/1000)  + "\n";
 		}
 
 		return out;
+	}
+
+	public String toTabPrecise(){
+		String out = "";
+		DecimalFormat df = new DecimalFormat("##");
+
+		for(int lane : clusterDensity.keySet()){
+			Metric metric = this.getDensity(lane);
+			out += lane +"\t" + df.format(metric.calcMean()) + " +/- " + df.format(metric.calcSD())  + "\n";
+		}
+
+		return out;
+	}
+
+	public String toTab(ClusterDensity ocd){
+		String out = "";
+		DecimalFormat df = new DecimalFormat("##");
+		DecimalFormat dfTwo = new DecimalFormat("##.##");	
+		if(ocd instanceof ClusterDensity){
+			if(ocd.clusterDensity.size() != this.clusterDensity.size()){
+				return "Incompatible list size.";
+			}
+			for(int lane : clusterDensity.keySet()){
+				Metric locMetric = this.getDensity(lane);
+				Metric extMetric = ocd.getDensity(lane);
+				out += lane + "\t" + df.format(locMetric.calcMean()/1000) + " +/- " + df.format(locMetric.calcSD()/1000) + "\t" + df.format(extMetric.calcMean()/1000) + " +/- "+ df.format(extMetric.calcSD()/1000) + "\t" + dfTwo.format(((extMetric.calcMean()/1000)/(locMetric.calcMean()/1000))*100)  +"%\n";
+
+			}
+
+		}
+		return out;
+
 	}
 
 	public HashMap<Integer, Metric> toObj(){
