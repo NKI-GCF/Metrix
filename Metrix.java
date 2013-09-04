@@ -30,7 +30,8 @@ import nki.parsers.xml.XmlDriver;
 public class Metrix {
 
 	public static void main(String[] args) {
-        	String runDir = "/net/RTAdumpII/HiSeq2000/";
+		// BEFORE COMPILING; DEFINE RUN DIRECTORY BELOW
+        	String runDir = "";
 
 		String searchTerm 					= "";
 		ArrayList<String> searchResults		= new ArrayList<String>();
