@@ -104,26 +104,36 @@ public class MetrixWatch extends Thread{
 		}
 
 		Matcher m = p.matcher(fileName);
-                if(!m.matches()){ // File is not a run directory
-                    return false;
-                }
+        if(!m.matches()){ // File is not a run directory
+             return false;
+        }
 
-                file = fileArg.getAbsolutePath();
-                File fileRI = new File(file + "/RunInfo.xml");
+//                file = fileArg.getAbsolutePath();
+        try{
+        	file = fileArg.getCanonicalPath();
+		}catch(IOException Ex){
+			metrixLogger.log(Level.INFO, "Argumented filepath cannot be resolved. " + Ex.toString());
+			return false;
+		}
+        File fileRI = new File(file + "/RunInfo.xml");
 
-                if(fileRI.isFile()){ // Valid Illumina Run Directory
-                // Check for runs that are still running
-                        File fileComplete = new File(file + "/RTAComplete.txt");
+        if(fileRI.isFile()){ // Valid Illumina Run Directory
+        	// Check for runs that are still running
+            File fileComplete = new File(file + "/RTAComplete.txt");
 
-                        if(fileComplete.isFile()){      // Run has finished
-                                metrixLogger.log(Level.INFO, "[CHECK] Illumina Run finished. Parsing available data for: " + file, file);
-                                ml.processMetrics(Paths.get(file), 2, dataStore); // Parse available info with complete state
-                                return false;               // Run has completed.
-                        }
+			if(fileComplete.isFile()){      // Run has finished
+            	metrixLogger.log(Level.INFO, "[CHECK] Illumina Run finished. Parsing available data for: " + file, file);
+            	ml.processMetrics(Paths.get(file), 2, dataStore); // Parse available info with complete state
+                return false;               // Run has completed.
+            }
 
 			File lastModCheck = new File(file+"/InterOp/");
 			File[] files = lastModCheck.listFiles();
 
+			if(!lastModCheck.isDirectory()){
+				// Print error.
+				return false;	// Run dir is malformed - InterOp dir does not exist.
+			}
 			Arrays.sort(files, new Comparator<File>(){
 			    public int compare(File f1, File f2)
 			    {
@@ -172,13 +182,13 @@ public class MetrixWatch extends Thread{
 	       if (trace) {
 	           Path prev = keys.get(key);
 	            if (prev == null) {
-			 metrixLogger.log(Level.INFO, "Registered new watch directory. ", dir);
-			if(newRun){
-				ml.processMetrics(dir, 5, dataStore);
-			}
+					metrixLogger.log(Level.INFO, "Registered new watch directory. ", dir);
+					if(newRun){
+						ml.processMetrics(dir, 5, dataStore);
+					}
 	            } else {
 	                if (!dir.equals(prev)) {
-				metrixLogger.log(Level.INFO, "Previously registered directory modified.", dir);
+						metrixLogger.log(Level.INFO, "Previously registered directory modified.", dir);
 	                }
 	            }
 	        }

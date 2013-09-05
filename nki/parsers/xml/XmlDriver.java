@@ -29,6 +29,9 @@ public class XmlDriver {
 
 	public boolean parseRunInfo() throws SAXException, IOException, ParserConfigurationException{
                 File xmlFile = new File(directory+"/RunInfo.xml");
+				if(!xmlFile.isFile()){
+					return false;
+				}
                 DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
                 Document doc = documentBuilder.parse(xmlFile);

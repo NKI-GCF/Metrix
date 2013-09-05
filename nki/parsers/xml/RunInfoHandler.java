@@ -26,7 +26,10 @@ public class RunInfoHandler {
 		sum.setMachineRunNumber(runMachineNr);
 
 		// Flowcell
-		String flowCell = doc.getElementsByTagName("Flowcell").item(0).getTextContent(); 
+		String flowCell = "XXXXXXXXXX";	// Default empty flowcell ID
+			if(doc.getElementsByTagName("Flowcell").getLength() != 0){
+				flowCell = doc.getElementsByTagName("Flowcell").item(0).getTextContent(); 
+			}
 		sum.setFlowcellID(flowCell);
 
 		// Instrument
@@ -34,7 +37,10 @@ public class RunInfoHandler {
 		sum.setInstrument(instrument);
 
 		// Date
-		String date = doc.getElementsByTagName("Date").item(0).getTextContent();
+		String date = "000000";
+		if(doc.getElementsByTagName("Date").getLength() != 0){
+			date = doc.getElementsByTagName("Date").item(0).getTextContent();
+		}
 		sum.setRunDate(Integer.parseInt(date));
 
 		// Reads (w/ children of number of reads)
@@ -44,9 +50,23 @@ public class RunInfoHandler {
 			for(int i = 0; i < readNodes.getLength(); i++){
 				// Read  -Number -NumCycles -IsIndexedRead
 				Node readNode = readNodes.item(i);
-				String readNumber = readNode.getAttributes().getNamedItem("Number").getTextContent();
-				String numCycles  = readNode.getAttributes().getNamedItem("NumCycles").getTextContent();
-				String isIndexedRead = readNode.getAttributes().getNamedItem("IsIndexedRead").getTextContent();
+				String readNumber = "";
+					if(readNode.getAttributes().getLength() >= 3){
+						readNumber = readNode.getAttributes().getNamedItem("Number").getTextContent();
+					}else{
+						readNumber = Integer.toString(i);
+					}
+
+				String numCycles  = "0";
+					if(readNode.getAttributes().getLength() >= 3){
+						numCycles = readNode.getAttributes().getNamedItem("NumCycles").getTextContent();
+					}
+
+				String isIndexedRead = "";
+					if(readNode.getAttributes().getLength() >= 3){
+						isIndexedRead = readNode.getAttributes().getNamedItem("IsIndexedRead").getTextContent();
+					}
+
 				totalCycles += Integer.parseInt(numCycles);
 				rd.insertMapping(Integer.parseInt(readNumber), numCycles, isIndexedRead);
 			}
@@ -76,19 +96,22 @@ public class RunInfoHandler {
 		sum.setReads(rd);	// Store in Summary object
 
 		// FlowcellLayout -LaneCount -SurfaceCount -SwathCount -TileCount
-			Node fcLayout = doc.getElementsByTagName("FlowcellLayout").item(0);
-			String lc = fcLayout.getAttributes().getNamedItem("LaneCount").getTextContent();
-			sum.setLaneCount(lc);
+			Node fcLayout;
+				
+			if(doc.getElementsByTagName("FlowcellLayout").getLength() != 0){
+				fcLayout = doc.getElementsByTagName("FlowcellLayout").item(0);
+				String lc = fcLayout.getAttributes().getNamedItem("LaneCount").getTextContent();
+				sum.setLaneCount(lc);
 
-                        String sc = fcLayout.getAttributes().getNamedItem("SurfaceCount").getTextContent();
-			sum.setSurfaceCount(sc);
+				String sc = fcLayout.getAttributes().getNamedItem("SurfaceCount").getTextContent();
+				sum.setSurfaceCount(sc);
 
-                        String swC = fcLayout.getAttributes().getNamedItem("SwathCount").getTextContent();
-			sum.setSwathCount(swC);
+				String swC = fcLayout.getAttributes().getNamedItem("SwathCount").getTextContent();
+				sum.setSwathCount(swC);
 
-                        String tc = fcLayout.getAttributes().getNamedItem("TileCount").getTextContent();
-			sum.setTileCount(tc);
-
+				String tc = fcLayout.getAttributes().getNamedItem("TileCount").getTextContent();
+				sum.setTileCount(tc);
+			}
 			sum.setXmlInfo(true);
 
 			return sum;

@@ -64,10 +64,10 @@ public class MetrixClient {
 					
 					// Set a value for command
 					sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
-					sendCommand.setState(2); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
+					sendCommand.setState(12); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
 					sendCommand.setCommand("FETCH");
 					sendCommand.setMode("CALL");
-					sendCommand.setType("METRIC"); // You can also make use of the available Constants here.
+					sendCommand.setType("DETAIL"); // You can also make use of the available Constants here.
 //					sendCommand.setRunId(""); // Use run directory path as string (no trailing slash) or if a State is desired, use setState and comment out setRunId() method.
 					oos.writeObject(sendCommand);
 					oos.flush();

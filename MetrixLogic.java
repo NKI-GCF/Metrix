@@ -264,8 +264,8 @@ public class MetrixLogic {
 
 	public boolean checkTimeout(String file){
 			File lastModCheck = new File(file+"/InterOp/");
-			if(!lastModCheck.isFile()){
-				metrixLogger.log(Level.SEVERE, "File " + file + " does not exist.");
+			if(!lastModCheck.isDirectory()){
+				metrixLogger.log(Level.SEVERE, "Directory " + file + " does not exist.");
 				return false;
 			}
 
