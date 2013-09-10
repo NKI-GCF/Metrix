@@ -21,6 +21,7 @@ import nki.exceptions.CommandValidityException;
 import nki.exceptions.UnimplementedCommandException;
 import nki.exceptions.MissingCommandDetailException;
 import nki.exceptions.EmptyResultSetCollection;
+import nki.util.LoggerWrapper;
 import java.net.*;
 import java.io.*;
 import java.lang.Exception;
@@ -42,6 +43,7 @@ public class CommandProcessor {
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
 	private DataStore ds;
+	private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public CommandProcessor(
 				Command command, 
@@ -74,16 +76,20 @@ public class CommandProcessor {
 			}catch(UnimplementedCommandException UCE){
 				// Create command and send back error.
 				oos.writeObject(UCE);
+				metrixLogger.log.warning("Unimplemented Command Exception: " + UCE.toString());
 			}catch(MissingCommandDetailException MCDE){
 				// Send back error over network in command.
 				oos.writeObject(MCDE);
+				metrixLogger.log.warning("Missing Command Detail Exception: " + MCDE.toString());
 			}catch(EmptyResultSetCollection ERSC){
 				// Send back error over network in command.
 				oos.writeObject(ERSC);
+				metrixLogger.log.warning("Empty Result Set Collection Exception: " + ERSC.toString());
 			}catch(Exception Ex){
 				// Send back error over network in command.
 				Ex.printStackTrace();
 				oos.writeObject(Ex);
+				metrixLogger.log.severe("Uncaught exception in CommandProcessor: " + Ex.toString());
 			}
 
 		}else{
@@ -92,7 +98,7 @@ public class CommandProcessor {
 		}
 	}
 
-	// API Key Check Diffie-Hellman key exchange
+	// API Key Check
 	private boolean checkAPI(){
 		valApi = true;
 		return valApi;
@@ -192,7 +198,7 @@ public class CommandProcessor {
 
 				while(litr.hasNext()){
 					Summary sum = (Summary) litr.next();
-					System.out.println("Processing " + sum.getRunId());
+					metrixLogger.log.info("Processing " + sum.getRunId());
 					if(!sum.equals(null)){
 						Boolean update = false;
 						String runDir = sum.getRunDirectory();
@@ -273,11 +279,12 @@ public class CommandProcessor {
 								sum.setLastUpdated();
 								DataStore.updateSummaryByRunName(sum, runDir);
                             }catch(Exception SEx){
-								System.out.println("Exception in update statement " + SEx.toString());
+								metrixLogger.log.severe("Exception in update statement " + SEx.toString());
                             }
 						}
 					}else{
 						// Throw error
+						metrixLogger.log.severe("[WARNING] Obtained an empty summary.");
 					}
 
 					// Generate and send update object.
@@ -310,6 +317,7 @@ public class CommandProcessor {
 				}
 				oos.flush();
 				DataStore.closeAll();
+				ds.closeAll();
 			}
 		}
 

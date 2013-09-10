@@ -8,6 +8,7 @@
 package nki.parsers.illumina;
 
 import nki.io.LittleEndianInputStream;
+import nki.util.LoggerWrapper;
 import java.io.IOException;
 import java.io.EOFException;
 import java.io.FileInputStream;
@@ -25,7 +26,8 @@ public class GenericIlluminaParser {
 	protected int recordLength = 0;
     protected int sleepTime = 3000;
 	protected boolean fileMissing = false;	
-	
+	private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+
 	public GenericIlluminaParser(Class<?> c, String source, int state){
 		try{
 			setSource(source);
@@ -36,7 +38,7 @@ public class GenericIlluminaParser {
 		}catch(IOException IO){
 			// Set fileMissing = true. --> Parse again later. 
 			setFileMissing(true);
-			System.out.println(c.getSimpleName() + " file not available for " + source);
+			metrixLogger.log.warning(c.getSimpleName() + " file not available for " + source);
 		}catch(InterruptedException IEX){
 
         }

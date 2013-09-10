@@ -9,7 +9,6 @@ package nki.io;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,6 +18,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
+import nki.util.LoggerWrapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
@@ -34,13 +34,12 @@ public class DataStore {
 
 	private HashMap<String, Summary> results;
 	private boolean emptyCheck = false;
-	private static Logger metrixLogger;
+	private static LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+
 	private static Properties configFile = new Properties();
  	public static Connection conn = null;
 
 	public DataStore() throws IOException{
-		metrixLogger = Logger.getLogger(DataStore.class.getName());
-       
 	        String externalFileName = System.getProperty("properties");
 	        String absFile = (new File(externalFileName)).getAbsolutePath();
 
@@ -239,7 +238,7 @@ public class DataStore {
 		try{
 			conn.close();
 		}catch(SQLException ex){
-			metrixLogger.log(Level.SEVERE, "Error closing SQL Connection! " + ex.toString());
+			metrixLogger.log.severe( "Error closing SQL Connection! " + ex.toString());
 		}
 	}	
 

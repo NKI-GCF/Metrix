@@ -3,6 +3,7 @@ import java.util.regex.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.text.*;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,8 +31,34 @@ import nki.parsers.xml.XmlDriver;
 public class Metrix {
 
 	public static void main(String[] args) {
+	    Properties configFile;
+
+		configFile = new Properties();
+		// Use external properties file, outside of jar location.
+    	String externalFileName = System.getProperty("properties");
+		
+		if(externalFileName == null){
+			System.out.println("[FATAL] Properties file not argumented as parameter. (use: java -Dproperties=metrix.properties Metrix)");
+			System.exit(1);
+		}
+
+	    String absFile = (new File(externalFileName)).getAbsolutePath();
+
+    	try{
+			InputStream fin = new FileInputStream(new File(absFile));
+		    configFile.load(fin);
+			fin.close();
+		}catch(FileNotFoundException FNFE){
+			System.out.println("[ERROR] Properties file not found.");
+			System.exit(1);	
+		}catch(IOException Ex){
+			System.out.println("[ERROR] Reading properties file. " + Ex.toString());
+			System.exit(1);
+ 		}
+
+
 		// BEFORE COMPILING; DEFINE RUN DIRECTORY BELOW
-        	String runDir = "";
+		String runDir = configFile.getProperty("RUNDIR", "/tmp/") + "/";
 
 		String searchTerm 					= "";
 		ArrayList<String> searchResults		= new ArrayList<String>();

@@ -11,6 +11,7 @@ import nki.parsers.illumina.*;
 import nki.constants.Constants;
 import nki.io.DataStore;
 import nki.objects.Summary;
+import nki.util.LoggerWrapper;
 
 public class MetrixWatch extends Thread{
 	
@@ -26,18 +27,7 @@ public class MetrixWatch extends Thread{
 	private Pattern p = Pattern.compile(illuDirRegex);
 	private long waitTime =  1800000;	// Update every 5 minutes.		       (ms)
 	private long forceTime = 1200000;	// If no update for 20 minutes, force parsing. (ms)
-	private static final Logger metrixLogger = Logger.getLogger(MetrixWatch.class.getName());
-
-	static{
-		try{
-			boolean append = true;
-			FileHandler fh = new FileHandler("metrixDaemon.log", append);
-			fh.setFormatter(new SimpleFormatter());
-			metrixLogger.addHandler(fh);
-		}catch(IOException Ex){
-			System.out.println("Error setting up logger " + Ex.toString());		
-		} 
-	}
+	private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	private HashMap<String, Summary> results = new HashMap<String, Summary>();
 	private MetrixLogic ml = new MetrixLogic();
@@ -66,14 +56,14 @@ public class MetrixWatch extends Thread{
 	*	Executes the runnable Watcher service
 	**/
 	public void run() {
-			metrixLogger.log(Level.INFO, "MetrixWatch Service started...");
+			metrixLogger.log.info( "MetrixWatch Service started...");
                         File folder = new File(runDirString);
 			if(folder.isDirectory()){
 				try{
-					System.out.println("Registering Illumina Run Directory.");
+					metrixLogger.log.info("Registering Illumina Run Directory.");
 					register(Paths.get(runDirString), false);
 				 }catch(IOException Ex){
-                    metrixLogger.log(Level.SEVERE, "IOException traversing watch directory.", Ex.toString());
+                    metrixLogger.log.severe( "IOException traversing watch directory. "+ Ex.toString());
                  }
 			}
 
@@ -112,7 +102,7 @@ public class MetrixWatch extends Thread{
         try{
         	file = fileArg.getCanonicalPath();
 		}catch(IOException Ex){
-			metrixLogger.log(Level.INFO, "Argumented filepath cannot be resolved. " + Ex.toString());
+			metrixLogger.log.info( "Argumented filepath cannot be resolved. " + Ex.toString());
 			return false;
 		}
         File fileRI = new File(file + "/RunInfo.xml");
@@ -122,7 +112,7 @@ public class MetrixWatch extends Thread{
             File fileComplete = new File(file + "/RTAComplete.txt");
 
 			if(fileComplete.isFile()){      // Run has finished
-            	metrixLogger.log(Level.INFO, "[CHECK] Illumina Run finished. Parsing available data for: " + file, file);
+            	metrixLogger.log.info( "[CHECK] Illumina Run finished. Parsing available data for: " + file);
             	ml.processMetrics(Paths.get(file), 2, dataStore); // Parse available info with complete state
                 return false;               // Run has completed.
             }
@@ -143,7 +133,7 @@ public class MetrixWatch extends Thread{
 			long difference = (System.currentTimeMillis() - files[files.length-1].lastModified());
 
             if(difference > 18000000){ // If no updates for 5 hours. (18000000 milliseconds)
-				metrixLogger.log(Level.INFO, "[CHECK] Illumina Run stopped. Parsing available data for: " + file, file);
+				metrixLogger.log.info( "[CHECK] Illumina Run stopped. Parsing available data for: " + file);
 				if(!ml.checkPaired(file, dataStore)){	// Check if run is paired and at turn cycle.
 					// Call MetrixLogic for parsing
 					ml.processMetrics(Paths.get(file), 3, dataStore); 
@@ -152,21 +142,21 @@ public class MetrixWatch extends Thread{
 						 register(Paths.get(file), false);
 						 register(Paths.get(file+"/InterOp/"), false);
 					}catch(IOException Ex){
-						metrixLogger.log(Level.SEVERE, "IOException traversing watch directory", Ex.toString());
+						metrixLogger.log.severe( "IOException traversing watch directory. " + Ex.toString());
 					}
 				}
 			}else{
 				try{
-					metrixLogger.log(Level.INFO, "[CHECK] Illumina Run detected: " + file, file);
+					metrixLogger.log.info( "[CHECK] Illumina Run detected: " + file);
                     	// Register rundir
                     register(Paths.get(file+"/InterOp/"), false);
 					register(Paths.get(file),newRun);
 				}catch(IOException Ex){
-					metrixLogger.log(Level.SEVERE, "IOException traversing watch directory.", Ex.toString());
+					metrixLogger.log.severe( "IOException traversing watch directory. " + Ex.toString());
 				}
 			}
 		}else{
-			metrixLogger.log(Level.INFO, "Directory: " + file + " does not comply with the Illumina run directory format. RunInfo.xml is missing.");
+			metrixLogger.log.info( "Directory: " + file + " does not comply with the Illumina run directory format. RunInfo.xml is missing.");
 		}
 
 		return true;
@@ -182,13 +172,13 @@ public class MetrixWatch extends Thread{
 	       if (trace) {
 	           Path prev = keys.get(key);
 	            if (prev == null) {
-					metrixLogger.log(Level.INFO, "Registered new watch directory. ", dir);
+					metrixLogger.log.info( "Registered new watch directory: " +dir);
 					if(newRun){
 						ml.processMetrics(dir, 5, dataStore);
 					}
 	            } else {
 	                if (!dir.equals(prev)) {
-						metrixLogger.log(Level.INFO, "Previously registered directory modified.", dir);
+						metrixLogger.log.info( "Previously registered directory modified: " + dir);
 	                }
 	            }
 	        }
@@ -261,10 +251,10 @@ public class MetrixWatch extends Thread{
 				try{
 					Thread.sleep(30000);
 				}catch(InterruptedException IEX){
-					metrixLogger.log(Level.SEVERE,"Sleeping of thread while creating a new run failed!");
+					metrixLogger.log.severe("Sleeping of thread while creating a new run failed!");
 				}
 				if(checkRegisterIllumina(send, true)){
-					metrixLogger.log(Level.INFO, "New run with path: " + send+" registered");
+					metrixLogger.log.info( "New run with path: " + send+" registered");
 				}else{
 					continue;
 				}	
@@ -279,7 +269,7 @@ public class MetrixWatch extends Thread{
 								// Parse summary object
 					if(ml.processMetrics(procFold, 1, dataStore)){
 						// Successfuly processed, continue watching.
-						metrixLogger.log(Level.INFO, "Parsed " + procFold  + " successfully. ");
+						metrixLogger.log.info( "Parsed " + procFold  + " successfully. ");
 					}
 						// ELSE Processing failed
 					
@@ -300,7 +290,7 @@ public class MetrixWatch extends Thread{
 	try{ 
 	        watcher.close();
 	}catch(IOException ex){
-		metrixLogger.log(Level.SEVERE, "Error closing the watcher", ex);
+		metrixLogger.log.severe( "Error closing the watcher. " + ex.toString());
 	}
     }
 
@@ -352,10 +342,10 @@ public class MetrixWatch extends Thread{
 			String nonInterOp = watchDir.toString().replace("/InterOp","");
 
 			try{
-				metrixLogger.log(Level.INFO, "Backlog parsing " + nonInterOp);
+				metrixLogger.log.info( "Backlog parsing " + nonInterOp);
 				sum = (Summary) dataStore.getSummaryByRunName(nonInterOp);
 			}catch(Exception Ex){
-				metrixLogger.log(Level.SEVERE, "Error in retrieving summary for forced check. " + Ex.toString());
+				metrixLogger.log.severe( "Error in retrieving summary for forced check. " + Ex.toString());
 			}
 
 			if(sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG){
@@ -366,7 +356,7 @@ public class MetrixWatch extends Thread{
 			if((currentTime - mapTime) > forceTime){
 				if(ml.processMetrics(Paths.get(nonInterOp), sum.getState(), dataStore)){
 					waitMap.put((WatchKey) watchPairs.getKey(), System.currentTimeMillis());
-					metrixLogger.log(Level.INFO, "Forcefully parsed " + nonInterOp);
+					metrixLogger.log.info( "Forcefully parsed " + nonInterOp);
 				}
 			}
 		}

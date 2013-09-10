@@ -14,7 +14,6 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
-import java.util.logging.*;
 import nki.objects.Command;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
@@ -25,13 +24,15 @@ import nki.exceptions.UnimplementedCommandException;
 import nki.io.DataStore;
 import nki.parsers.metrix.CommandProcessor;
 import nki.constants.Constants;
+import nki.util.LoggerWrapper;
 
 public class MetrixThread extends Thread {
 	private SocketChannel sChannel = null;
 	private boolean timedBool = false;	
 
-	// SERVER LOGGING HERE FOR INSTANTIATION OF CLIENT...
-	final Logger metrixLogger = Logger.getLogger(MetrixThread.class.getName());
+	// Server logging of client connections and interactions.
+	 LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+
 
 	public MetrixThread(SocketChannel sChannel){
 		super("MetrixThread");
@@ -42,7 +43,7 @@ public class MetrixThread extends Thread {
 		
 		try{
 			String clientSocketDetails = sChannel.socket().getRemoteSocketAddress().toString();
-			metrixLogger.log(Level.INFO, "[SERVER] Client connection accepted at: " + clientSocketDetails);
+			metrixLogger.log.info( "[SERVER] Client connection accepted at: " + clientSocketDetails);
 
 			// Create OutputStream for sending objects.
 			ObjectOutputStream  oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
@@ -91,19 +92,19 @@ public class MetrixThread extends Thread {
 							oos.close();
 						}
 					}else{
-						metrixLogger.log(Level.WARNING, "[SERVER] Command not understood [" + commandClient + "]");
+						metrixLogger.log.warning( "[SERVER] Command not understood [" + commandClient + "]");
 					}
 					
-					metrixLogger.log(Level.INFO, "[SERVER] Finished processing command");
+					metrixLogger.log.info( "[SERVER] Finished processing command");
 				}
 			}catch(ClassNotFoundException CNFE){
 				CNFE.printStackTrace();
 			}catch(Exception Ex){
-			//	metrixLogger.log(Level.INFO, "Disconnect from client. ");
+			//	metrixLogger.log.info( "Disconnect from client. ");
 			}
 
 		}catch(IOException Ex){
-			System.err.println("[Log] Client disconnected or IOException " + Ex.toString());
+			metrixLogger.log.warning("[Log] Client disconnected or IOException " + Ex.toString());
 		}
 
 	}

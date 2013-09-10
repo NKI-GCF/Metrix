@@ -22,26 +22,34 @@ import nki.exceptions.EmptyResultSetCollection;
 import nki.exceptions.MissingCommandDetailException;
 import nki.exceptions.UnimplementedCommandException;
 import nki.exceptions.InvalidCredentialsException;
-import java.util.logging.*;
 import java.util.*;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Properties;
 import nki.objects.MutableInt;
+import nki.util.LoggerWrapper;
 
 public class MetrixClient {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        final Logger metrixLogger = Logger.getLogger(MetrixClient.class.getName());
-	metrixLogger.log(Level.INFO, "[CLIENT] Initiated");
+		LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+		metrixLogger.log.info( "[CLIENT] Initiated");
 
-        Properties configFile = new Properties();
+		// Use external properties file, outside of jar location.
+		Properties configFile = new Properties();
+    	String externalFileName = System.getProperty("properties");
+	    String absFile = (new File(externalFileName)).getAbsolutePath();
 
-        // Use external properties file, outside of jar location.
-        String externalFileName = System.getProperty("properties");
-        String absFile = (new File(externalFileName)).getAbsolutePath();
-
-        InputStream fin = new FileInputStream(new File(absFile));
-        configFile.load(fin);
+    	try{
+			InputStream fin = new FileInputStream(new File(absFile));
+		    configFile.load(fin);
+			fin.close();
+		}catch(FileNotFoundException FNFE){
+			System.out.println("[ERROR] Properties file not found.");
+			System.exit(1);	
+		}catch(IOException Ex){
+			System.out.println("[ERROR] Reading properties file. " + Ex.toString());
+			System.exit(1);
+ 		}
 
         int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
 		String host = configFile.getProperty("HOST", "localhost");	

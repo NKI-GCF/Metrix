@@ -10,6 +10,7 @@ import java.nio.file.*;
 import java.io.*;
 import java.util.*;
 import nki.objects.Command;
+import nki.util.LoggerWrapper;
 import java.io.IOException;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -29,18 +30,7 @@ import java.util.regex.*;
 public class MetrixLogic {
 
 	// Instantiate Logger	
-        private static final Logger metrixLogger = Logger.getLogger(MetrixLogic.class.getName());
-	static{
-                try{
-                        boolean append = true;
-                        FileHandler fh = new FileHandler("metrixDaemon.log", append);
-                        fh.setFormatter(new SimpleFormatter());
-                        metrixLogger.addHandler(fh);
-                }catch(IOException Ex){
-                        System.out.println("Error setting up logger " + Ex.toString());
-                }
-        }
-
+	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	// Call inits
     private HashMap<String, Summary> results = new HashMap<String, Summary>();
@@ -53,8 +43,15 @@ public class MetrixLogic {
 
 	public boolean processMetrics(Path runDir, int st, DataStore ds){
 		boolean success = false;
+		boolean finishBool = false;
 
-		this.state = st;
+		if(st == -1){
+			finishBool = true;
+			this.state = Constants.STATE_FINISHED;
+		}else{
+			this.state = st;
+		}
+
 		String extractionMetrics = "";
 		String tileMetrics = "";
 		String qualityMetrics = "";
@@ -74,7 +71,9 @@ public class MetrixLogic {
 		this.checkSummary(path);
 
 		// Check if run has finished uncaught.
-		this.checkFinished(path);
+		if(finishBool){
+			this.checkFinished(path);
+		}
 
 		// Check if run hasnt halted.
 		if(this.checkTimeout(path) && !path.matches("(.*)/InterOp(.*)")){
@@ -83,8 +82,8 @@ public class MetrixLogic {
 		} 
 
 		// Save entry for init phase of run.
-		if(state == 5){
-			summary.setState(5);
+		if(state == Constants.STATE_INIT){
+			summary.setState(Constants.STATE_INIT);
 			summary.setLastUpdated();
 			try{
 				
@@ -97,11 +96,11 @@ public class MetrixLogic {
 					}
 				}
 			}catch(SAXException SAX){
-	        	metrixLogger.log(Level.SEVERE, "Error parsing XML with SAX. " + SAX.toString());			
+	        	metrixLogger.log.severe( "Error parsing XML with SAX. " + SAX.toString());			
 			}catch(IOException Ex){
-				metrixLogger.log(Level.SEVERE, "IOException Error. " + Ex.toString());
+				metrixLogger.log.severe( "IOException Error. " + Ex.toString());
 			}catch(ParserConfigurationException PXE){
-				metrixLogger.log(Level.SEVERE, "Parser Configuration Exception. " + PXE.toString());
+				metrixLogger.log.severe( "Parser Configuration Exception. " + PXE.toString());
 			}
 
 			results.put(path, summary);
@@ -121,10 +120,10 @@ public class MetrixLogic {
 		}
 	
 		// If more than 15 parsing errors have been made and the current cycle of run is over 26; fail the run.
-		if(summary.getParseError() >= 15 && summary.getCurrentCycle() > 26){
-			summary.setState(3);
+		if(summary.getParseError() >= 20 && summary.getCurrentCycle() > 26){
+			summary.setState(Constants.STATE_HANG);
 			saveEntry(path);
-			metrixLogger.log(Level.INFO, "Run has failed to complete within the allotted time frame.");
+			metrixLogger.log.info( "Run has failed to complete within the allotted time frame.");
 			return false;
 		}
 
@@ -145,8 +144,8 @@ public class MetrixLogic {
             int currentCycle = em.getLastCycle(); 
 
 			if(summary.getRunType() == "Paired End" && currentCycle == summary.getTurnCycle()){
-				summary.setState(4);
-				state = 4;
+				summary.setState(Constants.STATE_TURN);
+				state = Constants.STATE_TURN;
 			}
 
 			// If run == paired end. Check for FC turn at (numReads read 1 + index 1). Set state accordingly.
@@ -154,7 +153,7 @@ public class MetrixLogic {
 				// State has not been set yet and user has not yet been notified for the turning of the flowcell.
 				if(!summary.getHasNotifyTurned()){
 					summary.setState(Constants.STATE_TURN);
-					metrixLogger.log(Level.INFO, "Flowcell of run: " + path + " has to be turned. Current cycle: " + currentCycle);				
+					metrixLogger.log.info( "Flowcell of run: " + path + " has to be turned. Current cycle: " + currentCycle);				
 					summary.setHasNotifyTurned(true);
 				}
 			}
@@ -169,20 +168,20 @@ public class MetrixLogic {
 			}else{
 				summary.setState(state);
 			}
-			
+		
 			results.put(path, summary);
 			saveEntry(path);	// Store summary entry in SQL database
 	
-			metrixLogger.log(Level.INFO, "Finished processing: " + runDir.getFileName());
+			metrixLogger.log.info( "Finished processing: " + runDir.getFileName());
 			success = true;
         }catch(NullPointerException NPE){
 			NPE.printStackTrace();
 		}catch(SAXException SAX){
-			metrixLogger.log(Level.SEVERE, "Error parsing XML with SAX. " + SAX.toString());
+			metrixLogger.log.severe( "Error parsing XML with SAX. " + SAX.toString());
 		}catch(IOException Ex){
-			metrixLogger.log(Level.SEVERE, "IOException Error. " + Ex.toString());
+			metrixLogger.log.severe( "IOException Error. " + Ex.toString());
 		}catch(ParserConfigurationException PXE){
-			metrixLogger.log(Level.SEVERE, "Parser Configuration Exception. " + PXE.toString());
+			metrixLogger.log.severe( "Parser Configuration Exception. " + PXE.toString());
 		}
 
 		return success;
@@ -198,14 +197,21 @@ public class MetrixLogic {
 				summary = new Summary();
 			}
 		}catch(Exception SEx){	// SQL Exception - Generic catch
-			metrixLogger.log(Level.SEVERE, "Error checking for summary by runId in database. " + SEx.toString());
+			metrixLogger.log.severe( "Error checking for summary by runId in database. " + SEx.toString());
 		}
 	}
 
 	public void finishRun(String path){
 		this.checkSummary(path);
-		summary.setState(Constants.STATE_FINISHED);	// Set state to 2: Complete
-		metrixLogger.log(Level.INFO, "Run " + path +" has finished.");
+		summary.setState(Constants.STATE_FINISHED);	// Set state to STATE_FINISED (2): Complete
+		try{
+			DataStore tmpDS = new DataStore();
+			processMetrics(Paths.get(path), -1, tmpDS);
+			tmpDS.closeAll();
+		}catch(IOException IE){
+			metrixLogger.log.severe( "Error setting up database connection.");
+		}
+		metrixLogger.log.info( "Run " + path +" has finished.");
 		saveEntry(path);	
 	}
 
@@ -218,25 +224,26 @@ public class MetrixLogic {
 					summary.setSumId(lastId+1);
 					DataStore.appendedWrite(summary, path);
 				}catch(Exception Ex){
-					metrixLogger.log(Level.SEVERE, "Exception in write statement lastID = " + lastId+ " Error: " + Ex.toString());
+					metrixLogger.log.severe( "Exception in write statement lastID = " + lastId+ " Error: " + Ex.toString());
 				}
 			}else{
 				// Run has been parsed before. Update instead of insert
 				try{
 					DataStore.updateSummaryByRunName(summary, path);
 				}catch(Exception SEx){
-					metrixLogger.log(Level.SEVERE, "Exception in update statement " + SEx.toString());
+					metrixLogger.log.severe( "Exception in update statement " + SEx.toString());
 				}
 			}
 		}catch(Exception Ex){
-			metrixLogger.log(Level.SEVERE, "Run ID Checking error." + Ex.toString());
+			metrixLogger.log.severe( "Run ID Checking error." + Ex.toString());
 		}
 	}
 	
 	public boolean checkFinished(String path){
 		File RTAComplete = new File(path + "/RTAComplete.txt");
-		
-		if(RTAComplete.isFile()){
+		this.checkSummary(path);
+
+		if(RTAComplete.isFile() && summary.getState() != Constants.STATE_FINISHED){
 			this.finishRun(path);
 			return true;
 		}else{
@@ -254,7 +261,7 @@ public class MetrixLogic {
 			// State has not been set yet and user has not yet been notified for the turning of the flowcell.
 			if(!summary.getHasNotifyTurned()){
 				summary.setState(Constants.STATE_TURN);
-				metrixLogger.log(Level.INFO, "Flowcell of run: " + path + " has to be turned. Current cycle: " + cCycle);
+				metrixLogger.log.info( "Flowcell of run: " + path + " has to be turned. Current cycle: " + cCycle);
 				summary.setHasNotifyTurned(true);
 			}
 			check = true;
@@ -265,10 +272,10 @@ public class MetrixLogic {
 	public boolean checkTimeout(String file){
 			File lastModCheck = new File(file+"/InterOp/");
 			if(!lastModCheck.isDirectory()){
-				metrixLogger.log(Level.SEVERE, "Directory " + file + " does not exist.");
+				metrixLogger.log.severe( "Directory " + file + " does not exist.");
 				return false;
 			}
-
+  
 			File[] files = lastModCheck.listFiles();
 
 			Arrays.sort(files, new Comparator<File>(){
@@ -279,9 +286,9 @@ public class MetrixLogic {
 			
 			long difference = (System.currentTimeMillis() - files[files.length-1].lastModified());
 
-            if(difference > 86400000 && summary.getState() != Constants.STATE_FINISHED){ // If no updates for 24 hours. (86400000 milliseconds)
-				metrixLogger.log(Level.INFO, "Run has timed out. No data received for over 24 hours. Halting watch.");
-				state = 3;
+            if(difference > 86400000 && (summary.getState() == Constants.STATE_RUNNING)){ // If no updates for 24 hours. (86400000 milliseconds)
+				metrixLogger.log.info( "Run has timed out. No data received for over 24 hours. Halting watch.");
+				state = Constants.STATE_HANG;
 				return true;
 			}
 
