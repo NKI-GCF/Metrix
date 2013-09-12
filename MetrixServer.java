@@ -69,7 +69,7 @@ public class MetrixServer{
 				System.exit(1);
 			}
 		
-        	metrixLogger.log.info( "Initializing Directory Watcher Service.");
+        	metrixLogger.log.info( "Initializing Directory Watcher Service with directory: " + runDir);
 			// Start Watcher service
 				final MetrixWatch mw = new MetrixWatch(runDir, false, ds);
     	    	mw.start();

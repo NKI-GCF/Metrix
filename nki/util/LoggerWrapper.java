@@ -55,11 +55,33 @@ public class LoggerWrapper{
 			}else{
 				log.setUseParentHandlers(true);
 			}
-		    log.setLevel(Level.FINEST);  
+		    log.setLevel(getLevel(configFile.getProperty("LOG_LEVEL", "INFO")));
 		}catch(IOException Ex){
 			System.out.println("[ERROR] Could not create logfile. " + Ex.toString());
-			System.exit(1);
 		}
-	}  
+	}
 
+	private static Level getLevel(String lvl){
+		if(lvl.equals("ALL")){
+			return Level.ALL;
+		}else if(lvl.equals("CONFIG")){
+			return Level.CONFIG;
+		}else if(lvl.equals("FINE")){
+			return Level.FINE;
+		}else if(lvl.equals("FINER")){
+			return Level.FINER;
+		}else if(lvl.equals("FINEST")){
+			return Level.FINEST;
+		}else if(lvl.equals("INFO")){
+			return Level.INFO;
+		}else if(lvl.equals("OFF")){
+			return Level.OFF;
+		}else if(lvl.equals("SEVERE")){
+			return Level.SEVERE;
+		}else if(lvl.equals("WARNING")){
+			return Level.WARNING;
+		}else{	// Default Level INFO
+			return Level.INFO;
+		}
+	}
 }

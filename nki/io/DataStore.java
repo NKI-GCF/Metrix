@@ -24,16 +24,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 
 public class DataStore {
-	static final String WRITE_OBJECT_SQL = "INSERT INTO metrix_objects(run_id, object_value, state) VALUES (?, ?, ?)";
-	static final String UPDATE_OBJECT_SQL_ID = "UPDATE metrix_objects SET object_value = ?, state = ? WHERE id = ?";
-	static final String UPDATE_OBJECT_SQL_RUNNAME = "UPDATE metrix_objects SET object_value = ?, state = ? WHERE run_id = ?";
-	static final String READ_OBJECT_SQL_ID = "SELECT object_value FROM metrix_objects WHERE id = ?";
-	static final String READ_OBJECT_SQL_RUNNAME = "SELECT object_value FROM metrix_objects WHERE run_id = ?";
-	static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_objects WHERE state = ?";
-	static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_objects;";
+	static final String WRITE_OBJECT_SQL = "INSERT INTO metrix_int(run_id, object_value, state) VALUES (?, ?, ?)";
+	static final String UPDATE_OBJECT_SQL_ID = "UPDATE metrix_int SET object_value = ?, state = ? WHERE id = ?";
+	static final String UPDATE_OBJECT_SQL_RUNNAME = "UPDATE metrix_int SET object_value = ?, state = ? WHERE run_id = ?";
+	static final String READ_OBJECT_SQL_ID = "SELECT object_value FROM metrix_int WHERE id = ?";
+	static final String READ_OBJECT_SQL_RUNNAME = "SELECT object_value FROM metrix_int WHERE run_id = ?";
+	static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_int WHERE state = ?";
+	static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_int;";
 
-	private HashMap<String, Summary> results;
-	private boolean emptyCheck = false;
 	private static LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	private static Properties configFile = new Properties();
@@ -49,12 +47,14 @@ public class DataStore {
 		try{
 			conn = getConnection();
 		}catch(Exception ex){
+			metrixLogger.log.severe("Error setting up database connection. " + ex.toString());
 			ex.printStackTrace();
 			System.exit(0);
 		}
 	}
 
 	public static Connection getConnection() throws Exception{
+		// Load configuration settings for database connection enabling respective default values if no value set.
 		// host
 		String host = configFile.getProperty("SQL_HOST", "localhost");
 
@@ -65,13 +65,28 @@ public class DataStore {
 		String user = configFile.getProperty("SQL_USER", "root");
 
 		// pass
-		String pass = configFile.getProperty("SQL_PASS", "test");
+		String pass = configFile.getProperty("SQL_PASS", "root");
 
-		// db
+		// database name
 		String db = configFile.getProperty("SQL_DB", "metrix"); 
 
-		String driver = "com.mysql.jdbc.Driver";
-		String url = "jdbc:mysql://"+ host +":"+port+"/"+db+"?autoReconnect=true&characterEncoding=UTF-8&useUnicode=true";
+		// database server type
+		String db_type = configFile.getProperty("DB_SERVER_TYPE", "MYSQL");
+
+		String driver;
+		String url;
+
+			// Server type is Microsoft SQL Server
+		if(db_type.equals("MSSQL")){
+			driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+			url = "jdbc:sqlserver://"+ host +":"+port+";DatabaseName="+db+";user="+user+";Password="+pass;
+		}else{	// Server type is Mysql (default)
+			driver = "com.mysql.jdbc.Driver";
+			url = "jdbc:mysql://"+ host +":"+port+"/"+db+"?autoReconnect=true&characterEncoding=UTF-8&useUnicode=true";
+		}
+
+		metrixLogger.log.finest("Connecting to database using driver: " + driver + ". Using url: " + url);
+
 		Class.forName(driver);
 		Connection conn = DriverManager.getConnection(url, user, pass);
 		return conn;
@@ -241,5 +256,4 @@ public class DataStore {
 			metrixLogger.log.severe( "Error closing SQL Connection! " + ex.toString());
 		}
 	}	
-
 }

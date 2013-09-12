@@ -43,7 +43,7 @@ public class MetrixThread extends Thread {
 		
 		try{
 			String clientSocketDetails = sChannel.socket().getRemoteSocketAddress().toString();
-			metrixLogger.log.info( "[SERVER] Client connection accepted at: " + clientSocketDetails);
+		//	metrixLogger.log.info( "[SERVER] Client connection accepted at: " + clientSocketDetails);
 
 			// Create OutputStream for sending objects.
 			ObjectOutputStream  oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
@@ -75,6 +75,7 @@ public class MetrixThread extends Thread {
 							}
 	
 							if(mode.equals(Constants.COM_MODE_CALL)){	// Single call
+								metrixLogger.log.info("[SERVER] Received command ["+sChannel.socket().getInetAddress().getHostAddress()+"]: " + commandClient.getCommand() + " run(s) with state: "+ commandClient.getState() + " ("+ commandClient.getRetType() +") in format " + commandClient.getFormat());
 								cp = new CommandProcessor(commandClient, oos, ds);			
 							}
 		
