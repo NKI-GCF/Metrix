@@ -1,0 +1,19 @@
+-- ----------------------------------------------
+-- Metrix Server
+-- Netherlands Cancer Institute
+-- Bernd van der Veen - 2013
+-- For license details please see LICENSE.TXT
+-- SQL Script for Metrix Server object table 
+-- Database Type: Microsoft SQL Server
+-- Please change the database name if necessary.
+-- ----------------------------------------------
+
+use metrix;
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[metrix_objects]') AND type in (N'U'))
+DROP TABLE [dbo].[metrix_objects]
+CREATE TABLE metrix_objects (
+  id int NOT NULL IDENTITY(1,1) PRIMARY KEY CLUSTERED,
+  run_id varchar(512) DEFAULT NULL,
+  object_value varbinary(max),
+  state int DEFAULT NULL
+);

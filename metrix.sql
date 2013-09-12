@@ -1,8 +1,12 @@
--- Illumina Metrix Server 
+-- ----------------------------------------------
+-- Metrix Server
 -- Netherlands Cancer Institute
 -- Bernd van der Veen - 2013
 -- For license details please see LICENSE.TXT
--- SQL Script for Metrix Server object table --
+-- SQL Script for Metrix Server object table
+-- Database Language Type: MySQL
+-- Please change the database name if necessary.
+-- ----------------------------------------------
 
 DROP DATABASE IF EXISTS `metrix`;
 CREATE DATABASE `metrix`;
@@ -11,8 +15,8 @@ DROP TABLE IF EXISTS `metrix_objects`;
 CREATE TABLE `metrix`.`metrix_objects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `run_id` varchar(512) DEFAULT NULL,
-  `object_value` mediumblob,
-  `state` enum('1','2','3','4','5') DEFAULT NULL,
+  `object_value` longblob,
+  `state` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=UTF8;
 

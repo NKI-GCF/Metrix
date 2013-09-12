@@ -58,6 +58,7 @@ public class LoggerWrapper{
 		    log.setLevel(getLevel(configFile.getProperty("LOG_LEVEL", "INFO")));
 		}catch(IOException Ex){
 			System.out.println("[ERROR] Could not create logfile. " + Ex.toString());
+			System.exit(1);
 		}
 	}
 
