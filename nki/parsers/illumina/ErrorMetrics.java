@@ -17,9 +17,13 @@ import java.util.HashMap;
 import java.util.Collections;
 import nki.objects.ErrorCollection;
 import nki.objects.ErrorMap;
+import nki.util.LoggerWrapper;
 
 public class ErrorMetrics extends GenericIlluminaParser{
 	private ErrorCollection eScores;
+
+	// Instantiate Logger	
+	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public ErrorMetrics(String source, int state){
 		super(ErrorMetrics.class, source, state);
@@ -49,7 +53,7 @@ public class ErrorMetrics extends GenericIlluminaParser{
 			eScores.setVersion(leis.readByte());
 			eScores.setRecordLength(leis.readByte());		
 		}catch(IOException Ex){
-			System.out.println("Error in parsing version number and recordLength: " + Ex.toString());
+			metrixLogger.log.severe("Error in parsing version number and recordLength: " + Ex.toString());
 		}
 
 		try{
@@ -97,7 +101,7 @@ public class ErrorMetrics extends GenericIlluminaParser{
 		}catch(EOFException EOFEx){
 			// Reached end of file
 		}catch(IOException Ex){
-			System.out.println("IO Error");
+			metrixLogger.log.severe("IO Error in parsing the Error Metrics file.");
 		}
 		return eScores;
 	}

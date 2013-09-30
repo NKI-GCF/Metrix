@@ -19,9 +19,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import nki.util.LoggerWrapper;
 
 public class ExtractionMetrics extends GenericIlluminaParser{
 	ArrayList<Integer> cycles = new ArrayList<Integer>();
+
+	// Instantiate Logger	
+	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public ExtractionMetrics(String source, int state){
 		super(ExtractionMetrics.class, source, state);
@@ -46,7 +50,7 @@ public class ExtractionMetrics extends GenericIlluminaParser{
 			setVersion(leis.readByte());	
 			setRecordLength(leis.readByte()); 
 		}catch(IOException Ex){
-			System.out.println("Error in parsing version number and recordlength: " + Ex.toString());
+			metrixLogger.log.severe("Error in parsing version number and recordlength: " + Ex.toString());
 		}
 
 		try{
@@ -68,7 +72,7 @@ public class ExtractionMetrics extends GenericIlluminaParser{
 				long dateTime = leis.readLong();
 			}
 		}catch(IOException ExMain){
-			System.out.println("Error in main parsing of metrics data: " + ExMain.toString());
+			metrixLogger.log.severe("Error in main parsing of metrics data: " + ExMain.toString());
 		}
 	}
 
@@ -83,7 +87,7 @@ public class ExtractionMetrics extends GenericIlluminaParser{
 				leis.skipBytes(36);			
 			}
 		}catch(IOException Ex){
-			System.out.println("IOException in Unique Cycles " + Ex.toString());
+			metrixLogger.log.severe("IOException in Unique Cycles " + Ex.toString());
 		}		
 		
 		List<Integer> newList = new ArrayList<Integer>(new HashSet<Integer>(cycles));

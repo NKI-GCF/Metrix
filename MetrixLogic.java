@@ -22,7 +22,6 @@ import nki.io.DataStore;
 import nki.constants.Constants;
 import nki.objects.Summary;
 import nki.objects.QualityScores;
-import java.util.logging.*;
 import nki.parsers.xml.XmlDriver;
 import java.util.regex.*;
 
@@ -57,6 +56,7 @@ public class MetrixLogic {
 		String qualityMetrics = "";
 		String path = runDir.toString();
 
+
 		if(!path.matches("(.*)InterOp(.*)")){
                 extractionMetrics = path + "/InterOp/" + Constants.EXTRACTION_METRICS;
                 tileMetrics = path + "/InterOp/" + Constants.TILE_METRICS;
@@ -85,10 +85,11 @@ public class MetrixLogic {
 		if(state == Constants.STATE_INIT){
 			summary.setState(Constants.STATE_INIT);
 			summary.setLastUpdated();
+			XmlDriver xmd = null;
 			try{
 				
 				if(!summary.getXmlInfo()){
-					XmlDriver xmd = new XmlDriver(path , summary);
+					xmd = new XmlDriver(path , summary);
 					if(xmd.parseRunInfo()){
 						summary = xmd.getSummary();
 					}else{
@@ -101,6 +102,8 @@ public class MetrixLogic {
 				metrixLogger.log.severe( "IOException Error. " + Ex.toString());
 			}catch(ParserConfigurationException PXE){
 				metrixLogger.log.severe( "Parser Configuration Exception. " + PXE.toString());
+			}finally{
+				xmd.closeAll();
 			}
 
 			results.put(path, summary);
@@ -116,15 +119,26 @@ public class MetrixLogic {
 		QualityMetrics qm = new QualityMetrics(qualityMetrics, state);
 
 		if(em.getFileMissing() || tm.getFileMissing() || qm.getFileMissing()){ // Extraction or TileMetrics file missing. Parse again later.
-			summary.incParseError();
+		//	summary.incParseError();
 		}
 	
-		// If more than 15 parsing errors have been made and the current cycle of run is over 26; fail the run.
-		if(summary.getParseError() >= 20 && summary.getCurrentCycle() > 26){
-			summary.setState(Constants.STATE_HANG);
-			saveEntry(path);
-			metrixLogger.log.info( "Run has failed to complete within the allotted time frame.");
-			return false;
+		// Fail conditions:
+		// 	- More than 20 parsing attempts have been made which resulted in errors.
+		// 	- The current cycle of run is over 20
+		// 	- All involved InterOp files (EM, TM, QM) have not been updated for over 24 hours (86400000ms)
+		// 	- Run is not awaiting turning.
+		if(summary.getParseError() >= 20 && summary.getCurrentCycle() > 20){
+			if( (em.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT) &&
+				(tm.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT) &&
+				(qm.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT)
+			){
+				if(!summary.getPairedTurnCheck()){		// Check if this is not a run waiting for turning.
+					summary.setState(Constants.STATE_HANG);
+					saveEntry(path);
+					metrixLogger.log.info( "Run " + summary.getRunId() + " has failed to complete within the allotted time frame.");
+					return false;
+				}
+			}
 		}
 
         try{
@@ -149,7 +163,7 @@ public class MetrixLogic {
 			}
 
 			// If run == paired end. Check for FC turn at (numReads read 1 + index 1). Set state accordingly.
-			if(summary.getRunType() == "Paired End" && currentCycle == summary.getTurnCycle() && summary.getState() != Constants.STATE_HANG){
+			if(summary.getPairedTurnCheck()){
 				// State has not been set yet and user has not yet been notified for the turning of the flowcell.
 				if(!summary.getHasNotifyTurned()){
 					summary.setState(Constants.STATE_TURN);
@@ -190,12 +204,14 @@ public class MetrixLogic {
 	private void checkSummary(String path){
 		// Check if run path is present in the database already. If so, retrieve; else instantiate new summary object;
 		try{
-			if(DataStore.checkSummaryByRunId(path)){
-				summary = DataStore.getSummaryByRunName(path);
+			DataStore _ds = new DataStore();
+			if(_ds.checkSummaryByRunId(path)){
+				summary = _ds.getSummaryByRunName(path);
 			}else{ 	
 				// Summary isnt present in database
 				summary = new Summary();
 			}
+			_ds.closeAll();
 		}catch(Exception SEx){	// SQL Exception - Generic catch
 			metrixLogger.log.severe( "Error checking for summary by runId in database. " + SEx.toString());
 		}
@@ -211,29 +227,31 @@ public class MetrixLogic {
 		}catch(IOException IE){
 			metrixLogger.log.severe( "Error setting up database connection.");
 		}
-		metrixLogger.log.info( "Run " + path +" has finished.");
+		metrixLogger.log.info( "Run " + summary.getRunId() +" has finished.");
 		saveEntry(path);	
 	}
 
 	public void saveEntry(String path){
 		int lastId = 0;
         try{
-        	if(!DataStore.checkSummaryByRunId(path)){
+			DataStore _ds = new DataStore();
+        	if(!_ds.checkSummaryByRunId(path)){
 				try{
 					lastId = DataStore.getMaxId();
 					summary.setSumId(lastId+1);
-					DataStore.appendedWrite(summary, path);
+					_ds.appendedWrite(summary, path);
 				}catch(Exception Ex){
 					metrixLogger.log.severe( "Exception in write statement lastID = " + lastId+ " Error: " + Ex.toString());
 				}
 			}else{
 				// Run has been parsed before. Update instead of insert
 				try{
-					DataStore.updateSummaryByRunName(summary, path);
+					_ds.updateSummaryByRunName(summary, path);
 				}catch(Exception SEx){
 					metrixLogger.log.severe( "Exception in update statement " + SEx.toString());
 				}
 			}
+			_ds.closeAll();
 		}catch(Exception Ex){
 			metrixLogger.log.severe( "Run ID Checking error." + Ex.toString());
 		}
@@ -249,21 +267,18 @@ public class MetrixLogic {
 		}else{
 			return false;
 		}
-
 	}
 
 	public boolean checkPaired(String path, DataStore ds){
 		this.checkSummary(path);
 		boolean check = false;
 
-		int cCycle = summary.getCurrentCycle();	
-		 if(summary.getRunType() == "Paired End" && cCycle == summary.getTurnCycle() && summary.getState() != Constants.STATE_HANG){
+		 if(summary.getPairedTurnCheck()){
 			// State has not been set yet and user has not yet been notified for the turning of the flowcell.
-			if(!summary.getHasNotifyTurned()){
+				int cCycle = summary.getCurrentCycle();			
 				summary.setState(Constants.STATE_TURN);
-				metrixLogger.log.info( "Flowcell of run: " + path + " has to be turned. Current cycle: " + cCycle);
+				metrixLogger.log.info( "Flowcell of run: " + summary.getRunId() + " has to be turned. Current cycle: " + cCycle);
 				summary.setHasNotifyTurned(true);
-			}
 			check = true;
 		 }
 		return check;
@@ -287,7 +302,7 @@ public class MetrixLogic {
 			long difference = (System.currentTimeMillis() - files[files.length-1].lastModified());
 
             if(difference > 86400000 && (summary.getState() == Constants.STATE_RUNNING)){ // If no updates for 24 hours. (86400000 milliseconds)
-				metrixLogger.log.info( "Run has timed out. No data received for over 24 hours. Halting watch.");
+				metrixLogger.log.info( "Run ("+summary.getRunId()+") has timed out. No data received for over 24 hours. Halting watch.");
 				state = Constants.STATE_HANG;
 				return true;
 			}

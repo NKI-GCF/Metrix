@@ -186,7 +186,7 @@ public class Command implements Serializable{
 		return runId;
 	}
 
-	private boolean checkState(int st){
+	public boolean checkState(int st){
 
 		for (int i = 0; i < STATES.length; i++) {
 		    if (STATES[i] == st) {

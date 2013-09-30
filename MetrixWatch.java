@@ -25,7 +25,7 @@ public class MetrixWatch extends Thread{
 	private String runDirString;
 	private String illuDirRegex = "\\d*_.*_\\d*_\\d*.*";
 	private Pattern p = Pattern.compile(illuDirRegex);
-	private long waitTime =  1800000;	// Update every 5 minutes.		       (ms)
+	private long waitTime =  600000;	// Update every 10 minutes.		       (ms)
 	private long forceTime = 1200000;	// If no update for 20 minutes, force parsing. (ms)
 	private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
@@ -60,7 +60,7 @@ public class MetrixWatch extends Thread{
                         File folder = new File(runDirString);
 			if(folder.isDirectory()){
 				try{
-					metrixLogger.log.info("Registering Illumina Run Directory.");
+					metrixLogger.log.info("Registering Illumina Run Directory ("+ runDirString +")");
 					register(Paths.get(runDirString), false);
 				 }catch(IOException Ex){
                     metrixLogger.log.severe( "IOException traversing watch directory. "+ Ex.toString());
@@ -98,7 +98,6 @@ public class MetrixWatch extends Thread{
              return false;
         }
 
-//                file = fileArg.getAbsolutePath();
         try{
         	file = fileArg.getCanonicalPath();
 		}catch(IOException Ex){
@@ -132,7 +131,7 @@ public class MetrixWatch extends Thread{
 			
 			long difference = (System.currentTimeMillis() - files[files.length-1].lastModified());
 
-            if(difference > 18000000){ // If no updates for 5 hours. (18000000 milliseconds)
+            if(difference > Constants.ACTIVE_TIMEOUT){ // If no updates for 24 hours. (86400000 milliseconds)
 				metrixLogger.log.info( "[CHECK] Illumina Run stopped. Parsing available data for: " + file);
 				if(!ml.checkPaired(file, dataStore)){	// Check if run is paired and at turn cycle.
 					// Call MetrixLogic for parsing
@@ -326,7 +325,6 @@ public class MetrixWatch extends Thread{
 			
 			Path watchDir = keys.get(watchPairs.getKey());
 
-
 			// Because the initial run directory watched is present in the waitMap as well,
 			// We need to skip this forced scan.
 			if(watchDir.toString().equals(runDirString)){
@@ -342,15 +340,17 @@ public class MetrixWatch extends Thread{
 			String nonInterOp = watchDir.toString().replace("/InterOp","");
 
 			try{
+				DataStore _ds = new DataStore();
 				metrixLogger.log.info( "Backlog parsing " + nonInterOp);
-				sum = (Summary) dataStore.getSummaryByRunName(nonInterOp);
+				sum = (Summary) _ds.getSummaryByRunName(nonInterOp);
+				_ds.closeAll();
 			}catch(Exception Ex){
 				metrixLogger.log.severe( "Error in retrieving summary for forced check. " + Ex.toString());
 			}
 
 			if(sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG){
 				waitMap.remove(watchPairs.getKey());			// if watchkey is present, remove it from waitMap
-				keys.remove(watchPairs.getKey());			// Remove watchkeys from watch
+				keys.remove(watchPairs.getKey());			// Remove watchkeys from Watcher Service
 			}
 
 			if((currentTime - mapTime) > forceTime){
@@ -358,6 +358,8 @@ public class MetrixWatch extends Thread{
 					waitMap.put((WatchKey) watchPairs.getKey(), System.currentTimeMillis());
 					metrixLogger.log.info( "Forcefully parsed " + nonInterOp);
 				}
+			}else{
+				metrixLogger.log.info("No update needed yet for " + nonInterOp);
 			}
 		}
 	}

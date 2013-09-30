@@ -131,13 +131,15 @@ public class CommandProcessor {
 
 			if(recCom.getType().equals(Constants.COM_TYPE_SIMPLE) || recCom.getType().equals(Constants.COM_TYPE_DETAIL)){
 
+				// Check is state is set and required.
 				int state = -1;
-				try{
-						state = recCom.getState();
-				}catch(Exception Ex){
+				if(recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE) && !recCom.checkState(recCom.getState())){
 					throw new MissingCommandDetailException("Summary State of received command is missing.");
+				}else{
+					state = recCom.getState();
 				}
-				// Retrieve set and return object.
+			
+				// Setup new SummaryCollection and fill using command parameters (RunID or State)
 				SummaryCollection sc = new SummaryCollection();
 
 				if(recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)){
@@ -212,7 +214,6 @@ public class CommandProcessor {
 						boolean timeCheck = (currEpoch - sum.getLastUpdatedEpoch()) > Constants.METRIC_UPDATE_TIME;
 				
 						// Process Extraction Metrics
-
 						Reads rds = sum.getReads();
 
 						// Process Cluster Density and phasing / prephasing

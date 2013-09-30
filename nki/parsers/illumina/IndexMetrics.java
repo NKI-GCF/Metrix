@@ -20,8 +20,12 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import nki.objects.Indices;
+import nki.util.LoggerWrapper;
 
 public class IndexMetrics extends GenericIlluminaParser {
+	// Instantiate Logger	
+	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+
 	public IndexMetrics(String source, int state){
 		super(IndexMetrics.class, source, state);
 	}
@@ -52,7 +56,7 @@ public class IndexMetrics extends GenericIlluminaParser {
 		try{
 			setVersion(leis.readByte());		// Set Version
 		}catch(IOException Ex){
-			System.out.println("Error in parsing version number and recordlength: " + Ex.toString());
+			metrixLogger.log.severe("Error in parsing version number and recordlength: " + Ex.toString());
 		}
 		
 		boolean readBool = true;

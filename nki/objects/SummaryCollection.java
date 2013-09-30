@@ -16,6 +16,7 @@ import java.util.ListIterator;
 import nki.objects.Summary;
 import nki.objects.MutableInt;
 import nki.constants.Constants;
+import nki.util.LoggerWrapper;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
@@ -26,6 +27,9 @@ import javax.xml.transform.stream.*;
 public class SummaryCollection implements Serializable {
 	// Object Specific
 	private static final long serialVersionUID = 42L;
+
+	// Instantiate Logger	
+	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	// Object Collection
 	private ArrayList<Summary> summaryCollection = new ArrayList<Summary>();
@@ -222,9 +226,9 @@ public class SummaryCollection implements Serializable {
 			DOMSource source = new DOMSource(xmlDoc);
 			trans.transform(source, result);
 		}catch(TransformerConfigurationException TCE){
-			System.out.println("TransformerConfigurationException: " + TCE.toString());
+			metrixLogger.log.severe("TransformerConfigurationException: " + TCE.toString());
 		}catch(TransformerException TE){
-			System.out.println("TransformerException: " + TE.toString());
+			metrixLogger.log.severe("TransformerException: " + TE.toString());
 		}
 
 		return writer.toString();

@@ -12,6 +12,7 @@ import nki.util.LoggerWrapper;
 import java.io.IOException;
 import java.io.EOFException;
 import java.io.FileInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class GenericIlluminaParser {
 	protected int recordLength = 0;
     protected int sleepTime = 3000;
 	protected boolean fileMissing = false;	
+	private long lastModTime = 0;
 	private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public GenericIlluminaParser(Class<?> c, String source, int state){
@@ -34,7 +36,9 @@ public class GenericIlluminaParser {
 			if(state == 1){
 				Thread.sleep(sleepTime);
 			}
-			leis = new LittleEndianInputStream(new FileInputStream(source));	
+			leis = new LittleEndianInputStream(new FileInputStream(source));
+			// Check for last modified date
+			setLastModifiedSource();
 		}catch(IOException IO){
 			// Set fileMissing = true. --> Parse again later. 
 			setFileMissing(true);
@@ -74,5 +78,20 @@ public class GenericIlluminaParser {
 
 	public boolean getFileMissing(){
 		return fileMissing;
+	}
+
+	public void setLastModifiedSource(){
+		File lastModFile = new File(source);
+		if(lastModFile.exists()){
+			this.lastModTime = lastModFile.lastModified();
+		}
+	}
+
+	public long getLastModifiedSourceDiff(){
+		return (System.currentTimeMillis() - this.lastModTime);
+	}
+
+	public long getLastModifiedSource(){
+		return this.lastModTime;
 	}
 }

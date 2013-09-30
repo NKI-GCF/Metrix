@@ -20,10 +20,14 @@ import java.util.Collections;
 import nki.objects.IntensityScores;
 import nki.objects.IntensityMap;
 import nki.constants.Constants;
+import nki.util.LoggerWrapper;
 
 public class CorrectedIntensityMetrics extends GenericIlluminaParser{
 	private IntensityScores iScores;
 
+	// Instantiate Logger	
+	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	
 	public CorrectedIntensityMetrics(String source, int state){
 		super(CorrectedIntensityMetrics.class, source, state);
 	}
@@ -57,7 +61,7 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser{
 			iScores.setRecordLength(leis.readByte());
 			iScores.setSource(this.getSource());
 		}catch(IOException Ex){
-			System.out.println("Error in parsing version number and recordLength: " + Ex.toString());
+			metrixLogger.log.severe("Error in parsing version number and recordLength: " + Ex.toString());
 		}
 
 		try{
@@ -134,7 +138,7 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser{
 			// Reached end of file
 			// Lazy EOF - Ignore checking.
 		}catch(IOException Ex){
-			System.out.println("IO Error - CorrectedIntensityMetrics digest");
+			metrixLogger.log.severe("IO Error - CorrectedIntensityMetrics digest");
 		}
 	
 		// Return the qualityScores object.

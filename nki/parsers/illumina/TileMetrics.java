@@ -23,10 +23,14 @@ import nki.objects.ClusterDensity;
 import nki.objects.PhasingCollection;
 import nki.objects.Phasing;
 import nki.objects.Reads;
+import nki.util.LoggerWrapper;
 
 public class TileMetrics extends GenericIlluminaParser {
 	private final static int 		CLUSTER_DENSITY 	= 100;
 	private final static int 		CLUSTER_DENSITY_PF 	= 101;
+
+	// Instantiate Logger	
+	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	// Lane --> ClusterDensities
 	private ClusterDensity cdMap = new ClusterDensity();
@@ -100,7 +104,7 @@ public class TileMetrics extends GenericIlluminaParser {
 			setVersion(leis.readByte());
 			setRecordLength(leis.readByte());
 		}catch(IOException Ex){
-			System.out.println("Error in parsing version number and recordLength: " + Ex.toString());
+			metrixLogger.log.severe("Error in parsing version number and recordLength: " + Ex.toString());
 		}
 
 		boolean eofCheck = true;

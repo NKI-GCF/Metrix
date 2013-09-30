@@ -21,6 +21,9 @@ public class XmlDriver {
 
 	private Summary summary;
 	private String directory;
+	private DocumentBuilderFactory documentBuilderFactory;
+	private DocumentBuilder documentBuilder;
+	private Document doc;
 
 	public XmlDriver (String dir, Summary sum){
 		this.directory = dir;
@@ -32,12 +35,12 @@ public class XmlDriver {
 				if(!xmlFile.isFile()){
 					return false;
 				}
-                DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-                Document doc = documentBuilder.parse(xmlFile);
+                documentBuilderFactory = DocumentBuilderFactory.newInstance();
+                documentBuilder = documentBuilderFactory.newDocumentBuilder();
+                doc = documentBuilder.parse(xmlFile);
                 doc.getDocumentElement().normalize();
 
-		setSummary(RunInfoHandler.parseAll(doc, summary));
+				setSummary(RunInfoHandler.parseAll(doc, summary));
                 return summary.getXmlInfo();
 	}
 
@@ -47,5 +50,11 @@ public class XmlDriver {
 
 	public Summary getSummary(){
 		return summary;
+	}
+
+	public void closeAll(){
+		this.documentBuilderFactory = null;
+		this.documentBuilder = null;
+		this.doc = null;
 	}
 }

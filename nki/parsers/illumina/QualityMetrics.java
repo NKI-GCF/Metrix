@@ -19,9 +19,13 @@ import java.util.Collections;
 import nki.objects.QualityScores;
 import nki.objects.QualityMap;
 import nki.objects.Reads;
+import nki.util.LoggerWrapper;
 
 public class QualityMetrics extends GenericIlluminaParser{
 	QualityScores qScores;
+
+	// Instantiate Logger	
+	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public QualityMetrics(String source, int state){
 		super(QualityMetrics.class, source, state);
@@ -45,7 +49,7 @@ public class QualityMetrics extends GenericIlluminaParser{
 			setVersion(leis.readByte());
 			setRecordLength(leis.readByte());
 		}catch(IOException Ex){
-			System.out.println("Error in parsing version number and recordLength: " + Ex.toString());
+			metrixLogger.log.severe("Error in parsing version number and recordLength: " + Ex.toString());
 		}
 
 		try{
@@ -95,7 +99,7 @@ public class QualityMetrics extends GenericIlluminaParser{
 		}catch(EOFException EOFEx){
 			// Reached end of file
 		}catch(IOException Ex){
-			System.out.println("IO Error");
+			metrixLogger.log.severe("IO Error in parsing Quality Metrics");
 		}
 
 		// Return the qualityScores object.

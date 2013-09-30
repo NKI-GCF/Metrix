@@ -43,7 +43,6 @@ public class MetrixThread extends Thread {
 		
 		try{
 			String clientSocketDetails = sChannel.socket().getRemoteSocketAddress().toString();
-		//	metrixLogger.log.info( "[SERVER] Client connection accepted at: " + clientSocketDetails);
 
 			// Create OutputStream for sending objects.
 			ObjectOutputStream  oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
@@ -81,9 +80,9 @@ public class MetrixThread extends Thread {
 		
 						// Server Exceptions and important logging.
 						}catch(CommandValidityException CVE){
-							System.out.println("Command Validity Exception! " + CVE);
+							metrixLogger.log.warning("Command Validity Exception! " + CVE);
 						}catch(InvalidCredentialsException ICE){
-							System.out.println("Invalid Credentials Exception! " + ICE);
+							metrixLogger.log.warning("Invalid Credentials Exception! " + ICE);
 						}finally{
 							// Close all channels and client streams.
 							ds = null;

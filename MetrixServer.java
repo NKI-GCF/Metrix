@@ -40,10 +40,10 @@ public class MetrixServer{
 		    configFile.load(fin);
 			fin.close();
 		}catch(FileNotFoundException FNFE){
-			System.out.println("[ERROR] Properties file not found.");
+			metrixLogger.log.severe("[ERROR] Properties file not found.");
 			System.exit(1);	
 		}catch(IOException Ex){
-			System.out.println("[ERROR] Reading properties file. " + Ex.toString());
+			metrixLogger.log.severe("[ERROR] Reading properties file. " + Ex.toString());
 			System.exit(1);
  		}
 

@@ -23,6 +23,7 @@ import nki.objects.QScoreDist;
 import nki.objects.IntensityScores;
 import nki.objects.IntensityDist;
 import nki.objects.Indices;
+import nki.constants.Constants;
 
 public class Summary implements Serializable {
 
@@ -39,7 +40,7 @@ public class Summary implements Serializable {
 	private String		lastUpdated 	= "0";		// Last update time
 	private long		lastUpdatedEpoch = 0;
 	private String		phase; 				// Phase of run :: Imaging / Basecalling / RTAComplete
-	private String		runType;			// Run Type: Single / Paired / Nextera
+	private String		runType		= "Single End";			// Run Type: Single / Paired End / Nextera
 	private int			indexLength;			// Length of index read
 	private int         tileCount;				// Number of Tiles
 	private int 		state		= 5;		// State 0: Hanging / State 1: Running / State 2: Complete / State 3: Unknown / State 4: Flowcell needs turning
@@ -449,6 +450,22 @@ public class Summary implements Serializable {
 	
 	public int getParseError(){
 		return this.parseError;
+	}
+
+	public boolean getPairedTurnCheck(){
+		if(this.getRunType().equals("Paired End")){
+			if(this.getState() != Constants.STATE_HANG){
+				if(this.getCurrentCycle() == this.getTurnCycle()){
+					return true;
+				}else{
+					return false;
+				}
+			}else{
+				return false;
+			}
+		}else{	// Nextera is excluded
+			return false;
+		}
 	}
 }
 

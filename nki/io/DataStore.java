@@ -44,6 +44,7 @@ public class DataStore {
 	        InputStream fin = new FileInputStream(new File(absFile));
         	configFile.load(fin);
 	
+			fin.close();
 		try{
 			conn = getConnection();
 		}catch(Exception ex){
@@ -80,9 +81,11 @@ public class DataStore {
 		if(db_type.equals("MSSQL")){
 			driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 			url = "jdbc:sqlserver://"+ host +":"+port+";DatabaseName="+db+";user="+user+";Password="+pass;
+			metrixLogger.log.finest("Connecting to database (MSSQL) with url: " + url + "\tDriver: " + driver);
 		}else{	// Server type is Mysql (default)
 			driver = "com.mysql.jdbc.Driver";
 			url = "jdbc:mysql://"+ host +":"+port+"/"+db+"?autoReconnect=true&characterEncoding=UTF-8&useUnicode=true";
+			metrixLogger.log.finest("Connecting to database (MYSQL) with url: " + url + "\tDriver: " + driver);
 		}
 
 		metrixLogger.log.finest("Connecting to database using driver: " + driver + ". Using url: " + url);
