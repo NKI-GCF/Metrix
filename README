@@ -11,6 +11,10 @@ This program comes with ABSOLUTELY NO WARRANTY;
 This is free software, and you are welcome to redistribute it
 under certain conditions; for more information please see LICENSE.txt
 
+-------------------
+-- Run as Daemon --
+-------------------
+
 How to get started:
 
 1) Modify the metrix.properties file to reflect your setup
@@ -32,6 +36,9 @@ How to get started:
 8) Documentation on how to adapt the client side will follow in the future. If you've familiarized yourself with java and this source, 
 feel free to contribute code and / or answers.
 
+----------------
+-- Standalone --
+----------------
 
 How to use the standalone Metrix application:
 
