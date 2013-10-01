@@ -212,6 +212,9 @@ public class MetrixLogic {
 				summary = new Summary();
 			}
 			_ds.closeAll();
+			if(_ds != null){
+				_ds = null;
+			}
 		}catch(Exception SEx){	// SQL Exception - Generic catch
 			metrixLogger.log.severe( "Error checking for summary by runId in database. " + SEx.toString());
 		}
@@ -224,8 +227,11 @@ public class MetrixLogic {
 			DataStore tmpDS = new DataStore();
 			processMetrics(Paths.get(path), -1, tmpDS);
 			tmpDS.closeAll();
+			if(tmpDS != null){
+				tmpDS = null;
+			}
 		}catch(IOException IE){
-			metrixLogger.log.severe( "Error setting up database connection.");
+			metrixLogger.log.severe( "Error setting up database connection. " + IE.toString());
 		}
 		metrixLogger.log.info( "Run " + summary.getRunId() +" has finished.");
 		saveEntry(path);	
@@ -252,6 +258,9 @@ public class MetrixLogic {
 				}
 			}
 			_ds.closeAll();
+			if(_ds != null){
+				_ds = null;
+			}	
 		}catch(Exception Ex){
 			metrixLogger.log.severe( "Run ID Checking error." + Ex.toString());
 		}

@@ -24,13 +24,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 
 public class DataStore {
-	static final String WRITE_OBJECT_SQL = "INSERT INTO metrix_int(run_id, object_value, state) VALUES (?, ?, ?)";
-	static final String UPDATE_OBJECT_SQL_ID = "UPDATE metrix_int SET object_value = ?, state = ? WHERE id = ?";
-	static final String UPDATE_OBJECT_SQL_RUNNAME = "UPDATE metrix_int SET object_value = ?, state = ? WHERE run_id = ?";
-	static final String READ_OBJECT_SQL_ID = "SELECT object_value FROM metrix_int WHERE id = ?";
-	static final String READ_OBJECT_SQL_RUNNAME = "SELECT object_value FROM metrix_int WHERE run_id = ?";
-	static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_int WHERE state = ?";
-	static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_int;";
+	static final String WRITE_OBJECT_SQL = "INSERT INTO metrix_objects(run_id, object_value, state) VALUES (?, ?, ?)";
+	static final String UPDATE_OBJECT_SQL_ID = "UPDATE metrix_objects SET object_value = ?, state = ? WHERE id = ?";
+	static final String UPDATE_OBJECT_SQL_RUNNAME = "UPDATE metrix_objects SET object_value = ?, state = ? WHERE run_id = ?";
+	static final String READ_OBJECT_SQL_ID = "SELECT object_value FROM metrix_objects WHERE id = ?";
+	static final String READ_OBJECT_SQL_RUNNAME = "SELECT object_value FROM metrix_objects WHERE run_id = ?";
+	static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_objects WHERE state = ?";
+	static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_objects;";
 
 	private static LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
@@ -114,9 +114,16 @@ public class DataStore {
 		if (rs.next()){
 			id = rs.getInt(1);
 		}
-
-		rs.close();
-		pstmt.close();
+		try{
+			if(rs != null){
+				rs.close();
+			}
+			if(pstmt != null){
+				pstmt.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
 		return id;
 	}
 
@@ -127,8 +134,17 @@ public class DataStore {
 		rs.next();
 		Summary sum = (Summary) rs.getObject(1);
 		String className = sum.getClass().getName();
-		rs.close();
-		pstmt.close();
+
+		try{
+			if(rs != null){
+				rs.close();
+			}
+			if(pstmt != null){
+				pstmt.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
 
 		return sum;		
 	}
@@ -150,8 +166,16 @@ public class DataStore {
 			sum = (Summary) sumObject;
 		}
 		
-		rs.close();
-		pstmt.close();
+		try{
+			if(rs != null){
+				rs.close();
+			}
+			if(pstmt != null){
+				pstmt.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
 
 		return sum;
 	}
@@ -173,8 +197,17 @@ public class DataStore {
 			Summary sum = (Summary) sumObject;
 			sc.appendSummary(sum);
 		}
-		rs.close();
-		pstmt.close();
+		
+		try{
+			if(rs != null){
+				rs.close();
+			}
+			if(pstmt != null){
+				pstmt.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
 
 		return sc;
 	}
@@ -195,8 +228,17 @@ public class DataStore {
 			Summary sum = (Summary) sumObject;
 			sc.appendSummary(sum);
 		}
-		rs.close();
-		pstmt.close();
+
+		try{
+			if(rs != null){
+				rs.close();
+			}
+			if(pstmt != null){
+				pstmt.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
 
 		return sc;
 	}
@@ -209,7 +251,15 @@ public class DataStore {
 		pstmt.setString(3, runName);
 		
 		pstmt.executeUpdate();
-		pstmt.close();
+
+		try{
+			if(pstmt != null){
+				pstmt.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
+
 	}
 	
 	public static void updateSummaryById(Summary sum, int id) throws Exception {
@@ -219,7 +269,14 @@ public class DataStore {
 		pstmt.setInt(2, id);
 
 		pstmt.executeUpdate();
-		pstmt.close();
+	
+		try{
+			if(pstmt != null){
+				pstmt.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
 	}
 
 	public static int getMaxId() throws Exception{
@@ -230,7 +287,18 @@ public class DataStore {
 		while ( rs2.next() ){
 			maxID = rs2.getInt(1);
 		}
-		
+	
+		try{
+			if(s2 != null){
+				s2.close();
+			}
+			if(rs2 != null){
+				rs2.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
+
 		return maxID;
 	}
 
@@ -247,8 +315,17 @@ public class DataStore {
 			ret = false;
 		}
 	
-		rs.close();
-		pstmt.close();
+		try{
+			if(rs != null){
+				rs.close();
+			}
+			if(pstmt != null){
+				pstmt.close();
+			}
+		}catch(Exception E){
+			metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+		}
+		
 		return ret;
 	}
 
