@@ -17,7 +17,7 @@ under certain conditions; for more information please see LICENSE.txt
 
 How to get started:
 
-1) Modify the metrix.properties file to reflect your setup
+1) Modify the metrix.properties file to reflect your setup (set: DAEMON=TRUE)
 2) Insert the table metrix.sql into your database
 3) If needed, make the desired modifications to the source code.
 4) Compile the java files using:
@@ -49,10 +49,11 @@ How to use the standalone Metrix application:
 
 3) Run Metrix.java using:
 
-	/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java Metrix **Insert search term here**
+	/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java Metrix **Argu,emt search term here**
 
 The searchterm will be the string that is used to search in the directory names.
 This can be a run identifier, flowcell ID or any character string (minimum length is 3)
+If no searchterm is has been provided, the user will be prompted in the console.
 
 ----------------
 -- Optionally --
