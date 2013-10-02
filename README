@@ -49,7 +49,7 @@ How to use the standalone Metrix application:
 
 3) Run Metrix.java using:
 
-	/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java Metrix **Argu,emt search term here**
+	/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java Metrix **Argument search term here**
 
 The searchterm will be the string that is used to search in the directory names.
 This can be a run identifier, flowcell ID or any character string (minimum length is 3)
