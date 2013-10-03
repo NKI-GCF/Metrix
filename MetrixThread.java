@@ -31,7 +31,7 @@ public class MetrixThread extends Thread {
 	private boolean timedBool = false;	
 
 	// Server logging of client connections and interactions.
-	 LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	 private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 
 	public MetrixThread(SocketChannel sChannel){

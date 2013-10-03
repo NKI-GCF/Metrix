@@ -23,7 +23,7 @@ public class ErrorMetrics extends GenericIlluminaParser{
 	private ErrorCollection eScores;
 
 	// Instantiate Logger	
-	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public ErrorMetrics(String source, int state){
 		super(ErrorMetrics.class, source, state);

@@ -32,7 +32,7 @@ public class DataStore {
 	static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_objects WHERE state = ?";
 	static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_objects;";
 
-	private static LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	private static Properties configFile = new Properties();
  	public static Connection conn = null;

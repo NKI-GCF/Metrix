@@ -29,7 +29,7 @@ public class SummaryCollection implements Serializable {
 	private static final long serialVersionUID = 42L;
 
 	// Instantiate Logger	
-	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	// Object Collection
 	private ArrayList<Summary> summaryCollection = new ArrayList<Summary>();
@@ -143,24 +143,35 @@ public class SummaryCollection implements Serializable {
 				xml = dist.toXML(xml,xmlDoc);
 			}
 
-			sumXml = sumObj.getSampleInfo().toXML(sumXml, xmlDoc);
+			if(sumObj.hasSampleInfo()){
+				sumXml = sumObj.getSampleInfo().toXML(sumXml, xmlDoc);
+			}
 
-/*			// Cluster Density
-			sumXml = sumObj.getClusterDensity().toXML(sumXml, xmlDoc);
+			// Cluster Density
+			if(sumObj.hasClusterDensity()){
+				sumXml = sumObj.getClusterDensity().toXML(sumXml, xmlDoc);
+			}
 
 			// Cluster Density Passing Filter
-			sumXml = sumObj.getClusterDensityPF().toXML(sumXml, xmlDoc);
-			//sumXml.appendChild(xml);
+			if(sumObj.hasClusterDensityPF()){
+				sumXml = sumObj.getClusterDensityPF().toXML(sumXml, xmlDoc);
+			}
 
 			// Intensities
-			sumXml = sumObj.getIntensityDistAvg().toXML(sumXml, xmlDoc);
+			if(sumObj.hasIntensityDistCCAvg()){
+				sumXml = sumObj.getIntensityDistCCAvg().toXML(sumXml, xmlDoc);
+			}
 			
 			// Prephasing
-			sumXml = sumObj.getPrephasingMap().toXML(sumXml, xmlDoc);
+			if(sumObj.hasPrephasing()){
+				sumXml = sumObj.getPrephasingMap().toXML(sumXml, xmlDoc);
+			}
 
 			// Phasing
-			sumXml = sumObj.getPhasingMap().toXML(sumXml, xmlDoc);
-	*/
+			if(sumObj.hasPhasing()){
+				sumXml = sumObj.getPhasingMap().toXML(sumXml, xmlDoc);
+			}
+	
 		}else{
 			
 			sumXml = xmlDoc.createElement("ParseError");

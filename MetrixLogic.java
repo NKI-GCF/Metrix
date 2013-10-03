@@ -29,7 +29,7 @@ import java.util.regex.*;
 public class MetrixLogic {
 
 	// Instantiate Logger	
-	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	// Call inits
     private HashMap<String, Summary> results = new HashMap<String, Summary>();
@@ -71,7 +71,7 @@ public class MetrixLogic {
 		this.checkSummary(path);
 
 		// Check if run has finished uncaught.
-		if(finishBool){
+		if(finishBool && this.state != Constants.STATE_FINISHED){
 			this.checkFinished(path);
 		}
 
@@ -83,8 +83,10 @@ public class MetrixLogic {
 
 		// Save entry for init phase of run.
 		if(state == Constants.STATE_INIT){
+			// Set basic run info
 			summary.setState(Constants.STATE_INIT);
 			summary.setLastUpdated();
+			summary.setRunDirectory(path);
 			XmlDriver xmd = null;
 			try{
 				
@@ -225,6 +227,7 @@ public class MetrixLogic {
 		summary.setState(Constants.STATE_FINISHED);	// Set state to STATE_FINISED (2): Complete
 		try{
 			DataStore tmpDS = new DataStore();
+			metrixLogger.log.info("path  " + path + "\tState: " + summary.getState());
 			processMetrics(Paths.get(path), -1, tmpDS);
 			tmpDS.closeAll();
 			if(tmpDS != null){
@@ -232,6 +235,7 @@ public class MetrixLogic {
 			}
 		}catch(IOException IE){
 			metrixLogger.log.severe( "Error setting up database connection. " + IE.toString());
+			metrixLogger.log.severe( "Error stacktrace: " + IE );
 		}
 		metrixLogger.log.info( "Run " + summary.getRunId() +" has finished.");
 		saveEntry(path);	

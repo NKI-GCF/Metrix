@@ -25,7 +25,7 @@ public class QualityMetrics extends GenericIlluminaParser{
 	QualityScores qScores;
 
 	// Instantiate Logger	
-	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public QualityMetrics(String source, int state){
 		super(QualityMetrics.class, source, state);

@@ -24,7 +24,7 @@ import nki.util.LoggerWrapper;
 
 public class IndexMetrics extends GenericIlluminaParser {
 	// Instantiate Logger	
-	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public IndexMetrics(String source, int state){
 		super(IndexMetrics.class, source, state);

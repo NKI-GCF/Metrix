@@ -30,7 +30,7 @@ public class TileMetrics extends GenericIlluminaParser {
 	private final static int 		CLUSTER_DENSITY_PF 	= 101;
 
 	// Instantiate Logger	
-	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	// Lane --> ClusterDensities
 	private ClusterDensity cdMap = new ClusterDensity();

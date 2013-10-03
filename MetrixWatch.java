@@ -27,7 +27,7 @@ public class MetrixWatch extends Thread{
 	private Pattern p = Pattern.compile(illuDirRegex);
 	private long waitTime =  600000;	// Update every 10 minutes.		       (ms)
 	private long forceTime = 1200000;	// If no update for 20 minutes, force parsing. (ms)
-	private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	private HashMap<String, Summary> results = new HashMap<String, Summary>();
 	private MetrixLogic ml = new MetrixLogic();
@@ -112,7 +112,7 @@ public class MetrixWatch extends Thread{
 
 			if(fileComplete.isFile()){      // Run has finished
             	metrixLogger.log.info( "[CHECK] Illumina Run finished. Parsing available data for: " + file);
-            	ml.processMetrics(Paths.get(file), 2, dataStore); // Parse available info with complete state
+            	ml.processMetrics(Paths.get(file), Constants.STATE_FINISHED, dataStore); // Parse available info with complete state
                 return false;               // Run has completed.
             }
 
@@ -135,7 +135,7 @@ public class MetrixWatch extends Thread{
 				metrixLogger.log.info( "[CHECK] Illumina Run stopped. Parsing available data for: " + file);
 				if(!ml.checkPaired(file, dataStore)){	// Check if run is paired and at turn cycle.
 					// Call MetrixLogic for parsing
-					ml.processMetrics(Paths.get(file), 3, dataStore); 
+					ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore); 
   				 }else{
 				 	try{
 						 register(Paths.get(file), false);
@@ -173,7 +173,7 @@ public class MetrixWatch extends Thread{
 	            if (prev == null) {
 					metrixLogger.log.info( "Registered new watch directory: " +dir);
 					if(newRun){
-						ml.processMetrics(dir, 5, dataStore);
+						ml.processMetrics(dir, Constants.STATE_INIT, dataStore);
 					}
 	            } else {
 	                if (!dir.equals(prev)) {
@@ -236,17 +236,19 @@ public class MetrixWatch extends Thread{
 
 			// Once RTAComplete has been created, set run to finish.	
 			if(kind == ENTRY_CREATE){
-				if((child+"").matches("^.+?RTAComplete.txt$")){
-					ml.finishRun(child.getParent()+"");
-					// Remove keys from watch hash.
-					keys.remove(watchKey);
-					waitMap.remove(watchKey);
+				if((child.toString()).matches("^.+?RTAComplete.txt$")){
+					if(ml.checkFinished(child.getParent().toString())){
+						//ml.finishRun(child.getParent()+"");
+						// Remove keys from watch hash.
+						keys.remove(watchKey);
+						waitMap.remove(watchKey);
+					}
 				}
 			}
 
 			// If a new run gets started, register for monitoring. Wait for 5 seconds whilst files are being created.
 			if(kind == ENTRY_CREATE){
-				File send = new File(child+"");
+				File send = new File(child.toString());
 				try{
 					Thread.sleep(30000);
 				}catch(InterruptedException IEX){
@@ -266,7 +268,7 @@ public class MetrixWatch extends Thread{
 				if((child+"").matches("^.+?Out\\.bin")){
 					Path procFold = (child.getParent()).getParent();
 								// Parse summary object
-					if(ml.processMetrics(procFold, 1, dataStore)){
+					if(ml.processMetrics(procFold, Constants.STATE_RUNNING, dataStore)){
 						// Successfuly processed, continue watching.
 						metrixLogger.log.info( "Parsed " + procFold  + " successfully. ");
 					}

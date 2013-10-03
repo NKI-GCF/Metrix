@@ -68,7 +68,7 @@ This has to be achieved via a perl run script (please replace the (directory) pa
 use warnings;
 use strict;
 
-system("/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java -classpath [Full path to the Metrix directory here] Metrix @ARGV");
+system("/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java -Dproperties=metrix.properties -classpath [Full path to the Metrix directory here] Metrix @ARGV");
 
 -------
 

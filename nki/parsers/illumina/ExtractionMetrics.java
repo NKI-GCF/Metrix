@@ -25,7 +25,7 @@ public class ExtractionMetrics extends GenericIlluminaParser{
 	ArrayList<Integer> cycles = new ArrayList<Integer>();
 
 	// Instantiate Logger	
-	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public ExtractionMetrics(String source, int state){
 		super(ExtractionMetrics.class, source, state);

@@ -347,11 +347,13 @@ public class Metrix {
 			System.out.println("Currently not available.");
 		}
 
-		System.out.println("== Run Progress ==");
+		System.out.println("== Run Progress of "+ sum.getRunId() + "("+ sum.getRunType() + " - " + sum.getTotalCycles() + "bp)==");
 		if(sum.getCurrentCycle() == sum.getTotalCycles()){
 			System.out.println("Run has finished: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
-		}else if(sum.getCurrentCycle() == rds.getPairedTurnCycle()){
-			System.out.println("Run needs turning. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
+		}else if(sum.getRunType().equals("Paired End")){
+			if(sum.getCurrentCycle() == rds.getPairedTurnCycle()){
+				System.out.println("Run needs turning. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
+			}	
 		}else{
 			System.out.println("Run has not finished yet. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
 		}

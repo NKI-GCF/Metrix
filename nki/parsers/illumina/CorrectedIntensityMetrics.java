@@ -26,7 +26,7 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser{
 	private IntensityScores iScores;
 
 	// Instantiate Logger	
-	LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 	
 	public CorrectedIntensityMetrics(String source, int state){
 		super(CorrectedIntensityMetrics.class, source, state);

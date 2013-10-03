@@ -43,7 +43,7 @@ public class CommandProcessor {
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
 	private DataStore ds;
-	private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public CommandProcessor(
 				Command command, 

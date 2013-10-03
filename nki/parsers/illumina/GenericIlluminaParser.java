@@ -28,7 +28,7 @@ public class GenericIlluminaParser {
     protected int sleepTime = 3000;
 	protected boolean fileMissing = false;	
 	private long lastModTime = 0;
-	private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public GenericIlluminaParser(Class<?> c, String source, int state){
 		try{
