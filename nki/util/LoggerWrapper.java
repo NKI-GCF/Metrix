@@ -10,7 +10,6 @@ package nki.util;
 import java.io.*;
 import java.util.logging.*;
 import java.util.Properties;
-import nki.util.SingleLineFormatter;
 
 public class LoggerWrapper{
 	public static final Logger log = Logger.getLogger(LoggerWrapper.class.getName());  
