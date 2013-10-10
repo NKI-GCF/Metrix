@@ -54,6 +54,7 @@ public class Summary implements Serializable {
 	private int 		surfaceCount;			// Number of surface sides
 	private	int			swathCount;			// Number of swaths
 	private int			machineRunNumber;		// Nth number run on this machine
+	private String		machineType = "";		// Type of machine: HiSeq / MiSeq
 	private Reads		reads;				// Read information
 	private boolean		hasTurned	= false;
 	private boolean		hasNotifyTurned	= false;
@@ -123,8 +124,10 @@ public class Summary implements Serializable {
 	public void setSide(String s){
 		if(s.equals("A")){
 			this.side = "A";	
-		}else{
+		}else if(s.equals("B")){
 			this.side = "B";
+		}else{
+			this.side = "";
 		}
 	}
 
@@ -191,6 +194,14 @@ public class Summary implements Serializable {
 	
 	public int getMachineRunNumber(){
 		return machineRunNumber;
+	}
+
+	public void setMachineType(String machineType){
+		this.machineType = machineType;
+	}
+
+	public String getMachineType(){
+		return machineType;
 	}
 
 	public void setLaneCount(String numLanes){

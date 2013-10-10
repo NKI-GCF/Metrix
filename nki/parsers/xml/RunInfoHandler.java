@@ -22,6 +22,18 @@ public class RunInfoHandler {
 		String runID = runNode.getAttributes().getNamedItem("Id").getTextContent();
 		sum.setRunId(runID);
 
+		String[] spl = runID.split("_");
+		if((spl[3].substring(0,1)).equals("A")){
+			sum.setSide("A");
+			sum.setMachineType("HiSeq");
+		}else if((spl[3].substring(0,1)).equals("B")){
+			sum.setSide("B");
+			sum.setMachineType("HiSeq");
+		}else{	// Machine type is MiSeq - No Side
+			sum.setSide("");
+			sum.setMachineType("MiSeq");
+		}
+
 		String runMachineNr = runNode.getAttributes().getNamedItem("Number").getTextContent();
 		sum.setMachineRunNumber(runMachineNr);
 
