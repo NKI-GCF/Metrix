@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Metrix : A Server / Client parser for Illumina InterOp sequencer run metrics." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Metrix</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/NKI-GCF/Metrix">View on GitHub</a>
+
+          <h1 id="project_title">Metrix</h1>
+          <h2 id="project_tagline">A Server / Client parser for Illumina InterOp sequencer run metrics.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/NKI-GCF/Metrix/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/NKI-GCF/Metrix/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Metrix - A server / client interface for Illumina Sequencing Metrics.
+Metrics are collected by parsing the binary InterOp sequencer statistics.</p>
+
+<p>Currently supports Illumina's HiSeq 2000 and MiSeq formats. 
+Tested on HiSeq 2000 and MiSeq.</p>
+
+<p>Copyright (C) 2013 Bernd van der Veen
+Email: b.vd.veen[at]nki.nl</p>
+
+<p>This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions; for more information please see LICENSE.txt</p>
+
+<h3>
+<a name="run-as-daemon" class="anchor" href="#run-as-daemon"><span class="octicon octicon-link"></span></a>Run as Daemon</h3>
+
+<p>How to get started:</p>
+
+<p>1) Modify the metrix.properties file to reflect your setup (set: DAEMON=TRUE)</p>
+
+<p>2) Insert the table metrix.sql into your database</p>
+
+<p>3) If needed, make the desired modifications to the source code.</p>
+
+<p>4) Compile the java files using:</p>
+
+<pre><code>/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/javac *.java
+</code></pre>
+
+<p>5) Run Metrix with mysql connector library included in classpath:</p>
+
+<pre><code>/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java -cp lib/mysql-connector-java-5.1.6.jar:. -Dproperties=metrix.properties MetrixDaemon
+</code></pre>
+
+<p>6) If all correct, the server and watcher service has started and all run folders will be parsed and inserted in the SQL database.</p>
+
+<p>7) Only the clientside has not been fully implemented. Please modify this source file to reflect your needs. </p>
+
+<p>8) Run MetrixClient with the java binary. Support for multi format object returns, Summary / SummaryCollection POJO or a XML string.</p>
+
+<p>9) Documentation on how to adapt the client side will follow in the future. If you've familiarized yourself with java and this source, 
+feel free to contribute code and / or answers.</p>
+
+<h3>
+<a name="standalone" class="anchor" href="#standalone"><span class="octicon octicon-link"></span></a>Standalone</h3>
+
+<p>How to use the standalone Metrix application:</p>
+
+<p>1) Modify file metrix.properties to reflect the correct directory containing the illumina run directories.</p>
+
+<p>2) Compile the java files using: </p>
+
+<pre><code>/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/javac *.java
+</code></pre>
+
+<p>3) Run Metrix.java using:</p>
+
+<pre><code>/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java Metrix **Argument search term here**
+</code></pre>
+
+<p>The searchterm will be the string that is used to search in the directory names.
+This can be a run identifier, flowcell ID or any character string (minimum length is 3)
+If no searchterm is has been provided, the user will be prompted in the console.</p>
+
+<h4>
+<a name="optionally" class="anchor" href="#optionally"><span class="octicon octicon-link"></span></a>Optionally</h4>
+
+<p>4) On unix systems you can make this available on the command line anywhere on your server via /usr/local/bin)
+This has to be achieved via a perl run script (please replace the (directory) paths below):</p>
+
+<pre><code>#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+system("/[PATH_TO_JAVA_7.0_OR_HIGHER]/bin/java -Dproperties=metrix.properties -classpath [Full path to the Metrix directory here] Metrix @ARGV");
+
+</code></pre>
+
+<p>5) Symlink this perl script in /usr/local/bin with the desired name.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Metrix maintained by <a href="https://github.com/NKI-GCF">NKI-GCF</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
