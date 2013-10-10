@@ -205,20 +205,27 @@ public class MetrixLogic {
 
 	private void checkSummary(String path){
 		// Check if run path is present in the database already. If so, retrieve; else instantiate new summary object;
-		try{
-			DataStore _ds = new DataStore();
-			if(_ds.checkSummaryByRunId(path)){
-				summary = _ds.getSummaryByRunName(path);
-			}else{ 	
-				// Summary isnt present in database
-				summary = new Summary();
+		boolean scrape = false;
+		if(summary == null){
+			scrape = true;
+		}
+
+		if(scrape || !summary.getRunDirectory().equals(path)){
+			try{
+				DataStore _ds = new DataStore();
+				if(_ds.checkSummaryByRunId(path)){
+					summary = _ds.getSummaryByRunName(path);
+				}else{ 	
+					// Summary isnt present in database
+					summary = new Summary();
+				}
+				_ds.closeAll();
+				if(_ds != null){
+					_ds = null;
+				}
+			}catch(Exception SEx){	// SQL Exception - Generic catch
+				metrixLogger.log.severe( "Error checking for summary by runId in database. " + SEx.toString());
 			}
-			_ds.closeAll();
-			if(_ds != null){
-				_ds = null;
-			}
-		}catch(Exception SEx){	// SQL Exception - Generic catch
-			metrixLogger.log.severe( "Error checking for summary by runId in database. " + SEx.toString());
 		}
 	}
 
