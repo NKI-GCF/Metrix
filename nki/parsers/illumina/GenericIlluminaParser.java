@@ -94,4 +94,15 @@ public class GenericIlluminaParser {
 	public long getLastModifiedSource(){
 		return this.lastModTime;
 	}
+
+	public void closeSourceStream(){
+
+		if(leis != null){
+			try{
+				this.leis.close();
+			}catch(IOException Ex){
+				metrixLogger.log.warning("Error in closing the source stream: " + Ex.toString());
+			}
+		}
+	}
 }

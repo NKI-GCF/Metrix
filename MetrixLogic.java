@@ -32,7 +32,6 @@ public class MetrixLogic {
 	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	// Call inits
-    private HashMap<String, Summary> results = new HashMap<String, Summary>();
 	private Summary summary = null;
 	private int state;
 
@@ -89,7 +88,6 @@ public class MetrixLogic {
 			summary.setRunDirectory(path);
 			XmlDriver xmd = null;
 			try{
-				
 				if(!summary.getXmlInfo()){
 					xmd = new XmlDriver(path , summary);
 					if(xmd.parseRunInfo()){
@@ -108,7 +106,6 @@ public class MetrixLogic {
 				xmd.closeAll();
 			}
 
-			results.put(path, summary);
 			saveEntry(path);
 			return false;
 		}
@@ -185,7 +182,6 @@ public class MetrixLogic {
 				summary.setState(state);
 			}
 		
-			results.put(path, summary);
 			saveEntry(path);	// Store summary entry in SQL database
 	
 			metrixLogger.log.info( "Finished processing: " + runDir.getFileName());
@@ -198,6 +194,10 @@ public class MetrixLogic {
 			metrixLogger.log.severe( "IOException Error. " + Ex.toString());
 		}catch(ParserConfigurationException PXE){
 			metrixLogger.log.severe( "Parser Configuration Exception. " + PXE.toString());
+		}finally{
+			em.closeSourceStream();
+			qm.closeSourceStream();
+			tm.closeSourceStream();
 		}
 
 		return success;
@@ -234,12 +234,13 @@ public class MetrixLogic {
 		summary.setState(Constants.STATE_FINISHED);	// Set state to STATE_FINISED (2): Complete
 		try{
 			DataStore tmpDS = new DataStore();
-			metrixLogger.log.info("path  " + path + "\tState: " + summary.getState());
+			// Final processing run before finishing.
 			processMetrics(Paths.get(path), -1, tmpDS);
 			tmpDS.closeAll();
 			if(tmpDS != null){
 				tmpDS = null;
 			}
+			summary.setHasFinished(true); // Run has finished
 		}catch(IOException IE){
 			metrixLogger.log.severe( "Error setting up database connection. " + IE.toString());
 			metrixLogger.log.severe( "Error stacktrace: " + IE );

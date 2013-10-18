@@ -35,8 +35,7 @@ public class Summary implements Serializable {
 	private int 		currentCycle;			// Current cycle in run
 	private int 		totalCycles;			// Total amount of cycles 
 	private String		flowcellID;			// Flowcell ID
-	private String		instrument;			// Name of instrument
-	private String		side;				// Side of flowcell
+	private String		side = "";				// Side of flowcell
 	private String		lastUpdated 	= "0";		// Last update time
 	private long		lastUpdatedEpoch = 0;
 	private String		phase; 				// Phase of run :: Imaging / Basecalling / RTAComplete
@@ -53,10 +52,13 @@ public class Summary implements Serializable {
 	private int			laneCount;			// Number of lanes
 	private int 		surfaceCount;			// Number of surface sides
 	private	int			swathCount;			// Number of swaths
-	private int			machineRunNumber;		// Nth number run on this machine
-	private String		machineType = "";		// Type of machine: HiSeq / MiSeq
+	private int			instrumentRunNumber;		// Nth number run on this instrument
+	private String		instrument;			// Name of instrument
+	private String		instrumentType = "";		// Type of instrument: HiSeq / MiSeq
+	private String		runNameOptional = "";
 	private Reads		reads;				// Read information
 	private boolean		hasTurned	= false;
+	private boolean		hasFinished	= false;	// Has the run finished?
 	private boolean		hasNotifyTurned	= false;
 	private String		runDirectory = "";		// RunDirectory path
 	private int			parseError	=	0;	// Number of parsing errors
@@ -75,8 +77,6 @@ public class Summary implements Serializable {
 	private IntensityDist iDistCCAvg;
 
 	private Indices sampleInfo;
-
-//	private	HashMap<Object, ErrorRate>		errorRate;
 	private int 		firstCycleIntensity;
 
 	public void setSumId(int id){
@@ -188,20 +188,20 @@ public class Summary implements Serializable {
 		return date;
 	}
 
-	public void setMachineRunNumber(String runnr){
-		this.machineRunNumber = Integer.parseInt(runnr);
+	public void setInstrumentRunNumber(String runnr){
+		this.instrumentRunNumber = Integer.parseInt(runnr);
 	}
 	
-	public int getMachineRunNumber(){
-		return machineRunNumber;
+	public int getInstrumentRunNumber(){
+		return instrumentRunNumber;
 	}
 
-	public void setMachineType(String machineType){
-		this.machineType = machineType;
+	public void setInstrumentType(String instrumentType){
+		this.instrumentType = instrumentType;
 	}
 
-	public String getMachineType(){
-		return machineType;
+	public String getInstrumentType(){
+		return instrumentType;
 	}
 
 	public void setLaneCount(String numLanes){
@@ -324,6 +324,14 @@ public class Summary implements Serializable {
 
 	public String getRunId(){
 		return runId;
+	}
+
+	public void setRunNameOptional(String opt){
+		this.runNameOptional = opt;
+	}
+
+	public String getRunNameOptional(){
+		return runNameOptional;
 	}
 
 	public int getTurnCycle(){
@@ -461,6 +469,14 @@ public class Summary implements Serializable {
 	
 	public int getParseError(){
 		return this.parseError;
+	}
+
+	public void setHasFinished(boolean hf){
+		this.hasFinished = hf;
+	}
+
+	public boolean getHasFinished(){
+		return this.hasFinished;
 	}
 
 	public boolean getPairedTurnCheck(){

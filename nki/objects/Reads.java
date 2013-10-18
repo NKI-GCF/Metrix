@@ -1,4 +1,4 @@
-// Illumina Metrix - A server / client interface for Illumina Sequencing Metrics.
+// Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -14,12 +14,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class Reads implements Serializable{
 	
 	public static final long serialVersionUID = 42L;
 
-	private HashMap<Integer, ArrayList<String>> readMap = new HashMap<Integer, ArrayList<String>>();
+	private TreeMap<Integer, ArrayList<String>> readMap = new TreeMap<Integer, ArrayList<String>>();
 	private ArrayList<Integer> nonIndexList = new ArrayList<Integer>();
 	private int lastCycle = 1;
 	
@@ -80,5 +81,19 @@ public class Reads implements Serializable{
 		}else{
 			return false;
 		}
+	}
+
+	public String getDemultiplexIndex(){
+		String demuxIndex = "";
+		for(ArrayList<String> l : readMap.values()){
+			if(l.get(1).equals("N")){
+				demuxIndex += "y";	// Read is not an index
+			}else{
+				demuxIndex += "I"; // Read is an index
+			}
+			demuxIndex += l.get(0);
+		}
+
+		return demuxIndex;
 	}
 }

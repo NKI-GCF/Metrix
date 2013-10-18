@@ -235,6 +235,7 @@ public class CommandProcessor {
 								// Distribution present in ClusterDensity Object.
 								update = true;
 							}
+							tm.closeSourceStream();
 						}
 						
 						// Process QScore Dist
@@ -248,13 +249,14 @@ public class CommandProcessor {
 									sum.setQScoreDist(qScoreDist);
 									update = true;
 								}
+								qm.closeSourceStream();
 						}
 
 						// Process Corrected Intensities (+ Avg Cor Int Called Clusters)
 						if(!sum.hasIScores() || timeCheck){
-							CorrectedIntensityMetrics im = new CorrectedIntensityMetrics(intensityMetrics, 0);
-							if(!im.getFileMissing()){
-								IntensityScores isOut = im.digestData();
+							CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
+							if(!cim.getFileMissing()){
+								IntensityScores isOut = cim.digestData();
 
 								/* If you would like to store the intensity object, increase the max_allowed_packet with:
 								* SET GLOBAL max_allowed_packet = 1024 * 1024 * 50 to prevent a PacketTooBigException for the SQL Update.
@@ -267,6 +269,7 @@ public class CommandProcessor {
 								sum.setIntensityDistCCAvg(isOut.getAvgCorIntCCDist());
 								update = true;
 							}
+							cim.closeSourceStream();
 						}
 
 						// Process Index metrics
@@ -274,14 +277,22 @@ public class CommandProcessor {
 						IndexMetrics im = new IndexMetrics(indexMetrics, 0);
 						Indices indices = im.digestData();
 						sum.setSampleInfo(indices);
+
+						im.closeSourceStream();
 					
 						if(update == true){
 							try{
+								DataStore _ds = new DataStore();
 								sum.setLastUpdated();
-								DataStore.updateSummaryByRunName(sum, runDir);
+								_ds.updateSummaryByRunName(sum, runDir);
+								_ds.closeAll();
+								
+								if(_ds != null){
+									_ds = null;
+								}
                             }catch(Exception SEx){
 								metrixLogger.log.severe("Exception in update statement " + SEx.toString());
-                            }
+							}
 						}
 					}else{
 						// Throw error

@@ -25,17 +25,21 @@ public class RunInfoHandler {
 		String[] spl = runID.split("_");
 		if((spl[3].substring(0,1)).equals("A")){
 			sum.setSide("A");
-			sum.setMachineType("HiSeq");
+			sum.setInstrumentType("HiSeq");
 		}else if((spl[3].substring(0,1)).equals("B")){
 			sum.setSide("B");
-			sum.setMachineType("HiSeq");
-		}else{	// Machine type is MiSeq - No Side
+			sum.setInstrumentType("HiSeq");
+		}else{	// Instrument type is MiSeq - No Side
 			sum.setSide("");
-			sum.setMachineType("MiSeq");
+			sum.setInstrumentType("MiSeq");
 		}
 
-		String runMachineNr = runNode.getAttributes().getNamedItem("Number").getTextContent();
-		sum.setMachineRunNumber(runMachineNr);
+		if(spl.length>4){
+			sum.setRunNameOptional(spl[4]);
+		}
+		
+		String runInstrumentNr = runNode.getAttributes().getNamedItem("Number").getTextContent();
+		sum.setInstrumentRunNumber(runInstrumentNr);
 
 		// Flowcell
 		String flowCell = "XXXXXXXXXX";	// Default empty flowcell ID

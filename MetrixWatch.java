@@ -343,8 +343,8 @@ public class MetrixWatch extends Thread{
 
 			try{
 				DataStore _ds = new DataStore();
-				metrixLogger.log.info( "Backlog parsing " + nonInterOp);
 				sum = (Summary) _ds.getSummaryByRunName(nonInterOp);
+				metrixLogger.log.info( "Backlog parsing " + sum.getRunId());
 				_ds.closeAll();
 			}catch(Exception Ex){
 				metrixLogger.log.severe( "Error in retrieving summary for forced check. " + Ex.toString());
