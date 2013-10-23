@@ -45,9 +45,10 @@ public class LoggerWrapper{
 	   }  
    
 	private static void prepareLogger() {
+
+		Level propLvl = getLevel(configFile.getProperty("LOG_LEVEL", "INFO"));
 		try{
 			FileHandler myFileHandler = new FileHandler("metrixDaemon.log", true);  
-	//	    myFileHandler.setFormatter(new SingleLineFormatter());
 
 			Logger globalLogger = Logger.getLogger("global");
 			Handler[] handlers = globalLogger.getHandlers();
@@ -55,23 +56,20 @@ public class LoggerWrapper{
 				globalLogger.removeHandler(handler);
 			}
 
-	                myFileHandler.setFormatter(new SingleLineFormatter());
-
+	        myFileHandler.setFormatter(new SingleLineFormatter());
+			myFileHandler.setLevel(propLvl);
 	   		log.addHandler(myFileHandler);  
-//			log.addHandler(myConsoleHandler);
 			
-			if(asDaemon.equalsIgnoreCase("true")){
-//				log.setUseParentHandlers(false);
-			}else{
+			if(!asDaemon.equalsIgnoreCase("true")){
 //				log.setUseParentHandlers(true);
 				ConsoleHandler myConsoleHandler = new ConsoleHandler();
 				myConsoleHandler.setFormatter(new SingleLineFormatter());
-
+				myConsoleHandler.setLevel(propLvl);
 				log.addHandler(myConsoleHandler);
 			}
-                        log.setUseParentHandlers(false);
+            log.setUseParentHandlers(false);
 
-		    log.setLevel(getLevel(configFile.getProperty("LOG_LEVEL", "INFO")));
+		    log.setLevel(propLvl);
 		}catch(IOException Ex){
 			System.out.println("[ERROR] Could not create logfile. " + Ex.toString());
 			System.exit(1);

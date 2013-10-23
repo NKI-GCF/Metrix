@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
@@ -38,6 +39,12 @@ import nki.objects.Application;
 import nki.util.LoggerWrapper;
 import nki.util.PostProcessComparator;
 import nki.util.OperationComparator;
+import nki.util.FileOperations;
+import java.nio.file.*;
+import java.util.EnumSet;
+import java.nio.file.attribute.*;
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.*;
 
 public class PostProcessing {
 	
@@ -156,12 +163,12 @@ public class PostProcessing {
 	        Schema schema = factory.newSchema(new StreamSource(xsd));
 	        Validator validator = schema.newValidator();
 	        validator.validate(new StreamSource(xml));
-			metrixLogger.log.finer("[Metrix Post-Processor] Succes");
+			metrixLogger.log.finer("[Metrix Post-Processor] Successfully validated XML structure.");
     	}catch(IOException IO){
 			metrixLogger.log.warning("[Metrix Post-Processor] Failed to open required files. ("+IO.toString()+")");
 			isValid = false;
 		}catch(SAXException ex){  // Validation failed
-			metrixLogger.log.warning("[Metrix Post-Processor] Validation of XML failed. ("+ ex.toString() +" || " + ex.getLocalizedMessage() +")" );
+			metrixLogger.log.warning("[Metrix Post-Processor] XML validation failed. ("+ ex.toString() +" || " + ex.getLocalizedMessage() +")" );
 			isValid = false;
 	    }finally{
 			try{
@@ -244,16 +251,16 @@ public class PostProcessing {
 						}
 					}else{
 						isValid = false;
-						metrixLogger.log.severe("[Metrix Post Processor] Node Mismatch. This should not be possible");
+						metrixLogger.log.severe("[Metrix Post-Processor] Node Mismatch. This should not be possible");
 					}
 			}
-			metrixLogger.log.finest("[Metrix Post Processor] Sorting the process list...");
+			metrixLogger.log.finest("[Metrix Post-Processor] Sorting the process list...");
 			Collections.sort(blockList, new PostProcessComparator());
 			Collections.sort(processList, new OperationComparator<PostProcess>());
-			metrixLogger.log.finest("[Metrix Post Processor] Done sorting.");
+			metrixLogger.log.finest("[Metrix Post-Processor] Done sorting.");
 		}else{
 			isValid = false;
-			metrixLogger.log.severe("[Metrix Post Processor] Incompatible document structure. This should not be possible.");
+			metrixLogger.log.severe("[Metrix Post-Processor] Incompatible document structure. This should not be possible.");
 		}
 	}
 
@@ -293,7 +300,11 @@ public class PostProcessing {
 		for(PostProcess pp : processList){
 			if(pp instanceof FileOperation){
 				FileOperation fo = (FileOperation) pp;
-				executeFileOperation(fo);
+				if(fo.isValid()){
+					executeFileOperation(fo);
+				}else{
+					metrixLogger.log.warning("[Metrix Post-Processor] FileOperation " + fo.getTitle() + " not populated correctly. Source and/or destination are empty.");
+				}
 			}else if(pp instanceof Application){
 				Application app = (Application) pp;
 				executeApplication(app);
@@ -305,14 +316,215 @@ public class PostProcessing {
 	}
 
 	private int executeFileOperation(FileOperation fo){
-		metrixLogger.log.info("[Metrix Post Processor] Starting file operation: " + fo.getTitle());
+		metrixLogger.log.info("[Metrix Post-Processor] Starting file operation: " + fo.getTitle());
 		int exitStatus = -255;
+		
+		File sourceFile = new File(fo.getSource());
+		File destinationFile = new File(fo.getDestination());
+		
+		if(!sourceFile.exists()){
+			metrixLogger.log.warning("[Metrix Post-Processor] Source file: " + sourceFile + " does not exist.");
+			exitStatus = -1;
+			return exitStatus;
+		}
 
+		if(!sourceFile.canRead()){
+			metrixLogger.log.warning("[Metrix Post-Processor] Cannot read source file.");
+			exitStatus = -1;
+			return exitStatus;
+		}else{
+			metrixLogger.log.finest("[Metrix Post-Processor] Source file: " + sourceFile.toString() + " is readable.");
+		}
+
+		// If destination is file
+		// 	Check parent
+		//
+		// If destination is directory
+		// 
+		
+		// Destination is a file (assuming that all destination files will have an extension)
+
+		File targetDir;
+		if((destinationFile.toString()).lastIndexOf(".") > 0){
+			destinationFile.getParentFile().mkdirs();
+			targetDir = destinationFile.getParentFile();
+		}else{
+			targetDir = destinationFile;
+			destinationFile.mkdirs(); 
+		}
+
+		File sourceDir = null;
+		if((sourceFile.toString()).lastIndexOf(".") == -1){
+			sourceDir = sourceFile;
+		}
+
+		if(targetDir.canWrite()){
+			metrixLogger.log.info("[Metrix Post-Processor] Destination path is writeable.");
+		}else{
+			metrixLogger.log.info("[Metrix Post-Processor] Destination path is not writeable. " + targetDir);
+			exitStatus = -1;
+			return exitStatus;
+		}
+
+		if(fo.needOverwrite() && destinationFile.isFile()){
+			metrixLogger.log.info("[Metrix Post-Processor] Destination already exists. Overwriting.");
+		}else if(!fo.needOverwrite() && !destinationFile.exists()){
+			metrixLogger.log.info("[Metrix Post-Processor] Creating file during copy: " + sourceFile.getName());
+		}else if((sourceDir != null) && (fo.hasGlobbing())){
+			metrixLogger.log.info("[Metrix Post-Processor] Copying files with extension: " + fo.getGlobbing() + " from: " + sourceFile.getAbsoluteFile() + "to: " + destinationFile);		
+		}else if((sourceDir != null) && !(fo.hasGlobbing())){
+			metrixLogger.log.info("[Metrix Post-Processor] Copying directory: " + sourceFile + "\tto: " + destinationFile);			
+		}else{
+			metrixLogger.log.info("[Metrix Post-Processor] Destination already exists. Not overwriting.");
+			exitStatus = -1;
+			return exitStatus;
+		}
+
+		/*
+		*  Is process a copy operation?
+		*/
+		if(fo.isCopyOperation()){
+
+			// Is globbing used?
+			if(fo.hasGlobbing()){
+				metrixLogger.log.info("[Metrix Post-Processor] Using globbing pattern: " + fo.getGlobbing());
+				ArrayList<Path> foundFiles = findFilesGlobbing(Paths.get(fo.getSource()), fo.getGlobbing());
+				
+				// Execute the basic copy  operation for files that have been found with a pattern.
+				exitStatus = executeGlobbingCopy(fo, foundFiles);
+				return exitStatus;
+			}
+
+			try{
+				CopyOption[] options = new CopyOption[]{};
+				CopyOption[] replOpt = new CopyOption[]{
+					COPY_ATTRIBUTES, 
+					REPLACE_EXISTING,
+					java.nio.file.LinkOption.NOFOLLOW_LINKS
+				};
+
+				CopyOption[] stdOpt = new CopyOption[]{
+					COPY_ATTRIBUTES,
+					java.nio.file.LinkOption.NOFOLLOW_LINKS
+				};
+
+				// Overwrite in file operations?
+				options = !fo.needOverwrite() ? stdOpt : replOpt;
+	
+				// Is the source path a file?
+				if(sourceFile.isFile()){
+					Files.copy( 
+   		   	            sourceFile.toPath(), 
+						destinationFile.toPath(),
+						options
+				    );
+					metrixLogger.log.fine("Copying " + sourceFile + "to: " + destinationFile);
+				}else if(sourceFile.isDirectory()){ // Is the sourcepath a directory?
+					FileOperations fileops = 
+						new FileOperations(
+							sourceFile.toPath(),
+							destinationFile.toPath(),
+							options
+						);
+						
+						try{
+							fileops.recursiveCopy();
+						}catch(IOException IO){
+							metrixLogger.log.warning("[Metrix Post-Processor] IO Exception in recursive copy: " + IO.toString());
+						}
+		
+				}else{
+					metrixLogger.log.warning("[Metrix Post-Processor] Source file does not exist. ");
+					exitStatus = -1;
+					return exitStatus;
+				}
+			}catch(IOException Iex){
+				metrixLogger.log.warning("[Metrix Post-Processor] IOException during file copy: " + Iex.toString());
+			}
+
+			metrixLogger.log.finer("[Metrix Post-Processor] Successfully copied " + sourceFile + " to " + destinationFile);
+			exitStatus = 0;
+		}
+
+		/*
+		* Is process a symlink operation?
+		*/
+		if(fo.isSymlinkOperation()){
+			try {
+				Files.createSymbolicLink(sourceFile.toPath(), destinationFile.toPath());
+			}catch (IOException x) {
+				metrixLogger.log.warning("[Metrix Post-Processor] IOException while creating a symbolic link: " + x.toString());
+			} catch (UnsupportedOperationException x) {
+			    // Some file systems do not support symbolic links.
+				metrixLogger.log.warning("[Metrix Post-Processor] This OS does not support creating symbolic links: " + x.toString());
+			}
+		}
+
+		/*
+		* Process is another operation type
+		*/
+		// Not yet implemented.
+
+		hasFinished = true;
 		return exitStatus;
 	}
 
+	private ArrayList<Path> findFilesGlobbing(Path sourcePath, String pattern){
+		metrixLogger.log.fine("[Metrix Post-Processor] Finding files with globbing pattern: " + pattern + " in " + sourcePath);
+		FileOperations fileops = new FileOperations(sourcePath, pattern);
+	
+		try {
+			fileops.findFilesGlobbing();
+		}catch(IOException Ex){
+			metrixLogger.log.warning("[Metrix Post-Processor] IOException during globbing find operation. " +Ex.toString());
+		}
+
+		metrixLogger.log.info("[Metrix Post-Processor] Found " +  fileops.getResultsSize() + " files.");
+		return fileops.getResults();
+	}
+
+	private int executeGlobbingCopy(FileOperation fo, ArrayList<Path> fileList){
+		File destinationFile = new File(fo.getDestination());
+
+		CopyOption[] options = new CopyOption[]{};
+		CopyOption[] replOpt = new CopyOption[]{
+			COPY_ATTRIBUTES, 
+			REPLACE_EXISTING,
+			java.nio.file.LinkOption.NOFOLLOW_LINKS
+		};
+	
+		CopyOption[] stdOpt = new CopyOption[]{
+			COPY_ATTRIBUTES,
+			java.nio.file.LinkOption.NOFOLLOW_LINKS
+		};
+
+
+		if(!destinationFile.isDirectory()){
+			metrixLogger.log.fine("[Metrix Post-Processor] Destination path is not a directory.");
+			return -1;
+		}
+	
+		for(Path sourcePath : fileList){
+			options = !fo.needOverwrite() ? stdOpt : replOpt;
+			try{
+				Files.copy(
+					sourcePath,
+					(destinationFile.toPath()).resolve(sourcePath),
+					options
+				);
+			}catch(IOException Ex){
+				metrixLogger.log.warning("[Metrix Post-Processor] IOException in globbing file copy: " + Ex.toString());
+			}
+
+				
+			metrixLogger.log.finer("[Metrix Post-Processor] Copied: " + sourcePath + " to: " + destinationFile);
+		}
+
+		return 0; // All is good
+	}
+
 	private int executeApplication(Application app){
-		metrixLogger.log.info("[Metrix Post Processor] Starting script: " + app.getTitle());
+		metrixLogger.log.info("[Metrix Post-Processor] Starting script: " + app.getTitle());
 		// The script / application to execute
 	    final File scriptPath = new File(app.getScriptPath());
 
@@ -336,15 +548,15 @@ public class PostProcessing {
 			// Start the process and wait for it to finish. 
 			exitStatus = p.waitFor();
 		}catch(IOException IO){
-			metrixLogger.log.severe("[Metrix Post Processor] IOException while executing process (" + app.getId() + "): " + IO.toString());
+			metrixLogger.log.severe("[Metrix Post-Processor] IOException while executing process (" + app.getId() + "): " + IO.toString());
 		}catch(InterruptedException IE){
-			metrixLogger.log.severe("[Metrix Post Processor] InterruptedException for process ( " + app.getId() + "): " + IE.toString());
+			metrixLogger.log.severe("[Metrix Post-Processor] InterruptedException for process ( " + app.getId() + "): " + IE.toString());
 		}
 		
 		if(exitStatus == 0){
-			metrixLogger.log.info("[Metrix Post Processor] Application block ("+app.getOrder()+" :: "+app.getSubOrder()+" :: "+app.getId()+") has finished successfully.  ");
+			metrixLogger.log.info("[Metrix Post-Processor] Application block ("+app.getOrder()+" :: "+app.getSubOrder()+" :: "+app.getId()+") has finished successfully.  ");
 		}else{
-			metrixLogger.log.warning("[Metrix Post Processor] Application block '"+ app.getId() +"' has exited with errors.");
+			metrixLogger.log.warning("[Metrix Post-Processor] Application block '"+ app.getId() +"' has exited with errors.");
 		}
 
 		return exitStatus;

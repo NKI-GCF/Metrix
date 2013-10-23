@@ -1,0 +1,80 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified">
+  <xs:element name="Metrix">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded" minOccurs="0">
+        <xs:element name="FileOperation">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Copy" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="Source"/>
+                    <xs:element type="xs:string" name="Destination"/>
+                    <xs:element type="xs:string" name="Globbing"/>
+					<xs:element name="Overwrite">
+			            <xs:simpleType>
+            			    <xs:restriction base="xs:NMTOKEN">
+			                    <xs:enumeration value="Y"/>
+            			        <xs:enumeration value="N"/>
+			                </xs:restriction>
+            			</xs:simpleType>
+			        </xs:element>	
+                  </xs:sequence>
+                  <xs:attribute type="xs:positiveInteger" name="execOrder" use="required"/>
+                  <xs:attribute type="xs:string" name="id" use="required"/>
+                  <xs:attribute type="xs:string" name="title" use="required"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Symlink" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="Source"/>
+                    <xs:element type="xs:string" name="Destination"/>
+                    <xs:element type="xs:string" name="Globbing"/>
+					<xs:element name="Overwrite">
+			            <xs:simpleType>
+            			    <xs:restriction base="xs:NMTOKEN">
+			                    <xs:enumeration value="Y"/>
+            			        <xs:enumeration value="N"/>
+			                </xs:restriction>
+            			</xs:simpleType>
+			        </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:positiveInteger" name="execOrder" use="required"/>
+                  <xs:attribute type="xs:string" name="id" use="required"/>
+                  <xs:attribute type="xs:string" name="title" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:positiveInteger" name="execOrder"/>
+            <xs:attribute type="xs:string" name="id"/>
+            <xs:attribute type="xs:string" name="title"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Application">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Script" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="ScriptPath"/>
+                    <xs:element type="xs:string" name="Arguments"/>
+                    <xs:element type="xs:string" name="OutputPath"/>
+					<xs:element type="xs:string" name="WorkingDirectory" />
+                  </xs:sequence>
+                  <xs:attribute type="xs:positiveInteger" name="execOrder" use="required"/>
+                  <xs:attribute type="xs:string" name="id" use="required"/>
+                  <xs:attribute type="xs:string" name="title" use="required"/>
+                </xs:complexType>
+              </xs:element>
+             </xs:sequence>
+            <xs:attribute type="xs:positiveInteger" name="execOrder" use="required"/>
+            <xs:attribute type="xs:string" name="id" use="required"/>
+            <xs:attribute type="xs:string" name="title" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+      <xs:attribute type="xs:float" name="version"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

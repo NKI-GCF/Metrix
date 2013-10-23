@@ -22,6 +22,7 @@ public class FileOperation extends PostProcess{
 	private String	globbing;		// Globbing string
 	private String	source;			// Source path for operation
 	private String	destination;	// Destination path for operation
+	private String	overwrite;		//
 
 	public FileOperation(Node parentNode, Node childNode){
 		NamedNodeMap parentAttr = parentNode.getAttributes();
@@ -32,7 +33,7 @@ public class FileOperation extends PostProcess{
 		this.setId(childAttr.getNamedItem("id").getNodeValue());
 		this.setTitle(childAttr.getNamedItem("title").getNodeValue());
 		this.setProcessType(childNode.getNodeName());
-	
+
 		NodeList foProps = childNode.getChildNodes();
 
 		for(int i = 0; i < foProps.getLength(); i++){
@@ -44,6 +45,8 @@ public class FileOperation extends PostProcess{
 				this.setDestination(p.getTextContent());
 			}else if(p.getNodeName().equalsIgnoreCase("Globbing")){
 				this.setGlobbing(p.getTextContent());			
+			}else if(p.getNodeName().equalsIgnoreCase("Overwrite")){
+				this.setOverwrite(p.getTextContent());
 			}
 		}
 	}
@@ -72,12 +75,49 @@ public class FileOperation extends PostProcess{
 		return this.source;
 	}
 
-	public void setDestination(String dest){
-		this.destination = dest;
+	public void setDestination(String destination){
+		this.destination = destination;
 	}
 
 	public String getDestination(){
 		return this.destination;
+	}
+
+	public void setOverwrite(String overwrite){
+		if(overwrite.equals("")){
+			this.overwrite = "N";
+		}else{
+			this.overwrite = overwrite;
+		}
+	}
+
+	public boolean isCopyOperation(){
+		return processType.equalsIgnoreCase("copy") ? true : false;
+	}
+
+	public boolean isSymlinkOperation(){
+		return processType.equalsIgnoreCase("symlink") ? true : false;
+	}
+
+	public boolean hasGlobbing(){
+		if(!getGlobbing().equals("")){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	public boolean needOverwrite(){
+		return this.overwrite.equalsIgnoreCase("Y") ? true : false;
+	}
+
+	public boolean isValid(){
+		if( source != null && !source.equals("") &&  
+			destination != null && !destination.equals("")){
+			return true;
+		}else{
+			return false;
+		}
 	}
 }
 
