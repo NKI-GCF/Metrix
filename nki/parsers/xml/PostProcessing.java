@@ -295,19 +295,19 @@ public class PostProcessing {
 	}
 
 	private void executeProcessing(){
-		int status = -255;
+		int status = 0;
 
 		for(PostProcess pp : processList){
 			if(pp instanceof FileOperation){
 				FileOperation fo = (FileOperation) pp;
 				if(fo.isValid()){
-					executeFileOperation(fo);
+					status += executeFileOperation(fo);
 				}else{
 					metrixLogger.log.warning("[Metrix Post-Processor] FileOperation " + fo.getTitle() + " not populated correctly. Source and/or destination are empty.");
 				}
 			}else if(pp instanceof Application){
 				Application app = (Application) pp;
-				executeApplication(app);
+				status += executeApplication(app);
 			}
 		}
 		if(status == 0){
@@ -321,7 +321,10 @@ public class PostProcessing {
 		
 		File sourceFile = new File(fo.getSource());
 		File destinationFile = new File(fo.getDestination());
-		
+	
+		boolean sourceIsDir = false;
+		boolean destinationIsDir = false;
+
 		if(!sourceFile.exists()){
 			metrixLogger.log.warning("[Metrix Post-Processor] Source file: " + sourceFile + " does not exist.");
 			exitStatus = -1;
@@ -336,26 +339,24 @@ public class PostProcessing {
 			metrixLogger.log.finest("[Metrix Post-Processor] Source file: " + sourceFile.toString() + " is readable.");
 		}
 
-		// If destination is file
+		// If destination is file (assuming that all destination files will have an extension)
 		// 	Check parent
-		//
-		// If destination is directory
-		// 
-		
-		// Destination is a file (assuming that all destination files will have an extension)
-
 		File targetDir;
 		if((destinationFile.toString()).lastIndexOf(".") > 0){
 			destinationFile.getParentFile().mkdirs();
 			targetDir = destinationFile.getParentFile();
-		}else{
+		}else{ // If destination is a directory
 			targetDir = destinationFile;
 			destinationFile.mkdirs(); 
+			destinationIsDir = true;
+			fo.setDestination(destinationFile + File.separator + sourceFile.getName());
+			destinationFile = new File(fo.getDestination());
 		}
 
 		File sourceDir = null;
 		if((sourceFile.toString()).lastIndexOf(".") == -1){
 			sourceDir = sourceFile;
+			sourceIsDir = true;
 		}
 
 		if(targetDir.canWrite()){
@@ -374,8 +375,12 @@ public class PostProcessing {
 			metrixLogger.log.info("[Metrix Post-Processor] Copying files with extension: " + fo.getGlobbing() + " from: " + sourceFile.getAbsoluteFile() + "to: " + destinationFile);		
 		}else if((sourceDir != null) && !(fo.hasGlobbing())){
 			metrixLogger.log.info("[Metrix Post-Processor] Copying directory: " + sourceFile + "\tto: " + destinationFile);			
+		}else if(destinationIsDir && destinationFile.exists() && sourceFile.isFile()){
+			metrixLogger.log.info("[Metrix Post-Processor] Source is a file - destination is directory.");
+		}else if(destinationIsDir && fo.needOverwrite() && sourceFile.isFile()){
+			metrixLogger.log.info("[Metrix Post-Processor] Source is a file - destination is directory - Overwriting file.");
 		}else{
-			metrixLogger.log.info("[Metrix Post-Processor] Destination already exists. Not overwriting.");
+			metrixLogger.log.info("[Metrix Post-Processor] Destination file already exists. Not overwriting.");
 			exitStatus = -1;
 			return exitStatus;
 		}
@@ -413,12 +418,13 @@ public class PostProcessing {
 	
 				// Is the source path a file?
 				if(sourceFile.isFile()){
+					metrixLogger.log.fine("Copying " + sourceFile + "to: " + destinationFile);
 					Files.copy( 
    		   	            sourceFile.toPath(), 
 						destinationFile.toPath(),
 						options
 				    );
-					metrixLogger.log.fine("Copying " + sourceFile + "to: " + destinationFile);
+					exitStatus = 0;
 				}else if(sourceFile.isDirectory()){ // Is the sourcepath a directory?
 					FileOperations fileops = 
 						new FileOperations(
@@ -429,8 +435,10 @@ public class PostProcessing {
 						
 						try{
 							fileops.recursiveCopy();
+							exitStatus = 0;
 						}catch(IOException IO){
 							metrixLogger.log.warning("[Metrix Post-Processor] IO Exception in recursive copy: " + IO.toString());
+							exitStatus = -1;
 						}
 		
 				}else{
@@ -440,10 +448,12 @@ public class PostProcessing {
 				}
 			}catch(IOException Iex){
 				metrixLogger.log.warning("[Metrix Post-Processor] IOException during file copy: " + Iex.toString());
+				exitStatus = -1; 
 			}
-
-			metrixLogger.log.finer("[Metrix Post-Processor] Successfully copied " + sourceFile + " to " + destinationFile);
-			exitStatus = 0;
+		
+			if(exitStatus == 0){
+				metrixLogger.log.finer("[Metrix Post-Processor] Successfully copied " + sourceFile + " to " + destinationFile);
+			}
 		}
 
 		/*
@@ -465,7 +475,12 @@ public class PostProcessing {
 		*/
 		// Not yet implemented.
 
-		hasFinished = true;
+		if(exitStatus == 0){
+			metrixLogger.log.info("[Metrix Post-Processor] File Operation block ("+fo.getOrder()+" :: "+fo.getSubOrder()+" :: "+fo.getId()+") has finished successfully.");
+		}else{
+			metrixLogger.log.warning("[Metrix Post-Processor] File Operation block '"+ fo.getId() +"' has exited with errors.");
+		}
+
 		return exitStatus;
 	}
 
@@ -485,6 +500,7 @@ public class PostProcessing {
 
 	private int executeGlobbingCopy(FileOperation fo, ArrayList<Path> fileList){
 		File destinationFile = new File(fo.getDestination());
+		int exitStatus = 0;
 
 		CopyOption[] options = new CopyOption[]{};
 		CopyOption[] replOpt = new CopyOption[]{
@@ -512,15 +528,16 @@ public class PostProcessing {
 					(destinationFile.toPath()).resolve(sourcePath),
 					options
 				);
+				exitStatus += 0;
 			}catch(IOException Ex){
 				metrixLogger.log.warning("[Metrix Post-Processor] IOException in globbing file copy: " + Ex.toString());
+				exitStatus += -1;
 			}
 
-				
 			metrixLogger.log.finer("[Metrix Post-Processor] Copied: " + sourcePath + " to: " + destinationFile);
 		}
 
-		return 0; // All is good
+		return exitStatus; // All is good
 	}
 
 	private int executeApplication(Application app){
@@ -529,8 +546,7 @@ public class PostProcessing {
 	    final File scriptPath = new File(app.getScriptPath());
 
 		// The output file. All application activity is written to this file.
-		final File outputFile = new File(String.format(app.getOutputPath() + "/output_"+sum.getRunId()+"_" + app.getId() + "_%tY%<tm%<td_%<tH%<tM%<tS.txt",
-        System.currentTimeMillis()));
+		final File outputFile = new File(app.getOutputPath());
 		// The supplied arguments for the script 
 	    final String arguments = app.getArguments();
 

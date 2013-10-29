@@ -44,11 +44,8 @@ public class FileOperations{
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
 				{
 					Path targetdir = destination.resolve(source.relativize(dir));
-//					System.out.println("File " + dir + "\t Dest res: " + destination.resolve(source.relativize(dir)) );
-//					System.out.println("File " +  targetdir.getFileName() + " other: " + targetdir.getParent().getFileName());
 
 					if(!targetdir.getFileName().equals(targetdir.getParent().getFileName())){		
-//						System.out.println("File " +  targetdir.getFileName() + " other: " + targetdir.getParent().getFileName() + "\tdir: " + dir );
 						
 						try {
 							Files.copy(dir, targetdir);
