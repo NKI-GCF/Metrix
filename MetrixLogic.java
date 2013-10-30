@@ -23,8 +23,9 @@ import nki.constants.Constants;
 import nki.objects.Summary;
 import nki.objects.QualityScores;
 import nki.parsers.xml.XmlDriver;
+import nki.parsers.metrix.PostProcessing;
 import java.util.regex.*;
-
+import java.util.Properties;
 
 public class MetrixLogic {
 
@@ -34,6 +35,7 @@ public class MetrixLogic {
 	// Call inits
 	private Summary summary = null;
 	private int state;
+	private static Properties configFile = new Properties();
 
 	public MetrixLogic(){
 
@@ -246,7 +248,10 @@ public class MetrixLogic {
 			metrixLogger.log.severe( "Error stacktrace: " + IE );
 		}
 		metrixLogger.log.info( "Run " + summary.getRunId() +" has finished.");
-		saveEntry(path);	
+		saveEntry(path);
+
+		// Check if run requires post processing and execute it
+		runPostProcessing(summary);
 	}
 
 	public void saveEntry(String path){
@@ -329,5 +334,37 @@ public class MetrixLogic {
 			}
 
 			return false;
+	}
+
+	public void loadConfig(){
+		try{
+		    String externalFileName = System.getProperty("properties");
+		    String absFile = (new File(externalFileName)).getAbsolutePath();
+
+			InputStream fin = new FileInputStream(new File(absFile));
+   	    	configFile.load(fin);
+			fin.close();
+		}catch(IOException Ex){
+			metrixLogger.log.severe("IOException when loading config: " + Ex.toString());
+		}
+		
+	}
+
+	public boolean runPostProcessing(Summary sum){
+		// Load properties file parameter for post processing
+		loadConfig();
+		String execPP = configFile.getProperty("EXEC_POSTPROCESSING", "FALSE");
+		
+		if(execPP.equalsIgnoreCase("TRUE")){
+			metrixLogger.log.info("Calling post processing module for: " + sum.getRunId());
+			PostProcessing pp = new PostProcessing(sum);
+			pp.run();
+
+			return true;
+
+		}else{
+			metrixLogger.log.info("No postprocessing performed for: " + sum.getRunId());
+			return false;
+		}
 	}
 }
