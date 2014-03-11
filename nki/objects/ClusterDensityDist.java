@@ -21,7 +21,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 
-public class QScoreDist implements Serializable{
+public class ClusterDensityDist implements Serializable{
 
 	public static final long serialVersionUID = 42L;
 	

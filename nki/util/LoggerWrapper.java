@@ -18,6 +18,10 @@ public class LoggerWrapper{
 	static{
 		configFile = new Properties();
 		// Use external properties file, outside of jar location.
+        if(System.getProperty("properties") == null){
+            System.out.println("[Metrix] Error - 'properties' argument not specified at runtime. Use -Dproperties={Path to properties file}. ");
+            System.exit(1);
+        }
     	String externalFileName = System.getProperty("properties");
 	    String absFile = (new File(externalFileName)).getAbsolutePath();
 
