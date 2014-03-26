@@ -5,22 +5,14 @@
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
 
-import java.net.*;
-import java.io.*;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
-import java.net.InetSocketAddress;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
+import java.util.logging.Level;
 import nki.objects.Command;
-import nki.objects.Summary;
-import nki.objects.SummaryCollection;
-import nki.constants.Constants;
 import nki.exceptions.CommandValidityException;
 import nki.exceptions.InvalidCredentialsException;
-import nki.exceptions.UnimplementedCommandException;
 import nki.io.DataStore;
 import nki.parsers.metrix.CommandProcessor;
 import nki.constants.Constants;
@@ -39,9 +31,11 @@ public class MetrixThread extends Thread {
 		this.sChannel = sChannel;
 	}
 
+    @Override
 	public void run(){
 		
 		try{
+            // Store socket address for future use.
 			String clientSocketDetails = sChannel.socket().getRemoteSocketAddress().toString();
 
 			// Create OutputStream for sending objects.
@@ -55,10 +49,11 @@ public class MetrixThread extends Thread {
 
 			try{
 				Command commandClient;
-
-				while (( commandClient = (Command) ois.readObject()) != null){
+                Object clientMsg;
+				while ((clientMsg = ois.readObject()) != null){
 					String mode = "";
-					if(commandClient instanceof Command){
+					if(clientMsg instanceof Command){
+                        commandClient =  (Command) clientMsg;
 						mode = commandClient.getMode();
 						
 						CommandProcessor cp;
@@ -74,7 +69,7 @@ public class MetrixThread extends Thread {
 							}
 	
 							if(mode.equals(Constants.COM_MODE_CALL)){	// Single call
-								metrixLogger.log.info("[SERVER] Received command ["+sChannel.socket().getInetAddress().getHostAddress()+"]: " + commandClient.getCommand() + " run(s) with state: "+ commandClient.getState() + " ("+ commandClient.getRetType() +") in format " + commandClient.getFormat());
+								LoggerWrapper.log.log(Level.INFO, "[SERVER] Received command [{0}]: {1} run(s) with state: {2} ({3}) in format {4}", new Object[]{sChannel.socket().getInetAddress().getHostAddress(), commandClient.getCommand(), commandClient.getState(), commandClient.getRetType(), commandClient.getFormat()});
 								cp = new CommandProcessor(commandClient, oos, ds);			
 							}
 		
@@ -91,8 +86,10 @@ public class MetrixThread extends Thread {
 							ois.close();
 							oos.close();
 						}
-					}else{
-						metrixLogger.log.warning( "[SERVER] Command not understood [" + commandClient + "]");
+					}else if(clientMsg instanceof String){
+                        LoggerWrapper.log.log(Level.INFO, "[SERVER] Received command via socket. " + clientMsg);
+                    }else{
+						metrixLogger.log.warning( "[SERVER] Command not understood [" + clientMsg + "]");
 					}
 					
 					metrixLogger.log.info( "[SERVER] Finished processing command");

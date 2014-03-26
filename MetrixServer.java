@@ -77,20 +77,21 @@ public class MetrixServer{
 		
         	metrixLogger.log.info( "Initializing Directory Watcher Service with directory: " + runDir);
 			// Start Watcher service
-				final MetrixWatch mw = new MetrixWatch(runDir, false, ds);
-    	    	mw.start();
-		
-				metrixLogger.log.info( "Directory Watcher Service started - Monitoring.");
-	
-			// Configure Server paramters
-	        	ServerSocketChannel ssChannel = ServerSocketChannel.open();
-		        ssChannel.configureBlocking(true);
-		        ssChannel.socket().bind(new InetSocketAddress(port));	// Call server / Bind socket and port.
-		
-    	    	metrixLogger.log.info( "Metrix Thread Server initialized.");
+            final MetrixWatch mw = new MetrixWatch(runDir, false, ds);
+            mw.start();
 
-				metrixLogger.log.info( "Initializing backlog service.");
+            metrixLogger.log.info( "Directory Watcher Service started - Monitoring.");
+
+            // Configure Server
+            ServerSocketChannel ssChannel = ServerSocketChannel.open();
+            ssChannel.configureBlocking(true);
+            ssChannel.socket().bind(new InetSocketAddress(port));	// Call server / Bind socket and port.
+
+            metrixLogger.log.info( "Metrix Thread Server initialized.");
+
+            metrixLogger.log.info( "Initializing backlog service.");
 			final Runnable backlog = new Runnable() {
+                @Override
 	            public void run() {
 					if(mw.watcher != null){
 						mw.checkForceTime();
@@ -100,6 +101,7 @@ public class MetrixServer{
 
 			final ScheduledFuture<?> backlogHandle = scheduler.scheduleAtFixedRate(backlog, 10, 20, TimeUnit.MINUTES);
 			scheduler.schedule(new Runnable() {
+                @Override
 				public void run(){
 					backlogHandle.cancel(true);
 				}
@@ -110,8 +112,7 @@ public class MetrixServer{
 				new MetrixThread(ssChannel.accept()).start();
         	}
 		}catch(IOException Ex){
-			metrixLogger.log.severe( "IOException initializing server. " + Ex.toString());
-			Ex.printStackTrace();
+			LoggerWrapper.log.log( Level.SEVERE, "IOException initializing server. {0}", Ex.toString());
 			System.exit(1);	
 		}
     }
