@@ -7,15 +7,12 @@
 
 package nki.parsers.illumina;
 
-import nki.io.LittleEndianInputStream;
 import java.io.IOException;
 import java.io.EOFException;
-import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.Collections;
+import java.util.logging.Level;
 import nki.objects.QualityScores;
 import nki.objects.QualityMap;
 import nki.objects.Reads;
@@ -49,11 +46,11 @@ public class QualityMetrics extends GenericIlluminaParser{
 			setVersion(leis.readByte());
 			setRecordLength(leis.readByte());
 		}catch(IOException Ex){
-			metrixLogger.log.severe("Error in parsing version number and recordLength: " + Ex.toString());
+			metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
 		}
 
 		try{
-			HashMap<Integer, QualityMap> cycleMap = new HashMap<Integer, QualityMap>();
+			HashMap<Integer, QualityMap> cycleMap = new HashMap<>();
 
 			qScores.setSource(this.getSource());
 			qScores.setVersion(this.getVersion());
@@ -69,7 +66,7 @@ public class QualityMetrics extends GenericIlluminaParser{
 				if(qScores.getLane(laneNr) != null){
 					cycleMap = qScores.getLane(laneNr);
 				}else{
-					cycleMap = new HashMap<Integer, QualityMap>();
+					cycleMap = new HashMap<>();
 				}
 
 				if(cycleMap.containsKey(cycleNr)){
@@ -99,7 +96,7 @@ public class QualityMetrics extends GenericIlluminaParser{
 		}catch(EOFException EOFEx){
 			// Reached end of file
 		}catch(IOException Ex){
-			metrixLogger.log.severe("IO Error in parsing Quality Metrics");
+			LoggerWrapper.log.severe("IO Error in parsing Quality Metrics");
 		}
 
 		// Return the qualityScores object.

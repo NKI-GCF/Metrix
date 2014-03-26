@@ -25,10 +25,8 @@ public class LoggerWrapper{
     	String externalFileName = System.getProperty("properties");
 	    String absFile = (new File(externalFileName)).getAbsolutePath();
 
-    	try{
-			InputStream fin = new FileInputStream(new File(absFile));
-		    configFile.load(fin);
-			fin.close();
+        try (InputStream fin = new FileInputStream(new File(absFile))) {
+                configFile.load(fin);
 		}catch(FileNotFoundException FNFE){
 			System.out.println("[ERROR] Properties file not found.");
 			System.exit(1);	
@@ -81,26 +79,28 @@ public class LoggerWrapper{
 	}
 
 	private static Level getLevel(String lvl){
-		if(lvl.equals("ALL")){
-			return Level.ALL;
-		}else if(lvl.equals("CONFIG")){
-			return Level.CONFIG;
-		}else if(lvl.equals("FINE")){
-			return Level.FINE;
-		}else if(lvl.equals("FINER")){
-			return Level.FINER;
-		}else if(lvl.equals("FINEST")){
-			return Level.FINEST;
-		}else if(lvl.equals("INFO")){
-			return Level.INFO;
-		}else if(lvl.equals("OFF")){
-			return Level.OFF;
-		}else if(lvl.equals("SEVERE")){
-			return Level.SEVERE;
-		}else if(lvl.equals("WARNING")){
-			return Level.WARNING;
-		}else{	// Default Level INFO
-			return Level.INFO;
-		}
+        switch (lvl) {
+            case "ALL":
+                return Level.ALL;
+            case "CONFIG":
+                return Level.CONFIG;
+            case "FINE":
+                return Level.FINE;
+            case "FINER":
+                return Level.FINER;
+            case "FINEST":
+                return Level.FINEST;
+            case "INFO":
+                return Level.INFO;
+            case "OFF":
+                return Level.OFF;
+            case "SEVERE":
+                return Level.SEVERE;
+            case "WARNING":
+                return Level.WARNING;
+            default:
+                // Default Level INFO
+                return Level.INFO;
+        }
 	}
 }

@@ -44,11 +44,9 @@ public class Metrix {
 
 	    String absFile = (new File(externalFileName)).getAbsolutePath();
 
-    	try{
-			InputStream fin = new FileInputStream(new File(absFile));
-		    configFile.load(fin);
-			fin.close();
-		}catch(FileNotFoundException FNFE){
+        try (InputStream fin = new FileInputStream(new File(absFile))) {
+                configFile.load(fin);
+        }catch(FileNotFoundException FNFE){
 			System.out.println("[ERROR] Properties file not found.");
 			System.exit(1);	
 		}catch(IOException Ex){
@@ -56,12 +54,11 @@ public class Metrix {
 			System.exit(1);
  		}
 
-
 		// BEFORE COMPILING; DEFINE RUN DIRECTORY BELOW
 		String runDir = configFile.getProperty("RUNDIR", "/tmp/") + "/";
 
 		String searchTerm 					= "";
-		ArrayList<String> searchResults		= new ArrayList<String>();
+		ArrayList<String> searchResults		= new ArrayList<>();
 		String procResult 					= runDir;
 		int arrIdx = 0;
 	// If run string argumented : Search in rundir

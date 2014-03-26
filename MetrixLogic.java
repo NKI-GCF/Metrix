@@ -5,26 +5,19 @@
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
 
-import java.net.*;
 import java.nio.file.*;
 import java.io.*;
 import java.util.*;
-import nki.objects.Command;
 import nki.util.LoggerWrapper;
 import java.io.IOException;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
-import java.net.InetSocketAddress;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import nki.parsers.illumina.*;
 import nki.io.DataStore;
 import nki.constants.Constants;
 import nki.objects.Summary;
-import nki.objects.QualityScores;
 import nki.parsers.xml.XmlDriver;
 import nki.parsers.metrix.PostProcessing;
-import java.util.regex.*;
 import java.util.Properties;
 
 public class MetrixLogic {
@@ -35,7 +28,7 @@ public class MetrixLogic {
 	// Call inits
 	private Summary summary = null;
 	private int state;
-	private static Properties configFile = new Properties();
+	private static final Properties configFile = new Properties();
 
 	public MetrixLogic(){
 

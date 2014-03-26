@@ -10,14 +10,9 @@ package nki.parsers.illumina;
 import nki.io.LittleEndianInputStream;
 import nki.util.LoggerWrapper;
 import java.io.IOException;
-import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Collections;
+import java.util.logging.Level;
 
 public class GenericIlluminaParser {
 	protected String source = "";
@@ -39,10 +34,10 @@ public class GenericIlluminaParser {
 			leis = new LittleEndianInputStream(new FileInputStream(source));
 			// Check for last modified date
 			setLastModifiedSource();
-		}catch(IOException IO){
+		}catch(FileNotFoundException IO){
 			// Set fileMissing = true. --> Parse again later. 
 			setFileMissing(true);
-			metrixLogger.log.warning(c.getSimpleName() + " file not available for " + source);
+			metrixLogger.log.log(Level.WARNING, "{0} file not available for {1}", new Object[]{c.getSimpleName(), source});
 		}catch(InterruptedException IEX){
 
         }
@@ -101,7 +96,7 @@ public class GenericIlluminaParser {
 			try{
 				this.leis.close();
 			}catch(IOException Ex){
-				metrixLogger.log.warning("Error in closing the source stream: " + Ex.toString());
+				metrixLogger.log.log(Level.WARNING, "Error in closing the source stream: {0}", Ex.toString());
 			}
 		}
 	}

@@ -67,7 +67,17 @@ public class Command implements Serializable{
 			Constants.COM_TYPE_FULL
 		};
 
-	public Command(){
+    public Command(){
+        this.setDateTime();	// Set date time for instantiation of command object.
+    }
+    
+    // Instantiate with variables
+	public Command(String format, int state, String command, String mode, String type, String runId){
+        this.setFormat(format);
+        this.setCommand(command);
+        this.setMode(mode);
+        this.setType(type);
+        this.setRunId(runId);
 		this.setDateTime();	// Set date time for instantiation of command object.
 	}
 
@@ -116,10 +126,9 @@ public class Command implements Serializable{
 	}
 
 	public void setType(String type){
-		if(!Arrays.asList(TYPES).contains(type))
-		{
-			setMessage("Invalid stat type ("+type+")");
-			type = null;
+        if(!checkType(type)){
+            setMessage("Invalid type (" + type + ")");
+            type = null;
 		}else{
 			this.type = type;
 		}
@@ -187,16 +196,23 @@ public class Command implements Serializable{
 	}
 
 	public boolean checkState(int st){
-
-		for (int i = 0; i < STATES.length; i++) {
-		    if (STATES[i] == st) {
-			        return true;
+		for(int STATE : STATES){
+		    if (STATE == st) {
+                return true;
 		    }
-		}
-
+        }
 		return false;
 	}
 
+    public boolean checkType(String type){
+        for (String TYPE : TYPES) {
+            if (TYPE.equals(type)) {
+                return true;
+            }
+        }
+		return false;
+	}
+    
 	private boolean hasMetricFilter(){
 		if(filter != null){
 			return true;

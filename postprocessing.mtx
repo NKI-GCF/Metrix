@@ -1,44 +1,44 @@
 <?xml version="1.0"?>
 <Metrix version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="postprocessing.xsd">
-		<FileOperation execOrder="1" id="firstStage" title="Pre demultiplex file operations">
-			<Copy execOrder="1" id="preDmxCopyOne" title="Backup of intensity files">
-				<Source></Source>
-				<Destination></Destination>
-				<Globbing></Globbing>
-				<Overwrite>N</Overwrite>
-			</Copy>
-			
-			<Copy execOrder="2" id="preDmxCopyTwo" title="Backup of run settings">
-				<Source></Source>
-				<Destination></Destination>
-				<Globbing></Globbing>
-				<Overwrite>N</Overwrite>
-			</Copy>
+    <FileOperation execOrder="1" id="firstStage" title="Pre demultiplex file operations">
+            <Copy execOrder="1" id="preDmxCopyOne" title="Backup of intensity files">
+                    <Source></Source>
+                    <Destination></Destination>
+                    <Globbing></Globbing>
+                    <Overwrite>N</Overwrite>
+            </Copy>
 
-			<Symlink execOrder="3" id="preDmxSymlink" title="Symlinking samplesheet and runinfo">
-				<Source></Source>
-				<Destination></Destination>
-				<Globbing></Globbing>
-				<Overwrite>N</Overwrite>
-			</Symlink>
-		</FileOperation>
-		
-		<Application execOrder="2" id="dmxOp" title="Run scripts">
-		<!--	 Execute custom post sequencing metrics collection -->
-			<Script execOrder="1" id="metrics" title="Metrics collection">
-				<ScriptPath>/usr/local/bin/metrix</ScriptPath>
-				<Arguments>{RunID}</Arguments>
-				<OutputPath>/tmp/</OutputPath>
-				<WorkingDirectory>/</WorkingDirectory>
-			</Script>
-		</Application>
+            <Copy execOrder="2" id="preDmxCopyTwo" title="Backup of run settings">
+                    <Source></Source>
+                    <Destination></Destination>
+                    <Globbing></Globbing>
+                    <Overwrite>N</Overwrite>
+            </Copy>
 
-		<FileOperation execOrder="3" id="postDmxFileOp" title="Post demultiplexing operations">
-			<Symlink execOrder="1" id="postDmxFastQSymlink" title="Symlinking FastQ's">
-				<Source></Source>
-				<Destination></Destination>
-				<Globbing></Globbing>
-				<Overwrite>N</Overwrite>
-			</Symlink>
-		</FileOperation>
+            <Symlink execOrder="3" id="preDmxSymlink" title="Symlinking samplesheet and runinfo">
+                    <Source></Source>
+                    <Destination></Destination>
+                    <Globbing></Globbing>
+                    <Overwrite>N</Overwrite>
+            </Symlink>
+    </FileOperation>
+
+    <Application execOrder="2" id="dmxOp" title="Run scripts">
+    <!--	 Execute custom post sequencing metrics collection -->
+            <Script execOrder="1" id="metrics" title="Metrics collection">
+                    <ScriptPath>/usr/local/bin/metrix</ScriptPath>
+                    <Arguments>{RunID}</Arguments>
+                    <OutputPath>/tmp/</OutputPath>
+                    <WorkingDirectory>/</WorkingDirectory>
+            </Script>
+    </Application>
+
+    <FileOperation execOrder="3" id="postDmxFileOp" title="Post demultiplexing operations">
+            <Symlink execOrder="1" id="postDmxFastQSymlink" title="Symlinking FastQ's">
+                    <Source></Source>
+                    <Destination></Destination>
+                    <Globbing></Globbing>
+                    <Overwrite>N</Overwrite>
+            </Symlink>
+    </FileOperation>
 </Metrix>

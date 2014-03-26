@@ -15,7 +15,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import nki.objects.Summary;
-import nki.parsers.xml.RunInfoHandler;
 
 public class XmlDriver {
 

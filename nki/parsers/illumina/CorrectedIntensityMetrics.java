@@ -7,16 +7,10 @@
 
 package nki.parsers.illumina;
 
-import nki.io.LittleEndianInputStream;
-import nki.parsers.illumina.GenericIlluminaParser;
 import java.io.IOException;
 import java.io.EOFException;
-import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Collections;
+import java.util.logging.Level;
 import nki.objects.IntensityScores;
 import nki.objects.IntensityMap;
 import nki.constants.Constants;
@@ -61,11 +55,11 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser{
 			iScores.setRecordLength(leis.readByte());
 			iScores.setSource(this.getSource());
 		}catch(IOException Ex){
-			metrixLogger.log.severe("Error in parsing version number and recordLength: " + Ex.toString());
+			metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
 		}
 
 		try{
-			HashMap<Integer, IntensityMap> cycleMap = new HashMap<Integer, IntensityMap>();
+			HashMap<Integer, IntensityMap> cycleMap = new HashMap<>();
 			IntensityMap iMap = new IntensityMap();
 			int cnt = 0;
 
@@ -77,7 +71,7 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser{
 				if(iScores.getLane(laneNr) != null){
 					cycleMap = iScores.getLane(laneNr);
 				}else{
-					cycleMap = new HashMap<Integer, IntensityMap>();
+					cycleMap = new HashMap<>();
 				}
 
 				if(cycleMap.containsKey(cycleNr)){
@@ -138,7 +132,7 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser{
 			// Reached end of file
 			// Lazy EOF - Ignore checking.
 		}catch(IOException Ex){
-			metrixLogger.log.severe("IO Error - CorrectedIntensityMetrics digest");
+			LoggerWrapper.log.severe("IO Error - CorrectedIntensityMetrics digest");
 		}
 	
 		// Return the qualityScores object.

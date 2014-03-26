@@ -7,23 +7,16 @@
 
 package nki.parsers.illumina;
 
-import nki.io.LittleEndianInputStream;
 import java.io.IOException;
 import java.io.EOFException;
-import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.Collections;
+import java.util.logging.Level;
 import nki.objects.ErrorCollection;
 import nki.objects.ErrorMap;
 import nki.util.LoggerWrapper;
 
 public class ErrorMetrics extends GenericIlluminaParser{
 	private ErrorCollection eScores;
-
-	// Instantiate Logger	
-	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
 	public ErrorMetrics(String source, int state){
 		super(ErrorMetrics.class, source, state);
@@ -53,7 +46,7 @@ public class ErrorMetrics extends GenericIlluminaParser{
 			eScores.setVersion(leis.readByte());
 			eScores.setRecordLength(leis.readByte());		
 		}catch(IOException Ex){
-			metrixLogger.log.severe("Error in parsing version number and recordLength: " + Ex.toString());
+			LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
 		}
 
 		try{
@@ -70,7 +63,7 @@ public class ErrorMetrics extends GenericIlluminaParser{
 				if(eScores.getLane(laneNr) != null){
 					cycleMap = eScores.getLane(laneNr);
 				}else{
-					cycleMap = new HashMap<Integer, ErrorMap>();
+					cycleMap = new HashMap<>();
 				}
 
 				if(cycleMap.containsKey(cycleNr)){
@@ -101,7 +94,7 @@ public class ErrorMetrics extends GenericIlluminaParser{
 		}catch(EOFException EOFEx){
 			// Reached end of file
 		}catch(IOException Ex){
-			metrixLogger.log.severe("IO Error in parsing the Error Metrics file.");
+			LoggerWrapper.log.severe("IO Error in parsing the Error Metrics file.");
 		}
 		return eScores;
 	}

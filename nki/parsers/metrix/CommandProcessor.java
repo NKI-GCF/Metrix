@@ -8,7 +8,6 @@ import nki.io.DataStore;
 import nki.objects.QualityScores;
 import nki.objects.QScoreDist;
 import nki.objects.IntensityScores;
-import nki.objects.IntensityDist;
 import nki.objects.Indices;
 import nki.objects.Update;
 import nki.objects.Reads;
@@ -22,17 +21,13 @@ import nki.exceptions.UnimplementedCommandException;
 import nki.exceptions.MissingCommandDetailException;
 import nki.exceptions.EmptyResultSetCollection;
 import nki.util.LoggerWrapper;
-import java.net.*;
 import java.io.*;
-import java.lang.Exception;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.logging.Level;
 
-public class CommandProcessor {
+public final class CommandProcessor {
 
 	private boolean valCom = false;
 	private boolean valApi = false;
@@ -76,20 +71,18 @@ public class CommandProcessor {
 			}catch(UnimplementedCommandException UCE){
 				// Create command and send back error.
 				oos.writeObject(UCE);
-				metrixLogger.log.warning("Unimplemented Command Exception: " + UCE.toString());
+				LoggerWrapper.log.log(Level.WARNING, "Unimplemented Command Exception: {0}", UCE.toString());
 			}catch(MissingCommandDetailException MCDE){
 				// Send back error over network in command.
 				oos.writeObject(MCDE);
-				metrixLogger.log.warning("Missing Command Detail Exception: " + MCDE.toString());
+				LoggerWrapper.log.log(Level.WARNING, "Missing Command Detail Exception: {0}", MCDE.toString());
 			}catch(EmptyResultSetCollection ERSC){
 				// Send back error over network in command.
 				oos.writeObject(ERSC);
-				metrixLogger.log.warning("Empty Result Set Collection Exception: " + ERSC.toString());
+				LoggerWrapper.log.log(Level.WARNING, "Empty Result Set Collection Exception: {0}", ERSC.toString());
 			}catch(Exception Ex){
-				// Send back error over network in command.
-				Ex.printStackTrace();
 				oos.writeObject(Ex);
-				metrixLogger.log.severe("Uncaught exception in CommandProcessor: " + Ex.toString());
+				LoggerWrapper.log.log(Level.SEVERE, "Uncaught exception in CommandProcessor: {0}", Ex.toString());
 			}
 
 		}else{
@@ -143,12 +136,12 @@ public class CommandProcessor {
 				SummaryCollection sc = new SummaryCollection();
 
 				if(recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)){
-					Summary sum = ds.getSummaryByRunName(recCom.getRunId());
+					Summary sum = DataStore.getSummaryByRunName(recCom.getRunId());
 					sc.appendSummary(sum);
 				}else if(recCom.getState() == Constants.STATE_ALL_PSEUDO){
-					sc = ds.getSummaryCollections();
+					sc = DataStore.getSummaryCollections();
 				}else{
-					sc = ds.getSummaryCollectionByState(recCom.getState());
+					sc = DataStore.getSummaryCollectionByState(recCom.getState());
 				}
 
 				// If no active runs present return command with details.
@@ -174,20 +167,20 @@ public class CommandProcessor {
 
 			if(recCom.getType().equals(Constants.COM_TYPE_METRIC)){
 				// Retrieve summary from database and check metric availability.
-				if(recCom.getRunId() == null && Integer.toString(recCom.getState()) == ""){
+				if(recCom.getRunId() == null && "".equals(Integer.toString(recCom.getState()))){
 					throw new MissingCommandDetailException("Please supply parameters (Run State or Run Id) for the requested metrics.");
 				}
 
 				SummaryCollection sc = new SummaryCollection();
 				
 				if(recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)){
-					Summary sum = ds.getSummaryByRunName(recCom.getRunId());
+					Summary sum = DataStore.getSummaryByRunName(recCom.getRunId());
 					sc.appendSummary(sum);
 				}else{
 					if(recCom.getState() == Constants.STATE_ALL_PSEUDO){
-						sc = ds.getSummaryCollections();
+						sc = DataStore.getSummaryCollections();
 					}else{
-						sc = ds.getSummaryCollectionByState(recCom.getState());
+						sc = DataStore.getSummaryCollectionByState(recCom.getState());
 					}
 				}
 				
@@ -200,7 +193,7 @@ public class CommandProcessor {
 
 				while(litr.hasNext()){
 					Summary sum = (Summary) litr.next();
-					metrixLogger.log.info("Processing " + sum.getRunId());
+					LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
 					if(!sum.equals(null)){
 						Boolean update = false;
 						String runDir = sum.getRunDirectory();
@@ -284,19 +277,19 @@ public class CommandProcessor {
 							try{
 								DataStore _ds = new DataStore();
 								sum.setLastUpdated();
-								_ds.updateSummaryByRunName(sum, runDir);
-								_ds.closeAll();
+								DataStore.updateSummaryByRunName(sum, runDir);
+								DataStore.closeAll();
 								
 								if(_ds != null){
 									_ds = null;
 								}
                             }catch(Exception SEx){
-								metrixLogger.log.severe("Exception in update statement " + SEx.toString());
+								LoggerWrapper.log.log(Level.SEVERE, "Exception in update statement {0}", SEx.toString());
 							}
 						}
 					}else{
 						// Throw error
-						metrixLogger.log.severe("[WARNING] Obtained an empty summary.");
+						LoggerWrapper.log.severe("[WARNING] Obtained an empty summary.");
 					}
 
 					// Generate and send update object.
@@ -310,26 +303,29 @@ public class CommandProcessor {
 					oos.writeObject(update);
 					curCount++;
 				}// End SC While iterator
-				
-				/*
-				*  Check output formatting method and return.
-				*/
-				if(recCom.getFormat().equals(Constants.COM_FORMAT_XML)){
-					// Generate XML.
-					oos.writeObject(sc.getSummaryCollectionXMLAsString(recCom));
-				}else if(recCom.getFormat().equals(Constants.COM_FORMAT_TAB)){
-					// Generate TAB separated string
-					oos.writeObject(sc.toTab(recCom));
-				}else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
-					// Send back the SummaryCollection POJO
-					oos.writeObject(sc); 
-				}else{
-					// Exception
-						throw new MissingCommandDetailException("Requested output format not understood (" + recCom.getFormat() + ")");
-				}
+                /*
+                 *  Check output formatting method and return.
+                 */
+                switch (recCom.getFormat()) {
+                    case Constants.COM_FORMAT_XML:
+                        // Generate XML.
+                        oos.writeObject(sc.getSummaryCollectionXMLAsString(recCom));
+                        break;
+                    case Constants.COM_FORMAT_TAB:
+                        // Generate TAB separated string
+                        oos.writeObject(sc.toTab(recCom));
+                        break;
+                    case Constants.COM_FORMAT_OBJ:
+                        // Send back the SummaryCollection POJO
+                        oos.writeObject(sc);
+                        break;
+                    default:
+                        // Exception
+                        throw new MissingCommandDetailException("Requested output format not understood (" + recCom.getFormat() + ")");
+                }
 				oos.flush();
 				DataStore.closeAll();
-				ds.closeAll();
+
 			}
 		}
 

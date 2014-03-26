@@ -7,7 +7,6 @@
 
 import java.io.IOException;
 import java.io.EOFException;
-import java.lang.Exception;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
@@ -24,25 +23,21 @@ import nki.exceptions.UnimplementedCommandException;
 import nki.exceptions.InvalidCredentialsException;
 import java.util.*;
 import java.io.*;
-import java.util.HashMap;
 import java.util.Properties;
-import nki.objects.MutableInt;
+import java.util.logging.Level;
 import nki.util.LoggerWrapper;
 
 public class MetrixClient {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-		LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
-		metrixLogger.log.info( "[CLIENT] Initiated");
+		LoggerWrapper.log.info( "[CLIENT] Initiated");
 
 		// Use external properties file, outside of jar location.
 		Properties configFile = new Properties();
     	String externalFileName = System.getProperty("properties");
 	    String absFile = (new File(externalFileName)).getAbsolutePath();
 
-    	try{
-			InputStream fin = new FileInputStream(new File(absFile));
-		    configFile.load(fin);
-			fin.close();
+        try (InputStream fin = new FileInputStream(new File(absFile))) {
+            configFile.load(fin);
 		}catch(FileNotFoundException FNFE){
 			System.out.println("[ERROR] Properties file not found.");
 			System.exit(1);	
@@ -204,14 +199,11 @@ public class MetrixClient {
 					}
 				}catch(IOException Ex){
 				//	System.out.println("Error" + Ex);
+                    LoggerWrapper.log.log(Level.WARNING, "");
 				}
 	        }
-	}catch(EOFException ex){
-//		log.error("Server has shutdown.");
-	}catch(NoConnectionPendingException NCPE){
-//		log.error("Communication channel is not connection and no operation has been initiated.");
-	}catch(AsynchronousCloseException ACE){
-//		log.error("Another client has shutdown the server. Channel communication prohibited by issueing a direct command.");
+	}catch(  EOFException | NoConnectionPendingException | AsynchronousCloseException ex){
+        LoggerWrapper.log.log( Level.INFO, "[CLIENT] Connection closed. ({0})", ex.toString());
 	}
 
 	

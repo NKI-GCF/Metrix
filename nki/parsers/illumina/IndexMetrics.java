@@ -7,18 +7,8 @@
 
 package nki.parsers.illumina;
 
-import nki.io.LittleEndianInputStream; 
-import java.io.*;
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.List;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.util.logging.Level;
 import nki.objects.Indices;
 import nki.util.LoggerWrapper;
 
@@ -56,7 +46,7 @@ public class IndexMetrics extends GenericIlluminaParser {
 		try{
 			setVersion(leis.readByte());		// Set Version
 		}catch(IOException Ex){
-			metrixLogger.log.severe("Error in parsing version number and recordlength: " + Ex.toString());
+			LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", Ex.toString());
 		}
 		
 		boolean readBool = true;

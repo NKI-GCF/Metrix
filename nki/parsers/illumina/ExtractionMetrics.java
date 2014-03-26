@@ -7,22 +7,16 @@
 
 package nki.parsers.illumina;
 
-import nki.io.LittleEndianInputStream; 
-import java.io.*;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.List;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.util.logging.Level;
 import nki.util.LoggerWrapper;
 
 public class ExtractionMetrics extends GenericIlluminaParser{
-	ArrayList<Integer> cycles = new ArrayList<Integer>();
+	ArrayList<Integer> cycles = new ArrayList<>();
 
 	// Instantiate Logger	
 	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
@@ -50,7 +44,7 @@ public class ExtractionMetrics extends GenericIlluminaParser{
 			setVersion(leis.readByte());	
 			setRecordLength(leis.readByte()); 
 		}catch(IOException Ex){
-			metrixLogger.log.severe("Error in parsing version number and recordlength: " + Ex.toString());
+			metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", Ex.toString());
 		}
 
 		try{
@@ -72,7 +66,7 @@ public class ExtractionMetrics extends GenericIlluminaParser{
 				long dateTime = leis.readLong();
 			}
 		}catch(IOException ExMain){
-			metrixLogger.log.severe("Error in main parsing of metrics data: " + ExMain.toString());
+			metrixLogger.log.log(Level.SEVERE, "Error in main parsing of metrics data: {0}", ExMain.toString());
 		}
 	}
 
@@ -87,10 +81,10 @@ public class ExtractionMetrics extends GenericIlluminaParser{
 				leis.skipBytes(36);			
 			}
 		}catch(IOException Ex){
-			metrixLogger.log.severe("IOException in Unique Cycles " + Ex.toString());
+			metrixLogger.log.log(Level.SEVERE, "IOException in Unique Cycles {0}", Ex.toString());
 		}		
 		
-		List<Integer> newList = new ArrayList<Integer>(new HashSet<Integer>(cycles));
+		List<Integer> newList = new ArrayList<Integer>(new HashSet<>(cycles));
 		Collections.sort(newList);
 
 		return newList;

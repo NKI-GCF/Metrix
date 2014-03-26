@@ -1,6 +1,5 @@
 package nki.util;
 
-import static java.nio.file.StandardCopyOption.*;
 import static java.nio.file.FileVisitResult.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
@@ -13,10 +12,11 @@ public class FileOperations{
 	private Path destination;
 	private String pattern;
 	private CopyOption[] options;
-	private ArrayList<Path> results = new ArrayList<Path>();
+	private ArrayList<Path> results;
 	private List<Path> exclusions; 
 
 	public FileOperations(Path source, Path destination, CopyOption[] options){
+        this.results = new ArrayList<>();
 		this.source = source;
 		this.destination = destination;
 		this.options = options;
@@ -24,6 +24,7 @@ public class FileOperations{
 	}
 
 	public FileOperations(Path source, String pattern){
+        this.results = new ArrayList<>();
 		this.source = source;
 		this.pattern = pattern;
 	}

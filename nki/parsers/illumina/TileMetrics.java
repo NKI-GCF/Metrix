@@ -7,21 +7,13 @@
 
 package nki.parsers.illumina;
 
-import nki.io.LittleEndianInputStream;
 import java.io.IOException;
 import java.io.EOFException;
-import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.Collections;
 import java.util.*;
+import java.util.logging.Level;
 import nki.objects.ClusterDensity;
 import nki.objects.PhasingCollection;
-import nki.objects.Phasing;
 import nki.objects.Reads;
 import nki.util.LoggerWrapper;
 
@@ -41,7 +33,7 @@ public class TileMetrics extends GenericIlluminaParser {
 	// LANE --> READ --> PrePhasingScores
 	private PhasingCollection preMap = new PhasingCollection();
 
-	ArrayList<Integer> cycles = new ArrayList<Integer>();
+	ArrayList<Integer> cycles = new ArrayList<>();
 
 	public TileMetrics(String source, int state){
 		super(TileMetrics.class, source, state);
@@ -104,7 +96,7 @@ public class TileMetrics extends GenericIlluminaParser {
 			setVersion(leis.readByte());
 			setRecordLength(leis.readByte());
 		}catch(IOException Ex){
-			metrixLogger.log.severe("Error in parsing version number and recordLength: " + Ex.toString());
+			metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
 		}
 
 		boolean eofCheck = true;
@@ -210,7 +202,7 @@ public class TileMetrics extends GenericIlluminaParser {
 	}
 	
 	private List<Integer> digits(int i) {
-	    List<Integer> digits = new ArrayList<Integer>();
+	    List<Integer> digits = new ArrayList<>();
 	    while(i > 0) {
 	        digits.add(i % 10);
 	        i /= 10;

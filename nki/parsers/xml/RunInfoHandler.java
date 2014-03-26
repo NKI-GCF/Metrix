@@ -23,16 +23,21 @@ public class RunInfoHandler {
 		sum.setRunId(runID);
 
 		String[] spl = runID.split("_");
-		if((spl[3].substring(0,1)).equals("A")){
-			sum.setSide("A");
-			sum.setInstrumentType("HiSeq");
-		}else if((spl[3].substring(0,1)).equals("B")){
-			sum.setSide("B");
-			sum.setInstrumentType("HiSeq");
-		}else{	// Instrument type is MiSeq - No Side
-			sum.setSide("");
-			sum.setInstrumentType("MiSeq");
-		}
+        switch (spl[3].substring(0,1)) {
+            case "A":
+                sum.setSide("A");
+                sum.setInstrumentType("HiSeq");
+                break;
+            case "B":
+                sum.setSide("B");
+                sum.setInstrumentType("HiSeq");
+                break;
+            default:
+                // Instrument type is MiSeq - No Side
+                sum.setSide("");
+                sum.setInstrumentType("MiSeq");
+                break;
+        }
 
 		if(spl.length>4){
 			sum.setRunNameOptional(spl[4]);

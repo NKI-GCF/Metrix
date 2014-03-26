@@ -7,14 +7,8 @@
 
 package nki.util;
 
-import java.net.*;
-import java.io.*;
-import java.lang.*;
-import java.util.Collections;
 import java.util.Comparator;
 import nki.objects.PostProcess;
-import nki.objects.FileOperation;
-import nki.objects.Application;
 
 public class OperationComparator<T extends PostProcess> implements Comparator<T> {
 
