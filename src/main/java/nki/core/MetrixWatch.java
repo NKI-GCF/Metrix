@@ -1,3 +1,4 @@
+package nki.core;
 
 import java.util.regex.*;
 import java.io.*;
@@ -323,7 +324,7 @@ public class MetrixWatch extends Thread {
         while (it.hasNext()) {
 
             Map.Entry watchPairs = (Map.Entry) it.next();
-            long mapTime = (long) watchPairs.getValue();
+            long mapTime = (Long)watchPairs.getValue();
 
             Path watchDir = keys.get(watchPairs.getKey());
 

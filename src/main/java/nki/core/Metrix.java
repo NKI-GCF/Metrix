@@ -1,3 +1,5 @@
+package nki.core;
+
 import java.io.*;
 import java.util.regex.*;
 import java.util.ArrayList;

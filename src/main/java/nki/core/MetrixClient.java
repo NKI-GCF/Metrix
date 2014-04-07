@@ -1,3 +1,5 @@
+package nki.core;
+
 // Metrix - A server / client interface for Illumina Sequencing Metrics.
 // Copyright (C) 2013 Bernd van der Veen
 

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>nki</groupId>
+  <artifactId>metrix</artifactId>
+  <packaging>jar</packaging>
+  <version>0.9-2014</version>
+  <name>Metrix Illumina InterOp server/client framework</name>
+  <url>https://github.com/NKI-GCF/Metrix</url>
+
+  <scm>
+    <connection>
+      scm:git:https://www.github.com/NKI-GCF/Metrix
+    </connection>
+    <developerConnection>
+      scm:git:ssh://www.github.com/NKI-GCF/Metrix
+    </developerConnection>
+    <url>
+      https://www.github.com/NKI-GCF/Metrix
+    </url>
+  </scm>
+
+  <repositories>  
+    <repository>
+      <id>tgac-repo</id>
+      <name>TGAC Maven Repository</name>
+      <url>https://repos.tgac.ac.uk/maven/repo</url>
+      <releases>
+        <updatePolicy>always</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
+
+    <repository>
+      <id>Atlassian Maven Repository</id>
+      <url>https://maven.atlassian.com/public</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>tgac-repo</id>
+      <name>TGAC Maven Repository</name>
+      <url>https://repos.tgac.ac.uk/maven/repo</url>
+    </pluginRepository>
+
+    <pluginRepository>
+      <id>apache-snapshots</id>
+      <name>apache snapshots repository</name>
+      <url>http://repository.apache.org/snapshots</url>
+      <snapshots>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </pluginRepository>
+
+    <pluginRepository>
+      <id>Atlassian Maven Repository</id>
+      <url>https://maven.atlassian.com/public</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>nki.core.Metrix</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.0</version>
+    </dependency>
+  </dependencies>
+
+</project>
