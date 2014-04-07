@@ -13,261 +13,272 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.ListIterator;
+
 import nki.objects.Summary;
 import nki.objects.MutableInt;
 import nki.constants.Constants;
 import nki.util.LoggerWrapper;
 
 import org.w3c.dom.*;
+
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 
 public class SummaryCollection implements Serializable {
-	// Object Specific
-	private static final long serialVersionUID = 42L;
+  // Object Specific
+  private static final long serialVersionUID = 42L;
 
-	// Instantiate Logger	
-	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  // Instantiate Logger
+  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
-	// Object Collection
-	private ArrayList<Summary> summaryCollection = new ArrayList<Summary>();
-	private HashMap<Integer, MutableInt> summaryStateMapping = new HashMap<Integer, MutableInt>();
-	private String collectionFormat = Constants.COM_FORMAT_OBJ;			// Default
+  // Object Collection
+  private ArrayList<Summary> summaryCollection = new ArrayList<Summary>();
+  private HashMap<Integer, MutableInt> summaryStateMapping = new HashMap<Integer, MutableInt>();
+  private String collectionFormat = Constants.COM_FORMAT_OBJ;      // Default
 
-	public void appendSummary(Summary sum){
-		summaryCollection.add(sum);
-		
-		MutableInt frq = summaryStateMapping.get(sum.getState());
-		if(frq == null){
-			summaryStateMapping.put(sum.getState(), new MutableInt());
-		}else{
-			summaryStateMapping.get(sum.getState()).increment();
-		}
-	}
+  public void appendSummary(Summary sum) {
+    summaryCollection.add(sum);
 
-	public Document getSummaryCollectionAsXML(Command com){
-		Document xmlDoc = null;
-		try{
-			// Build the XML document
-			DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
-			xmlDoc = docBuilder.newDocument();
+    MutableInt frq = summaryStateMapping.get(sum.getState());
+    if (frq == null) {
+      summaryStateMapping.put(sum.getState(), new MutableInt());
+    }
+    else {
+      summaryStateMapping.get(sum.getState()).increment();
+    }
+  }
 
-			Element root = xmlDoc.createElement("SummaryCollection");
-			xmlDoc.appendChild(root);
-			
-			// Set run counts as root attributes
-			root.setAttribute("active", convertStateInt(Constants.STATE_RUNNING));
-			root.setAttribute("finished", convertStateInt(Constants.STATE_FINISHED));
-			root.setAttribute("error", convertStateInt(Constants.STATE_HANG));
-			root.setAttribute("turn", convertStateInt(Constants.STATE_TURN));
-			root.setAttribute("init", convertStateInt(Constants.STATE_INIT));
+  public Document getSummaryCollectionAsXML(Command com) {
+    Document xmlDoc = null;
+    try {
+      // Build the XML document
+      DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+      xmlDoc = docBuilder.newDocument();
 
-			ListIterator litr = this.getSummaryIterator();
-		
-			// Iterate over Summary Collection and add values to XmlDocFac
-			while(litr.hasNext()){
-				Summary sumObj = (Summary) litr.next();
+      Element root = xmlDoc.createElement("SummaryCollection");
+      xmlDoc.appendChild(root);
 
-				// If state is 12, fetch all objects.
-				if(sumObj.getState() == com.getState() || com.getState() == Constants.STATE_ALL_PSEUDO){
-					Element sumXml = xmlDoc.createElement("Summary");
-					sumXml.setAttribute("runId", sumObj.getRunId());
-					if(com.getType().equals(Constants.COM_TYPE_SIMPLE)){
-						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
-					}else if(com.getType().equals(Constants.COM_TYPE_DETAIL)){
-						sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
-					}else if(com.getType().equals(Constants.COM_TYPE_METRIC)){
-						sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);
-					}else{
-						sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
-					}
+      // Set run counts as root attributes
+      root.setAttribute("active", convertStateInt(Constants.STATE_RUNNING));
+      root.setAttribute("finished", convertStateInt(Constants.STATE_FINISHED));
+      root.setAttribute("error", convertStateInt(Constants.STATE_HANG));
+      root.setAttribute("turn", convertStateInt(Constants.STATE_TURN));
+      root.setAttribute("init", convertStateInt(Constants.STATE_INIT));
 
-					root.appendChild(sumXml);
-				}
-			}			
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}
-		
-		setCollectionFormat(Constants.COM_FORMAT_XML);		
+      ListIterator litr = this.getSummaryIterator();
 
-		// Return in the form of a XML Document
-		return xmlDoc;
-	}
+      // Iterate over Summary Collection and add values to XmlDocFac
+      while (litr.hasNext()) {
+        Summary sumObj = (Summary) litr.next();
+
+        // If state is 12, fetch all objects.
+        if (sumObj.getState() == com.getState() || com.getState() == Constants.STATE_ALL_PSEUDO) {
+          Element sumXml = xmlDoc.createElement("Summary");
+          sumXml.setAttribute("runId", sumObj.getRunId());
+          if (com.getType().equals(Constants.COM_TYPE_SIMPLE)) {
+            sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
+          }
+          else if (com.getType().equals(Constants.COM_TYPE_DETAIL)) {
+            sumXml = summaryAsDetailed(sumObj, sumXml, xmlDoc);
+          }
+          else if (com.getType().equals(Constants.COM_TYPE_METRIC)) {
+            sumXml = summaryAsMetric(sumObj, sumXml, xmlDoc);
+          }
+          else {
+            sumXml = summaryAsSimple(sumObj, sumXml, xmlDoc);
+          }
+
+          root.appendChild(sumXml);
+        }
+      }
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
+    setCollectionFormat(Constants.COM_FORMAT_XML);
+
+    // Return in the form of a XML Document
+    return xmlDoc;
+  }
 
 	/*
-	 *	XML Builders
+   *	XML Builders
 	 */
 
-	private Element summaryAsSimple(Summary sumObj, Element sumXml, Document xmlDoc){
+  private Element summaryAsSimple(Summary sumObj, Element sumXml, Document xmlDoc) {
 
-		sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
-		sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
-		sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState()+""));
-		sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated()+""));
-		sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate()+""));
-		sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles()+""));
-		sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));		
+    sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
+    sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
+    sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));
 
-		return sumXml;
-	}
+    return sumXml;
+  }
 
-	private Element summaryAsDetailed(Summary sumObj, Element sumXml, Document xmlDoc){
+  private Element summaryAsDetailed(Summary sumObj, Element sumXml, Document xmlDoc) {
 
-		sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
-		sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
-		sumXml.appendChild(createElement(xmlDoc, "flowcellId", sumObj.getFlowcellID()));
-		sumXml.appendChild(createElement(xmlDoc, "runSide", sumObj.getSide()));
-		sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState()+""));
-		sumXml.appendChild(createElement(xmlDoc, "runPhase", sumObj.getPhase()));
-		sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated()+""));
-		sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate()+""));
-		sumXml.appendChild(createElement(xmlDoc, "currentCycle", sumObj.getCurrentCycle()+""));
-		sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles()+""));
-		sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));
+    sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
+    sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
+    sumXml.appendChild(createElement(xmlDoc, "flowcellId", sumObj.getFlowcellID()));
+    sumXml.appendChild(createElement(xmlDoc, "runSide", sumObj.getSide()));
+    sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "runPhase", sumObj.getPhase()));
+    sumXml.appendChild(createElement(xmlDoc, "lastUpdated", sumObj.getLastUpdated() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "currentCycle", sumObj.getCurrentCycle() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));
 
-		return sumXml;
+    return sumXml;
 
-	}
+  }
 
-	private Element summaryAsMetric(Summary sumObj, Element sumXml, Document xmlDoc){
-		if(sumObj.getParseError() == 0){
-			// QScore Dist
-			Element xml = xmlDoc.createElement("QScoreDist");
-			QScoreDist dist = sumObj.getQScoreDist();
-			if(dist != null){
-				xml.setAttribute("totalClusters", dist.getTotalClusters()+"");
-				xml = dist.toXML(xml,xmlDoc);
-			}
+  private Element summaryAsMetric(Summary sumObj, Element sumXml, Document xmlDoc) {
+    if (sumObj.getParseError() == 0) {
+      // QScore Dist
+      Element xml = xmlDoc.createElement("QScoreDist");
+      QScoreDist dist = sumObj.getQScoreDist();
+      if (dist != null) {
+        xml.setAttribute("totalClusters", dist.getTotalClusters() + "");
+        xml = dist.toXML(xml, xmlDoc);
+      }
 
-			if(sumObj.hasSampleInfo()){
-				sumXml = sumObj.getSampleInfo().toXML(sumXml, xmlDoc);
-			}
+      if (sumObj.hasSampleInfo()) {
+        sumXml = sumObj.getSampleInfo().toXML(sumXml, xmlDoc);
+      }
 
-			// Cluster Density
-			if(sumObj.hasClusterDensity()){
-				sumXml = sumObj.getClusterDensity().toXML(sumXml, xmlDoc);
-			}
+      // Cluster Density
+      if (sumObj.hasClusterDensity()) {
+        sumXml = sumObj.getClusterDensity().toXML(sumXml, xmlDoc);
+      }
 
-			// Cluster Density Passing Filter
-			if(sumObj.hasClusterDensityPF()){
-				sumXml = sumObj.getClusterDensityPF().toXML(sumXml, xmlDoc);
-			}
+      // Cluster Density Passing Filter
+      if (sumObj.hasClusterDensityPF()) {
+        sumXml = sumObj.getClusterDensityPF().toXML(sumXml, xmlDoc);
+      }
 
-			// Intensities
-			if(sumObj.hasIntensityDistCCAvg()){
-				sumXml = sumObj.getIntensityDistCCAvg().toXML(sumXml, xmlDoc);
-			}
-			
-			// Prephasing
-			if(sumObj.hasPrephasing()){
-				sumXml = sumObj.getPrephasingMap().toXML(sumXml, xmlDoc);
-			}
+      // Intensities
+      if (sumObj.hasIntensityDistCCAvg()) {
+        sumXml = sumObj.getIntensityDistCCAvg().toXML(sumXml, xmlDoc);
+      }
 
-			// Phasing
-			if(sumObj.hasPhasing()){
-				sumXml = sumObj.getPhasingMap().toXML(sumXml, xmlDoc);
-			}
-	
-		}else{
-			
-			sumXml = xmlDoc.createElement("ParseError");
-			sumXml.setAttribute("runId", sumObj.getRunId());
-		}
-		
-		return sumXml;
-	}
+      // Prephasing
+      if (sumObj.hasPrephasing()) {
+        sumXml = sumObj.getPrephasingMap().toXML(sumXml, xmlDoc);
+      }
+
+      // Phasing
+      if (sumObj.hasPhasing()) {
+        sumXml = sumObj.getPhasingMap().toXML(sumXml, xmlDoc);
+      }
+
+    }
+    else {
+
+      sumXml = xmlDoc.createElement("ParseError");
+      sumXml.setAttribute("runId", sumObj.getRunId());
+    }
+
+    return sumXml;
+  }
 
 	/*
 	 *  Helpers
 	 */
 
-	private String convertStateInt(int mapping){
+  private String convertStateInt(int mapping) {
 
-		if(summaryStateMapping.containsKey(mapping)){
-			return Integer.toString(summaryStateMapping.get(mapping).get());
-		}else{
-			return "";
-		}
-	}
+    if (summaryStateMapping.containsKey(mapping)) {
+      return Integer.toString(summaryStateMapping.get(mapping).get());
+    }
+    else {
+      return "";
+    }
+  }
 
-	private Element createElement(Document doc, String name, String text){
-		Element e = doc.createElement(name);
-		if(text == null){
-			text = "";
-		}
-		e.appendChild(doc.createTextNode(text));
+  private Element createElement(Document doc, String name, String text) {
+    Element e = doc.createElement(name);
+    if (text == null) {
+      text = "";
+    }
+    e.appendChild(doc.createTextNode(text));
 
-		return e;
-	}
+    return e;
+  }
 
 	/*
 	 *	Converters 
 	 */
 
 
-	public String toTab(Command com){
-			ListIterator litr = this.getSummaryIterator();
-		
-			// Iterate over Summary Collection convert to tab separated format.
-			while(litr.hasNext()){
-				Summary sumObj = (Summary) litr.next();
-				
-				
-			}
+  public String toTab(Command com) {
+    ListIterator litr = this.getSummaryIterator();
 
-			return "";
-	}
+    // Iterate over Summary Collection convert to tab separated format.
+    while (litr.hasNext()) {
+      Summary sumObj = (Summary) litr.next();
 
-	public String getSummaryCollectionXMLAsString(Command com){
-		// Call getSummaryCollectionAsXML
-		Document xmlDoc = this.getSummaryCollectionAsXML(com);
-		StringWriter writer = new StringWriter();
 
-		try {
-			TransformerFactory tFact = TransformerFactory.newInstance();
-			Transformer trans = tFact.newTransformer();
-			
-			trans.setOutputProperty("omit-xml-declaration", "yes");
+    }
 
-			StreamResult result = new StreamResult(writer);
-			DOMSource source = new DOMSource(xmlDoc);
-			trans.transform(source, result);
-		}catch(TransformerConfigurationException TCE){
-			metrixLogger.log.severe("TransformerConfigurationException: " + TCE.toString());
-		}catch(TransformerException TE){
-			metrixLogger.log.severe("TransformerException: " + TE.toString());
-		}
+    return "";
+  }
 
-		return writer.toString();
-	}
+  public String getSummaryCollectionXMLAsString(Command com) {
+    // Call getSummaryCollectionAsXML
+    Document xmlDoc = this.getSummaryCollectionAsXML(com);
+    StringWriter writer = new StringWriter();
+
+    try {
+      TransformerFactory tFact = TransformerFactory.newInstance();
+      Transformer trans = tFact.newTransformer();
+
+      trans.setOutputProperty("omit-xml-declaration", "yes");
+
+      StreamResult result = new StreamResult(writer);
+      DOMSource source = new DOMSource(xmlDoc);
+      trans.transform(source, result);
+    }
+    catch (TransformerConfigurationException TCE) {
+      metrixLogger.log.severe("TransformerConfigurationException: " + TCE.toString());
+    }
+    catch (TransformerException TE) {
+      metrixLogger.log.severe("TransformerException: " + TE.toString());
+    }
+
+    return writer.toString();
+  }
 
 	/*
 	 *	Getters / Setters
-	 */ 
+	 */
 
-	public void setCollectionFormat(String format){
-		this.collectionFormat = format;
-	}
+  public void setCollectionFormat(String format) {
+    this.collectionFormat = format;
+  }
 
-	public String getCollectionFormat(){
-		return collectionFormat;
-	}
+  public String getCollectionFormat() {
+    return collectionFormat;
+  }
 
-	public ListIterator<Summary> getSummaryIterator(){
-		return summaryCollection.listIterator();
-	}
+  public ListIterator<Summary> getSummaryIterator() {
+    return summaryCollection.listIterator();
+  }
 
-	public int getCollectionCount(){
-		return summaryCollection.size();
-	}
+  public int getCollectionCount() {
+    return summaryCollection.size();
+  }
 
-	public Iterator getStateCount(){
-		return summaryStateMapping.entrySet().iterator();
-	}
+  public Iterator getStateCount() {
+    return summaryStateMapping.entrySet().iterator();
+  }
 
 
 }

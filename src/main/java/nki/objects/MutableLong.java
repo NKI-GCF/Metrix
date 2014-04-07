@@ -9,26 +9,26 @@ package nki.objects;
 
 import java.io.*;
 
-public class MutableLong implements Serializable{
-	public static final long serialVersionUID = 42L;
-	public long val = 0;
+public class MutableLong implements Serializable {
+  public static final long serialVersionUID = 42L;
+  public long val = 0;
 
-	public MutableLong(){
-	}
+  public MutableLong() {
+  }
 
-	public void increment(){
-		++val;
-	}
-	
-	public long get() {
-		return val;
-	}
+  public void increment() {
+    ++val;
+  }
 
-	public void add(long addVal){
-		val += addVal;
-	}
+  public long get() {
+    return val;
+  }
 
-	public String toString(){
-		return val + "";
-	}
+  public void add(long addVal) {
+    val += addVal;
+  }
+
+  public String toString() {
+    return val + "";
+  }
 }

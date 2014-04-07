@@ -13,76 +13,79 @@ import java.util.Iterator;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+
 import nki.objects.MutableLong;
 
 import org.w3c.dom.*;
+
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 
-public class ClusterDensityDist implements Serializable{
+public class ClusterDensityDist implements Serializable {
 
-	public static final long serialVersionUID = 42L;
-	
-	// QualityMap - Integer scores
-	private HashMap<Integer, MutableLong> qScoreDist = new HashMap<Integer, MutableLong>();
+  public static final long serialVersionUID = 42L;
 
-	public MutableLong getScore(int qScore){
-		return qScoreDist.get(qScore);
-	}
+  // QualityMap - Integer scores
+  private HashMap<Integer, MutableLong> qScoreDist = new HashMap<Integer, MutableLong>();
 
-	public void setScore(int qScore, long metric){
-		MutableLong val = qScoreDist.get(qScore);
-		if(val == null){
-			val = new MutableLong();
-			val.add(metric);
-			qScoreDist.put(qScore, val);
-		}else{
-			qScoreDist.get(qScore).add(metric);
-		}
-	}
+  public MutableLong getScore(int qScore) {
+    return qScoreDist.get(qScore);
+  }
 
-	public Element toXML(Element sumXml, Document xmlDoc){
-		Element distXml = xmlDoc.createElement("QScores");
-		for(int scoreVal : qScoreDist.keySet()){
-			Element scoreEle = xmlDoc.createElement("QScore");
-			Element score = createElement(xmlDoc, "Score", scoreVal+"");
-			MutableLong metric = this.getScore(scoreVal);
-			Element clusters = createElement(xmlDoc, "Clusters", metric.get()+"");
-			scoreEle.appendChild(score);
-			scoreEle.appendChild(clusters);
-			distXml.appendChild(scoreEle);
+  public void setScore(int qScore, long metric) {
+    MutableLong val = qScoreDist.get(qScore);
+    if (val == null) {
+      val = new MutableLong();
+      val.add(metric);
+      qScoreDist.put(qScore, val);
+    }
+    else {
+      qScoreDist.get(qScore).add(metric);
+    }
+  }
 
-			sumXml.appendChild(distXml);
-		}
+  public Element toXML(Element sumXml, Document xmlDoc) {
+    Element distXml = xmlDoc.createElement("QScores");
+    for (int scoreVal : qScoreDist.keySet()) {
+      Element scoreEle = xmlDoc.createElement("QScore");
+      Element score = createElement(xmlDoc, "Score", scoreVal + "");
+      MutableLong metric = this.getScore(scoreVal);
+      Element clusters = createElement(xmlDoc, "Clusters", metric.get() + "");
+      scoreEle.appendChild(score);
+      scoreEle.appendChild(clusters);
+      distXml.appendChild(scoreEle);
 
-		return sumXml;
-	}
+      sumXml.appendChild(distXml);
+    }
 
-	private Element createElement(Document doc, String name, String text){
-		Element e = doc.createElement(name);
-		if(text == null){
-			text = "";
-		}
-		e.appendChild(doc.createTextNode(text));
+    return sumXml;
+  }
 
-		return e;
-	}
+  private Element createElement(Document doc, String name, String text) {
+    Element e = doc.createElement(name);
+    if (text == null) {
+      text = "";
+    }
+    e.appendChild(doc.createTextNode(text));
 
-	public String toTab(){
-		String out = "";
+    return e;
+  }
 
-		for(int score : qScoreDist.keySet()){
-			MutableLong metric = this.getScore(score);
-			out += score +"\t" + metric.get() + "\n";
-		}
+  public String toTab() {
+    String out = "";
 
-		return out;
-	}
+    for (int score : qScoreDist.keySet()) {
+      MutableLong metric = this.getScore(score);
+      out += score + "\t" + metric.get() + "\n";
+    }
 
-	public HashMap<Integer, MutableLong> toObj(){
-		return qScoreDist;
-	}
+    return out;
+  }
+
+  public HashMap<Integer, MutableLong> toObj() {
+    return qScoreDist;
+  }
 
 }

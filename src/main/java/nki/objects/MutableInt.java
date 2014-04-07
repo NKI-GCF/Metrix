@@ -9,48 +9,50 @@ package nki.objects;
 
 import java.io.*;
 
-public class MutableInt implements Serializable{
-	public static final long serialVersionUID = 42L;
-	public int val = 0;
-	public int numTiles = 0;
+public class MutableInt implements Serializable {
+  public static final long serialVersionUID = 42L;
+  public int val = 0;
+  public int numTiles = 0;
 
-	public MutableInt(){
-	}
+  public MutableInt() {
+  }
 
-	public void add(Integer val){
-		this.val += val;
-		incrementTiles();
-	}
+  public void add(Integer val) {
+    this.val += val;
+    incrementTiles();
+  }
 
-	public void increment(){
-		++val;
-		incrementTiles();
-	}
-	
-	public int get() {
-		return val;
-	}
+  public void increment() {
+    ++val;
+    incrementTiles();
+  }
 
-//	public void avg(int numTiles){
-	public void avg(){
-		this.val = val / numTiles;
-	}
+  public int get() {
+    return val;
+  }
 
-	public int getAvg(){
-		if(numTiles == 0){return val;}
-		return val / numTiles;
-	}
+  //	public void avg(int numTiles){
+  public void avg() {
+    this.val = val / numTiles;
+  }
 
-	public String toString(){
-		return val + "";
-	}
+  public int getAvg() {
+    if (numTiles == 0) {
+      return val;
+    }
+    return val / numTiles;
+  }
 
-	public void incrementTiles(){
-		numTiles++;
-	}
+  public String toString() {
+    return val + "";
+  }
 
-	public int getTiles(){
-		return numTiles;
-	}
+  public void incrementTiles() {
+    numTiles++;
+  }
+
+  public int getTiles() {
+    return numTiles;
+  }
 
 }

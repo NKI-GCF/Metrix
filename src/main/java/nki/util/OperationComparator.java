@@ -8,6 +8,7 @@
 package nki.util;
 
 import java.util.Comparator;
+
 import nki.objects.PostProcess;
 
 public class OperationComparator<T extends PostProcess> implements Comparator<T> {
@@ -15,12 +16,13 @@ public class OperationComparator<T extends PostProcess> implements Comparator<T>
   @Override
   public int compare(T p1, T p2) {
 
-	int mainOrderCompare = Integer.compare(p1.getOrder(), p2.getOrder());
-     if (mainOrderCompare != 0) {
-        return mainOrderCompare;
-     } else {
-		return (p1.getSubOrder() < p2.getSubOrder() ) ? -1 : (p1.getSubOrder() > p2.getSubOrder()) ? 1 : 0;
-     }
+    int mainOrderCompare = Integer.compare(p1.getOrder(), p2.getOrder());
+    if (mainOrderCompare != 0) {
+      return mainOrderCompare;
+    }
+    else {
+      return (p1.getSubOrder() < p2.getSubOrder()) ? -1 : (p1.getSubOrder() > p2.getSubOrder()) ? 1 : 0;
+    }
   }
 
 }

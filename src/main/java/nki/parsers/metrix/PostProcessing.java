@@ -25,6 +25,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.*;
+
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import nki.objects.Summary;
@@ -35,543 +36,592 @@ import nki.util.LoggerWrapper;
 import nki.util.PostProcessComparator;
 import nki.util.OperationComparator;
 import nki.util.FileOperations;
+
 import java.nio.file.*;
 import java.nio.file.Files;
+
 import static java.nio.file.StandardCopyOption.*;
+
 import java.util.logging.Level;
 
 public class PostProcessing {
-	
-	private DocumentBuilderFactory documentBuilderFactory;
-	private DocumentBuilder documentBuilder;
-	private Document doc;
-	private Summary sum;
-	private String xmlFile;
-	private ArrayList<PostProcess> blockList = new ArrayList<>();
-	private ArrayList<PostProcess> processList = new ArrayList<>();
-	private boolean isValid = true;
-	private boolean hasFinished = false;
 
-	private HashMap<String, String> tm = new HashMap<>();	// Template mapping collection for placeholder substitutions.
-	// Instantiate Logger
-	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
-    // Properties config
-	private static final Properties configFile = new Properties();
-		
+  private DocumentBuilderFactory documentBuilderFactory;
+  private DocumentBuilder documentBuilder;
+  private Document doc;
+  private Summary sum;
+  private String xmlFile;
+  private ArrayList<PostProcess> blockList = new ArrayList<>();
+  private ArrayList<PostProcess> processList = new ArrayList<>();
+  private boolean isValid = true;
+  private boolean hasFinished = false;
 
-	public PostProcessing(Summary s){
-		this.sum = s;	// Set summary
-	}
+  private HashMap<String, String> tm = new HashMap<>();  // Template mapping collection for placeholder substitutions.
+  // Instantiate Logger
+  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  // Properties config
+  private static final Properties configFile = new Properties();
 
-	public void run(){
-		LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Initializing post processing for {0}", sum.getRunId());
-		/*
+
+  public PostProcessing(Summary s) {
+    this.sum = s;  // Set summary
+  }
+
+  public void run() {
+    LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Initializing post processing for {0}", sum.getRunId());
+    /*
 		 *  Pre PP loaders and checks
 		 */
-		loadProperties();
-		initXml();
-		validateXmlStructure();
+    loadProperties();
+    initXml();
+    validateXmlStructure();
 		
 		/*
 		 *  Load post processing configuration
 		 */
-		loadTemplate();
+    loadTemplate();
 
 		/*
 		 *  Interpret processing
-		 */ 
-		parseXmlStructure();	
+		 */
+    parseXmlStructure();
 
 		/*
 		 *  Execute post processing
 		 */
-		if(isValid){
-			executeProcessing();
-		}else{
-			LoggerWrapper.log.warning("[Metrix Post-Processor] One or more validation checks failed. Cannot execute processing.");
-		}
+    if (isValid) {
+      executeProcessing();
+    }
+    else {
+      LoggerWrapper.log.warning("[Metrix Post-Processor] One or more validation checks failed. Cannot execute processing.");
+    }
 
-		if(hasFinished){
-			LoggerWrapper.log.info("[Metrix Post-Processor] Post processing has successfully finished.");
-		}else{
-			LoggerWrapper.log.warning("[Metrix Post-Processor] One or more steps during post processing encountered errors. Please check your configuration.");
-		}
-	}
+    if (hasFinished) {
+      LoggerWrapper.log.info("[Metrix Post-Processor] Post processing has successfully finished.");
+    }
+    else {
+      LoggerWrapper.log.warning("[Metrix Post-Processor] One or more steps during post processing encountered errors. Please check your configuration.");
+    }
+  }
 
-	private void loadProperties(){
-		LoggerWrapper.log.finer("[Metrix Post-Processor] Loading properties...");
-        try{
-			// Use external properties file, outside of jar location.
-    	    String externalFileName = System.getProperty("properties");
-	        String absFile = (new File(externalFileName)).getAbsolutePath();
-            try (InputStream fin = new FileInputStream(new File(absFile))) {
-                configFile.load(fin);
-            }
-			LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully loaded properties: {0}", absFile);
-        }catch(FileNotFoundException FNFE){
-            LoggerWrapper.log.severe("[ERROR] Properties file not found.");
-			isValid = false;
-        }catch(IOException Ex){
-            LoggerWrapper.log.log(Level.SEVERE, "[ERROR] Reading properties file. {0}", Ex.toString());
-			isValid = false;
+  private void loadProperties() {
+    LoggerWrapper.log.finer("[Metrix Post-Processor] Loading properties...");
+    try {
+      // Use external properties file, outside of jar location.
+      String externalFileName = System.getProperty("properties");
+      String absFile = (new File(externalFileName)).getAbsolutePath();
+      try (InputStream fin = new FileInputStream(new File(absFile))) {
+        configFile.load(fin);
+      }
+      LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully loaded properties: {0}", absFile);
+    }
+    catch (FileNotFoundException FNFE) {
+      LoggerWrapper.log.severe("[ERROR] Properties file not found.");
+      isValid = false;
+    }
+    catch (IOException Ex) {
+      LoggerWrapper.log.log(Level.SEVERE, "[ERROR] Reading properties file. {0}", Ex.toString());
+      isValid = false;
+    }
+  }
+
+  private void initXml() {
+    LoggerWrapper.log.finer("[Metrix Post-Processor] Initializing post processing xml.");
+    try {
+      xmlFile = configFile.getProperty("POSTPROCESSING", "./postprocessing.mtx");
+      documentBuilderFactory = DocumentBuilderFactory.newInstance();
+      documentBuilder = documentBuilderFactory.newDocumentBuilder();
+      doc = documentBuilder.parse(xmlFile);
+      doc.getDocumentElement().normalize();
+      LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully loaded post processing xml: {0}", xmlFile);
+    }
+    catch (IOException Ex) {
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException. {0}", Ex.toString());
+      isValid = false;
+    }
+    catch (SAXException SAX) {
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] SAXException. Cannot process post processing XML file ({0})", SAX.toString());
+      isValid = false;
+    }
+    catch (ParserConfigurationException PCE) {
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] ParserConfigurationException. Cannot process post processing XML file ({0})", PCE.toString());
+      isValid = false;
+    }
+  }
+
+  /*
+   * XML Structure validation method.
+   * Contents of postprocessing.mtx (XML) are verified against postprocessing.xsd
+   */
+  private void validateXmlStructure() {
+    LoggerWrapper.log.finer("[Metrix Post-Processor] Validating xml structure...");
+    InputStream xml = null;
+    InputStream xsd = null;
+    try {
+      // The required files:
+      // - postprocessing.mtx	(properties file)
+      // - postprocessing.xsd (default location in root)
+      xml = new FileInputStream(xmlFile);
+      xsd = new FileInputStream("./postprocessing.xsd");
+
+      SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      Schema schema = factory.newSchema(new StreamSource(xsd));
+      Validator validator = schema.newValidator();
+      validator.validate(new StreamSource(xml));
+      LoggerWrapper.log.finer("[Metrix Post-Processor] Successfully validated XML structure.");
+    }
+    catch (IOException IO) {
+      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Failed to open required files. ({0})", IO.toString());
+      isValid = false;
+    }
+    catch (SAXException ex) {  // Validation failed
+      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] XML validation failed. ({0} || {1})", new Object[]{ex.toString(), ex.getLocalizedMessage()});
+      isValid = false;
+    }
+    finally {
+      try {
+        if (xml != null) {
+          xml.close();
         }
-	}
 
-	private void initXml(){
-		LoggerWrapper.log.finer("[Metrix Post-Processor] Initializing post processing xml.");
-		try{
-			xmlFile = configFile.getProperty("POSTPROCESSING", "./postprocessing.mtx");
-			documentBuilderFactory = DocumentBuilderFactory.newInstance();
-			documentBuilder = documentBuilderFactory.newDocumentBuilder();
-			doc = documentBuilder.parse(xmlFile);
-			doc.getDocumentElement().normalize();
-			LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully loaded post processing xml: {0}", xmlFile);
-		}catch(IOException Ex){
-			LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException. {0}", Ex.toString());
-			isValid = false;
-		}catch(SAXException SAX){
-			LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] SAXException. Cannot process post processing XML file ({0})", SAX.toString());
-			isValid = false;
-		}catch(ParserConfigurationException PCE){
-			LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] ParserConfigurationException. Cannot process post processing XML file ({0})", PCE.toString());
-			isValid = false;
-		}
-	}
+        if (xsd != null) {
+          xsd.close();
+        }
+      }
+      catch (IOException ex) {
+        LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Error closing XML objects. ({0})", ex.toString());
+      }
+    }
+  }
 
-	/*
-	 * XML Structure validation method.
-	 * Contents of postprocessing.mtx (XML) are verified against postprocessing.xsd
-	 */
-	private void validateXmlStructure(){
-		LoggerWrapper.log.finer("[Metrix Post-Processor] Validating xml structure...");
-		InputStream xml = null;
-		InputStream xsd = null;
-	    try {
-			// The required files:
-			// - postprocessing.mtx	(properties file)
-			// - postprocessing.xsd (default location in root)
-			xml = new FileInputStream(xmlFile);
-			xsd = new FileInputStream("./postprocessing.xsd");
+  private void loadTemplate() {
+    LoggerWrapper.log.finer("[Metrix Post-Processor] Loading templates...");
+    boolean check = true;
 
-    	    SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-	        Schema schema = factory.newSchema(new StreamSource(xsd));
-	        Validator validator = schema.newValidator();
-	        validator.validate(new StreamSource(xml));
-			LoggerWrapper.log.finer("[Metrix Post-Processor] Successfully validated XML structure.");
-    	}catch(IOException IO){
-			LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Failed to open required files. ({0})", IO.toString());
-			isValid = false;
-		}catch(SAXException ex){  // Validation failed
-			LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] XML validation failed. ({0} || {1})", new Object[]{ex.toString(), ex.getLocalizedMessage()});
-			isValid = false;
-	    }finally{
-			try{
-				if(xml != null){
-					xml.close();
-				}
+    tm.put("{TotalCycles}", Integer.toString(sum.getTotalCycles()));
+    tm.put("{FlowcellID}", sum.getFlowcellID());
+    tm.put("{FlowcellSide}", sum.getSide());
+    tm.put("{SequencerRunNr}", Integer.toString(sum.getInstrumentRunNumber()));
+    tm.put("{SequencerName}", sum.getInstrument());
+    tm.put("{SequencerType}", sum.getInstrumentType());
+    tm.put("{RunNameOptional}", sum.getRunNameOptional());
+    tm.put("{RunDate}", Integer.toString(sum.getRunDate()));
+    tm.put("{RunType}", sum.getRunType());
+    tm.put("{RunDirectory}", sum.getRunDirectory());
+    tm.put("{RunID}", sum.getRunId());
+    tm.put("{DemuxIndex}", sum.getReads().getDemultiplexIndex());
 
-				if(xsd != null){
-					xsd.close();
-				}
-			}catch(IOException ex){
-				LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Error closing XML objects. ({0})", ex.toString());
-			}
-		}
-	}
+    for (String a : tm.values()) {
+      if (a == null) {
+        LoggerWrapper.log.warning("[Metrix Post-Processor] Null values found in template set. Failed.");
+        isValid = false;
+        check = false;
+      }
+    }
 
-	private void loadTemplate(){
-		LoggerWrapper.log.finer("[Metrix Post-Processor] Loading templates...");
-		boolean check = true;
+    if (check) {
+      LoggerWrapper.log.finer("[Metrix Post-Processor] Templates OK.");
+    }
+  }
 
-		tm.put("{TotalCycles}",Integer.toString(sum.getTotalCycles()));
-		tm.put("{FlowcellID}", sum.getFlowcellID());
-		tm.put("{FlowcellSide}", sum.getSide());
-		tm.put("{SequencerRunNr}", Integer.toString(sum.getInstrumentRunNumber()));
-		tm.put("{SequencerName}", sum.getInstrument());
-		tm.put("{SequencerType}", sum.getInstrumentType());
-		tm.put("{RunNameOptional}", sum.getRunNameOptional());
-		tm.put("{RunDate}", Integer.toString(sum.getRunDate()));
-		tm.put("{RunType}", sum.getRunType());
-		tm.put("{RunDirectory}", sum.getRunDirectory());
-		tm.put("{RunID}", sum.getRunId());
-		tm.put("{DemuxIndex}", sum.getReads().getDemultiplexIndex());
+  private void parseXmlStructure() {
+    // By de facto the XSD validation should have caught the root element name formatting
+    if (doc.getDocumentElement().getNodeName().equals("Metrix")) {
+      NodeList nodeList = doc.getElementsByTagName("*");
 
-		for (String a : tm.values()) {
-			if(a == null){
-				LoggerWrapper.log.warning("[Metrix Post-Processor] Null values found in template set. Failed.");		
-				isValid = false;
-				check = false;
-			}
-		}
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        Node node = nodeList.item(i);
+        if (node.getNodeName().equals("Metrix")) {
+          continue;
+        }
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+          String nodeName = node.getNodeName();
+          if (nodeName.equals("FileOperation") || nodeName.equals("Application")) {
+            // Do block node processing
+            PostProcess processBlock = new PostProcess(node);
+            blockList.add(processBlock);
 
-		if(check){
-			LoggerWrapper.log.finer("[Metrix Post-Processor] Templates OK.");
-		}
-	}
+            NodeList foChildren = node.getChildNodes();
 
-	private void parseXmlStructure(){
-		// By de facto the XSD validation should have caught the root element name formatting
-		if(doc.getDocumentElement().getNodeName().equals("Metrix")){
-			NodeList nodeList = doc.getElementsByTagName("*");
-	
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-				if(node.getNodeName().equals("Metrix")){continue;}
-				if (node.getNodeType() == Node.ELEMENT_NODE) {
-					String nodeName = node.getNodeName();
-						if(nodeName.equals("FileOperation") || nodeName.equals("Application")){
-							// Do block node processing
-							PostProcess processBlock = new PostProcess(node);
-							blockList.add(processBlock);
+            // Iterate over defined children and create do Operation node processing.
+            for (int x = 0; x < foChildren.getLength(); x++) {
+              Node fo = foChildren.item(x);
+              if (fo.getNodeName().equals("#text") || fo.getNodeName().equals("#comment")) {
+                continue;
+              }
+              switch (nodeName) {
+                case "FileOperation":
+                  fo = mapTemplate(fo);
+                  FileOperation foObject = new FileOperation(node, fo);
+                  processList.add(foObject);
+                  break;
+                case "Application":
+                  fo = mapTemplate(fo);
+                  Application appObject = new Application(node, fo);
+                  processList.add(appObject);
+                  break;
+              }
+            }
+          }
+        }
+        else {
+          isValid = false;
+          LoggerWrapper.log.severe("[Metrix Post-Processor] Node Mismatch. This should not be possible");
+        }
+      }
+      LoggerWrapper.log.finest("[Metrix Post-Processor] Sorting the process list...");
+      Collections.sort(blockList, new PostProcessComparator());
+      Collections.sort(processList, new OperationComparator<>());
+      LoggerWrapper.log.finest("[Metrix Post-Processor] Done sorting.");
+    }
+    else {
+      isValid = false;
+      LoggerWrapper.log.severe("[Metrix Post-Processor] Incompatible document structure. This should not be possible.");
+    }
+  }
 
-							NodeList foChildren = node.getChildNodes();
+  private Node mapTemplate(Node childNode) {
+    if (!childNode.hasChildNodes()) {
+      return childNode;
+    }
+    NodeList childNodeList = childNode.getChildNodes();
 
-							// Iterate over defined children and create do Operation node processing.
-							for(int x = 0; x < foChildren.getLength(); x++){
-								Node fo = foChildren.item(x);
-								if(fo.getNodeName().equals("#text") || fo.getNodeName().equals("#comment")){continue;}
-                                switch (nodeName) {
-                                    case "FileOperation":
-                                        fo = mapTemplate(fo);
-                                        FileOperation foObject = new FileOperation(node, fo);
-                                        processList.add(foObject);
-                                        break;
-                                    case "Application":
-                                        fo = mapTemplate(fo);
-                                        Application appObject = new Application(node, fo);
-                                        processList.add(appObject);
-                                        break;
-                                }
-							}
-						}
-					}else{
-						isValid = false;
-						LoggerWrapper.log.severe("[Metrix Post-Processor] Node Mismatch. This should not be possible");
-					}
-			}
-			LoggerWrapper.log.finest("[Metrix Post-Processor] Sorting the process list...");
-			Collections.sort(blockList, new PostProcessComparator());
-			Collections.sort(processList, new OperationComparator<>());
-			LoggerWrapper.log.finest("[Metrix Post-Processor] Done sorting.");
-		}else{
-			isValid = false;
-			LoggerWrapper.log.severe("[Metrix Post-Processor] Incompatible document structure. This should not be possible.");
-		}
-	}
+    for (int i = 0; i < childNodeList.getLength(); i++) {
+      Node innerNode = childNodeList.item(i);
+      Node replacementNode = innerNode;
 
-	private Node mapTemplate(Node childNode){
-		if(!childNode.hasChildNodes()){return childNode;}
-		NodeList childNodeList = childNode.getChildNodes();
+      if (innerNode.getNodeName().equals("#text")) {
+        continue;
+      }
+      String oldVal = innerNode.getTextContent();
 
-		for (int i = 0; i < childNodeList.getLength(); i++) {
-			Node innerNode = childNodeList.item(i);
-			Node replacementNode = innerNode;
+      if (oldVal == null) {
+        continue;
+      }
+      Pattern pattern = Pattern.compile("\\{(.+?)\\}");
+      Matcher matcher = pattern.matcher(oldVal);
+      StringBuffer buffer = new StringBuffer();
+      while (matcher.find()) {
+        String replacement = tm.get(matcher.group());
+        if (replacement != null) {
+          matcher.appendReplacement(buffer, "");
+          buffer.append(replacement);
+        }
+      }
+      matcher.appendTail(buffer);
 
-			if(innerNode.getNodeName().equals("#text")){continue;}
-			String oldVal = innerNode.getTextContent();
-			
-			if(oldVal == null){continue;}
-			Pattern pattern = Pattern.compile("\\{(.+?)\\}");
-			Matcher matcher = pattern.matcher(oldVal);
-			StringBuffer buffer = new StringBuffer();
-			while (matcher.find()) {
-				String replacement = tm.get(matcher.group());
-				if (replacement != null) {
-					matcher.appendReplacement(buffer, "");
-					buffer.append(replacement);
-				}
-			}
-			matcher.appendTail(buffer);
+      replacementNode.setTextContent(buffer.toString());
+      childNode.replaceChild(replacementNode, innerNode);
+    }
+    return childNode;
+  }
 
-			replacementNode.setTextContent(buffer.toString());
-			childNode.replaceChild(replacementNode, innerNode);
-		}
-		return childNode;
-	}
+  private void executeProcessing() {
+    int status = 0;
 
-	private void executeProcessing(){
-		int status = 0;
+    for (PostProcess pp : processList) {
+      if (pp instanceof FileOperation) {
+        FileOperation fo = (FileOperation) pp;
+        if (fo.isValid()) {
+          status += executeFileOperation(fo);
+        }
+        else {
+          LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] FileOperation {0} not populated correctly. Source and/or destination are empty.", fo.getTitle());
+        }
+      }
+      else if (pp instanceof Application) {
+        Application app = (Application) pp;
+        status += executeApplication(app);
+      }
+    }
+    if (status == 0) {
+      hasFinished = true;
+    }
+  }
 
-		for(PostProcess pp : processList){
-			if(pp instanceof FileOperation){
-				FileOperation fo = (FileOperation) pp;
-				if(fo.isValid()){
-					status += executeFileOperation(fo);
-				}else{
-					LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] FileOperation {0} not populated correctly. Source and/or destination are empty.", fo.getTitle());
-				}
-			}else if(pp instanceof Application){
-				Application app = (Application) pp;
-				status += executeApplication(app);
-			}
-		}
-		if(status == 0){
-			hasFinished = true;
-		}
-	}
+  private int executeFileOperation(FileOperation fo) {
+    LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting file operation: {0}", fo.getTitle());
+    int exitStatus = -255;
 
-	private int executeFileOperation(FileOperation fo){
-		LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting file operation: {0}", fo.getTitle());
-		int exitStatus = -255;
-		
-		File sourceFile = new File(fo.getSource());
-		File destinationFile = new File(fo.getDestination());
-	
-		boolean sourceIsDir = false;
-		boolean destinationIsDir = false;
+    File sourceFile = new File(fo.getSource());
+    File destinationFile = new File(fo.getDestination());
 
-		if(!sourceFile.exists()){
-			LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Source file: {0} does not exist.", sourceFile);
-			exitStatus = -1;
-			return exitStatus;
-		}
+    boolean sourceIsDir = false;
+    boolean destinationIsDir = false;
 
-		if(!sourceFile.canRead()){
-			LoggerWrapper.log.warning("[Metrix Post-Processor] Cannot read source file.");
-			exitStatus = -1;
-			return exitStatus;
-		}else{
-			LoggerWrapper.log.log(Level.FINEST, "[Metrix Post-Processor] Source file: {0} is readable.", sourceFile.toString());
-		}
+    if (!sourceFile.exists()) {
+      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Source file: {0} does not exist.", sourceFile);
+      exitStatus = -1;
+      return exitStatus;
+    }
 
-		// If destination is file (assuming that all destination files will have an extension)
-		// 	Check parent
-		File targetDir;
-		if((destinationFile.toString()).lastIndexOf(".") > 0){
-			destinationFile.getParentFile().mkdirs();
-			targetDir = destinationFile.getParentFile();
-		}else{ // If destination is a directory
-			targetDir = destinationFile;
-			destinationFile.mkdirs(); 
-			destinationIsDir = true;
-			fo.setDestination(destinationFile + File.separator + sourceFile.getName());
-			destinationFile = new File(fo.getDestination());
-		}
+    if (!sourceFile.canRead()) {
+      LoggerWrapper.log.warning("[Metrix Post-Processor] Cannot read source file.");
+      exitStatus = -1;
+      return exitStatus;
+    }
+    else {
+      LoggerWrapper.log.log(Level.FINEST, "[Metrix Post-Processor] Source file: {0} is readable.", sourceFile.toString());
+    }
 
-		File sourceDir = null;
-		if((sourceFile.toString()).lastIndexOf(".") == -1){
-			sourceDir = sourceFile;
-			sourceIsDir = true;
-		}
+    // If destination is file (assuming that all destination files will have an extension)
+    // 	Check parent
+    File targetDir;
+    if ((destinationFile.toString()).lastIndexOf(".") > 0) {
+      destinationFile.getParentFile().mkdirs();
+      targetDir = destinationFile.getParentFile();
+    }
+    else { // If destination is a directory
+      targetDir = destinationFile;
+      destinationFile.mkdirs();
+      destinationIsDir = true;
+      fo.setDestination(destinationFile + File.separator + sourceFile.getName());
+      destinationFile = new File(fo.getDestination());
+    }
 
-		if(targetDir.canWrite()){
-			LoggerWrapper.log.info("[Metrix Post-Processor] Destination path is writeable.");
-		}else{
-			LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Destination path is not writeable. {0}", targetDir);
-			exitStatus = -1;
-			return exitStatus;
-		}
+    File sourceDir = null;
+    if ((sourceFile.toString()).lastIndexOf(".") == -1) {
+      sourceDir = sourceFile;
+      sourceIsDir = true;
+    }
 
-		if(fo.needOverwrite() && destinationFile.isFile()){
-			LoggerWrapper.log.info("[Metrix Post-Processor] Destination already exists. Overwriting.");
-		}else if(!fo.needOverwrite() && !destinationFile.exists()){
-			LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Creating file during copy: {0}", sourceFile.getName());
-		}else if((sourceDir != null) && (fo.hasGlobbing())){
-			LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Copying files with extension: {0} from: {1}to: {2}", new Object[]{fo.getGlobbing(), sourceFile.getAbsoluteFile(), destinationFile});		
-		}else if((sourceDir != null) && !(fo.hasGlobbing())){
-			LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Copying directory: {0}\tto: {1}", new Object[]{sourceFile, destinationFile});			
-		}else if(destinationIsDir && destinationFile.exists() && sourceFile.isFile()){
-			LoggerWrapper.log.info("[Metrix Post-Processor] Source is a file - destination is directory.");
-		}else if(destinationIsDir && fo.needOverwrite() && sourceFile.isFile()){
-			LoggerWrapper.log.info("[Metrix Post-Processor] Source is a file - destination is directory - Overwriting file.");
-		}else{
-			LoggerWrapper.log.info("[Metrix Post-Processor] Destination file already exists. Not overwriting.");
-			exitStatus = -1;
-			return exitStatus;
-		}
+    if (targetDir.canWrite()) {
+      LoggerWrapper.log.info("[Metrix Post-Processor] Destination path is writeable.");
+    }
+    else {
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Destination path is not writeable. {0}", targetDir);
+      exitStatus = -1;
+      return exitStatus;
+    }
+
+    if (fo.needOverwrite() && destinationFile.isFile()) {
+      LoggerWrapper.log.info("[Metrix Post-Processor] Destination already exists. Overwriting.");
+    }
+    else if (!fo.needOverwrite() && !destinationFile.exists()) {
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Creating file during copy: {0}", sourceFile.getName());
+    }
+    else if ((sourceDir != null) && (fo.hasGlobbing())) {
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Copying files with extension: {0} from: {1}to: {2}", new Object[]{fo.getGlobbing(), sourceFile.getAbsoluteFile(), destinationFile});
+    }
+    else if ((sourceDir != null) && !(fo.hasGlobbing())) {
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Copying directory: {0}\tto: {1}", new Object[]{sourceFile, destinationFile});
+    }
+    else if (destinationIsDir && destinationFile.exists() && sourceFile.isFile()) {
+      LoggerWrapper.log.info("[Metrix Post-Processor] Source is a file - destination is directory.");
+    }
+    else if (destinationIsDir && fo.needOverwrite() && sourceFile.isFile()) {
+      LoggerWrapper.log.info("[Metrix Post-Processor] Source is a file - destination is directory - Overwriting file.");
+    }
+    else {
+      LoggerWrapper.log.info("[Metrix Post-Processor] Destination file already exists. Not overwriting.");
+      exitStatus = -1;
+      return exitStatus;
+    }
 
 		/*
 		*  Is process a copy operation?
 		*/
-		if(fo.isCopyOperation()){
+    if (fo.isCopyOperation()) {
 
-			// Is globbing used?
-			if(fo.hasGlobbing()){
-				LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Using globbing pattern: {0}", fo.getGlobbing());
-				ArrayList<Path> foundFiles = findFilesGlobbing(Paths.get(fo.getSource()), fo.getGlobbing());
-				
-				// Execute the basic copy  operation for files that have been found with a pattern.
-				exitStatus = executeGlobbingCopy(fo, foundFiles);
-				return exitStatus;
-			}
+      // Is globbing used?
+      if (fo.hasGlobbing()) {
+        LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Using globbing pattern: {0}", fo.getGlobbing());
+        ArrayList<Path> foundFiles = findFilesGlobbing(Paths.get(fo.getSource()), fo.getGlobbing());
 
-			try{
-				CopyOption[] options = new CopyOption[]{};
-				CopyOption[] replOpt = new CopyOption[]{
-					COPY_ATTRIBUTES, 
-					REPLACE_EXISTING,
-					java.nio.file.LinkOption.NOFOLLOW_LINKS
-				};
+        // Execute the basic copy  operation for files that have been found with a pattern.
+        exitStatus = executeGlobbingCopy(fo, foundFiles);
+        return exitStatus;
+      }
 
-				CopyOption[] stdOpt = new CopyOption[]{
-					COPY_ATTRIBUTES,
-					java.nio.file.LinkOption.NOFOLLOW_LINKS
-				};
+      try {
+        CopyOption[] options = new CopyOption[]{};
+        CopyOption[] replOpt = new CopyOption[]{
+            COPY_ATTRIBUTES,
+            REPLACE_EXISTING,
+            java.nio.file.LinkOption.NOFOLLOW_LINKS
+        };
 
-				// Overwrite in file operations?
-				options = !fo.needOverwrite() ? stdOpt : replOpt;
-	
-				// Is the source path a file?
-				if(sourceFile.isFile()){
-					LoggerWrapper.log.log(Level.FINE, "Copying {0}to: {1}", new Object[]{sourceFile, destinationFile});
-					Files.copy( 
-   		   	            sourceFile.toPath(), 
-						destinationFile.toPath(),
-						options
-				    );
-					exitStatus = 0;
-				}else if(sourceFile.isDirectory()){ // Is the sourcepath a directory?
-					FileOperations fileops = 
-						new FileOperations(
-							sourceFile.toPath(),
-							destinationFile.toPath(),
-							options
-						);
-						
-						try{
-							fileops.recursiveCopy();
-							exitStatus = 0;
-						}catch(IOException IO){
-							LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IO Exception in recursive copy: {0}", IO.toString());
-							exitStatus = -1;
-						}
-		
-				}else{
-					LoggerWrapper.log.warning("[Metrix Post-Processor] Source file does not exist. ");
-					exitStatus = -1;
-					return exitStatus;
-				}
-			}catch(IOException Iex){
-				LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IOException during file copy: {0}", Iex.toString());
-				exitStatus = -1; 
-			}
-		
-			if(exitStatus == 0){
-				LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully copied {0} to {1}", new Object[]{sourceFile, destinationFile});
-			}
-		}
+        CopyOption[] stdOpt = new CopyOption[]{
+            COPY_ATTRIBUTES,
+            java.nio.file.LinkOption.NOFOLLOW_LINKS
+        };
+
+        // Overwrite in file operations?
+        options = !fo.needOverwrite() ? stdOpt : replOpt;
+
+        // Is the source path a file?
+        if (sourceFile.isFile()) {
+          LoggerWrapper.log.log(Level.FINE, "Copying {0}to: {1}", new Object[]{sourceFile, destinationFile});
+          Files.copy(
+              sourceFile.toPath(),
+              destinationFile.toPath(),
+              options
+          );
+          exitStatus = 0;
+        }
+        else if (sourceFile.isDirectory()) { // Is the sourcepath a directory?
+          FileOperations fileops =
+              new FileOperations(
+                  sourceFile.toPath(),
+                  destinationFile.toPath(),
+                  options
+              );
+
+          try {
+            fileops.recursiveCopy();
+            exitStatus = 0;
+          }
+          catch (IOException IO) {
+            LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IO Exception in recursive copy: {0}", IO.toString());
+            exitStatus = -1;
+          }
+
+        }
+        else {
+          LoggerWrapper.log.warning("[Metrix Post-Processor] Source file does not exist. ");
+          exitStatus = -1;
+          return exitStatus;
+        }
+      }
+      catch (IOException Iex) {
+        LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IOException during file copy: {0}", Iex.toString());
+        exitStatus = -1;
+      }
+
+      if (exitStatus == 0) {
+        LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully copied {0} to {1}", new Object[]{sourceFile, destinationFile});
+      }
+    }
 
 		/*
 		* Is process a symlink operation?
 		*/
-		if(fo.isSymlinkOperation()){
-			try {
-				Files.createSymbolicLink(sourceFile.toPath(), destinationFile.toPath());
-			}catch (IOException x) {
-				LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IOException while creating a symbolic link: {0}", x.toString());
-			} catch (UnsupportedOperationException x) {
-			    // Some file systems do not support symbolic links.
-				LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] This OS does not support creating symbolic links: {0}", x.toString());
-			}
-		}
+    if (fo.isSymlinkOperation()) {
+      try {
+        Files.createSymbolicLink(sourceFile.toPath(), destinationFile.toPath());
+      }
+      catch (IOException x) {
+        LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IOException while creating a symbolic link: {0}", x.toString());
+      }
+      catch (UnsupportedOperationException x) {
+        // Some file systems do not support symbolic links.
+        LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] This OS does not support creating symbolic links: {0}", x.toString());
+      }
+    }
 
 		/*
 		* Process is another operation type
 		*/
-		// Not yet implemented.
+    // Not yet implemented.
 
-		if(exitStatus == 0){
-			LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] File Operation block ({0} :: {1} :: {2}) has finished successfully.", new Object[]{fo.getOrder(), fo.getSubOrder(), fo.getId()});
-		}else{
-			LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] File Operation block ''{0}'' has exited with errors.", fo.getId());
-		}
+    if (exitStatus == 0) {
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] File Operation block ({0} :: {1} :: {2}) has finished successfully.", new Object[]{fo.getOrder(), fo.getSubOrder(), fo.getId()});
+    }
+    else {
+      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] File Operation block ''{0}'' has exited with errors.", fo.getId());
+    }
 
-		return exitStatus;
-	}
+    return exitStatus;
+  }
 
-	private ArrayList<Path> findFilesGlobbing(Path sourcePath, String pattern){
-		LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Finding files with globbing pattern: {0} in {1}", new Object[]{pattern, sourcePath});
-		FileOperations fileops = new FileOperations(sourcePath, pattern);
-	
-		try {
-			fileops.findFilesGlobbing();
-		}catch(IOException Ex){
-			LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IOException during globbing find operation. {0}", Ex.toString());
-		}
+  private ArrayList<Path> findFilesGlobbing(Path sourcePath, String pattern) {
+    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Finding files with globbing pattern: {0} in {1}", new Object[]{pattern, sourcePath});
+    FileOperations fileops = new FileOperations(sourcePath, pattern);
 
-		LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Found {0} files.", fileops.getResultsSize());
-		return fileops.getResults();
-	}
+    try {
+      fileops.findFilesGlobbing();
+    }
+    catch (IOException Ex) {
+      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IOException during globbing find operation. {0}", Ex.toString());
+    }
 
-	private int executeGlobbingCopy(FileOperation fo, ArrayList<Path> fileList){
-		File destinationFile = new File(fo.getDestination());
-		int exitStatus = 0;
+    LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Found {0} files.", fileops.getResultsSize());
+    return fileops.getResults();
+  }
 
-		CopyOption[] options = new CopyOption[]{};
-		CopyOption[] replOpt = new CopyOption[]{
-			COPY_ATTRIBUTES, 
-			REPLACE_EXISTING,
-			java.nio.file.LinkOption.NOFOLLOW_LINKS
-		};
-	
-		CopyOption[] stdOpt = new CopyOption[]{
-			COPY_ATTRIBUTES,
-			java.nio.file.LinkOption.NOFOLLOW_LINKS
-		};
+  private int executeGlobbingCopy(FileOperation fo, ArrayList<Path> fileList) {
+    File destinationFile = new File(fo.getDestination());
+    int exitStatus = 0;
+
+    CopyOption[] options = new CopyOption[]{};
+    CopyOption[] replOpt = new CopyOption[]{
+        COPY_ATTRIBUTES,
+        REPLACE_EXISTING,
+        java.nio.file.LinkOption.NOFOLLOW_LINKS
+    };
+
+    CopyOption[] stdOpt = new CopyOption[]{
+        COPY_ATTRIBUTES,
+        java.nio.file.LinkOption.NOFOLLOW_LINKS
+    };
 
 
-		if(!destinationFile.isDirectory()){
-			LoggerWrapper.log.fine("[Metrix Post-Processor] Destination path is not a directory.");
-			return -1;
-		}
-	
-		for(Path sourcePath : fileList){
-			options = !fo.needOverwrite() ? stdOpt : replOpt;
-			try{
-				Files.copy(
-					sourcePath,
-					(destinationFile.toPath()).resolve(sourcePath),
-					options
-				);
-				exitStatus += 0;
-			}catch(IOException Ex){
-				LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IOException in globbing file copy: {0}", Ex.toString());
-				exitStatus += -1;
-			}
+    if (!destinationFile.isDirectory()) {
+      LoggerWrapper.log.fine("[Metrix Post-Processor] Destination path is not a directory.");
+      return -1;
+    }
 
-			LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Copied: {0} to: {1}", new Object[]{sourcePath, destinationFile});
-		}
+    for (Path sourcePath : fileList) {
+      options = !fo.needOverwrite() ? stdOpt : replOpt;
+      try {
+        Files.copy(
+            sourcePath,
+            (destinationFile.toPath()).resolve(sourcePath),
+            options
+        );
+        exitStatus += 0;
+      }
+      catch (IOException Ex) {
+        LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] IOException in globbing file copy: {0}", Ex.toString());
+        exitStatus += -1;
+      }
 
-		return exitStatus; // All is good
-	}
+      LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Copied: {0} to: {1}", new Object[]{sourcePath, destinationFile});
+    }
 
-	private int executeApplication(Application app){
-		LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting script: {0}", app.getTitle());
-		// The script / application to execute
-	    final File scriptPath = new File(app.getScriptPath());
+    return exitStatus; // All is good
+  }
 
-		// The output file. All application activity is written to this file.
-		final File outputFile = new File(app.getOutputPath());
-		// The supplied arguments for the script 
-	    final String arguments = app.getArguments();
+  private int executeApplication(Application app) {
+    LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting script: {0}", app.getTitle());
+    // The script / application to execute
+    final File scriptPath = new File(app.getScriptPath());
 
-		ProcessBuilder pb = new ProcessBuilder(scriptPath.toString(), arguments);
-		
-		// Instantiate the ProcessBuilder
-		pb.redirectOutput(outputFile);
-		pb.redirectErrorStream(true);
+    // The output file. All application activity is written to this file.
+    final File outputFile = new File(app.getOutputPath());
+    // The supplied arguments for the script
+    final String arguments = app.getArguments();
 
-		// Default exitstatus -255 for return without processing.
-		int exitStatus = -255;
+    ProcessBuilder pb = new ProcessBuilder(scriptPath.toString(), arguments);
 
-		try{
-			Process p = pb.start();
-			// Start the process and wait for it to finish. 
-			exitStatus = p.waitFor();
-		}catch(IOException IO){
-			LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{app.getId(), IO.toString()});
-		}catch(InterruptedException IE){
-			LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{app.getId(), IE.toString()});
-		}
-		
-		if(exitStatus == 0){
-			LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Application block ({0} :: {1} :: {2}) has finished successfully.  ", new Object[]{app.getOrder(), app.getSubOrder(), app.getId()});
-		}else{
-			LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Application block ''{0}'' has exited with errors.", app.getId());
-		}
+    // Instantiate the ProcessBuilder
+    pb.redirectOutput(outputFile);
+    pb.redirectErrorStream(true);
 
-		return exitStatus;
-	}
+    // Default exitstatus -255 for return without processing.
+    int exitStatus = -255;
+
+    try {
+      Process p = pb.start();
+      // Start the process and wait for it to finish.
+      exitStatus = p.waitFor();
+    }
+    catch (IOException IO) {
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{app.getId(), IO.toString()});
+    }
+    catch (InterruptedException IE) {
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{app.getId(), IE.toString()});
+    }
+
+    if (exitStatus == 0) {
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Application block ({0} :: {1} :: {2}) has finished successfully.  ", new Object[]{app.getOrder(), app.getSubOrder(), app.getId()});
+    }
+    else {
+      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Application block ''{0}'' has exited with errors.", app.getId());
+    }
+
+    return exitStatus;
+  }
 }
 
 /*	Possible placeholders for parameters or variables.
