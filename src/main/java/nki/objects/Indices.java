@@ -11,36 +11,28 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-
-import nki.objects.MutableLong;
-import nki.constants.Constants;
 
 import org.w3c.dom.*;
-
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
 
 public class Indices implements Serializable {
 
   public static final long serialVersionUID = 42L;
 
   // Project - Sample - Index/Lane/Clusters
-  private HashMap<String, HashMap<String, HashMap<String, Object>>> indices = new HashMap<String, HashMap<String, HashMap<String, Object>>>();
+  private Map<String, Map<String, SampleInfo>> indices = new HashMap<>();
   private long totalClusters = 0;
 
+  public Map<String, Map<String, SampleInfo>> getIndices() {
+    return indices;
+  }
+
   public void setIndex(String projName, String sampName, String idx, int numClusters, int laneNr, int readNr) {
-    HashMap<String, HashMap<String, Object>> project = indices.get(projName);
-    HashMap<String, Object> sampleMap;
+    Map<String, SampleInfo> project = indices.get(projName);
+    SampleInfo sampleMap;
 
     if (project == null) {
-      project = new HashMap<String, HashMap<String, Object>>();
+      project = new HashMap<>();
       sampleMap = setSample(readNr, laneNr, numClusters, idx);
-
       project.put(sampName, sampleMap);
     }
     else {
@@ -51,11 +43,7 @@ public class Indices implements Serializable {
         project.put(sampName, sampleMap);
       }
       else {  // Update num clusters.
-        if (sampleMap.get(Constants.SAMPLE_NUM_CLUSTERS) instanceof MutableLong) {
-          MutableLong ml = (MutableLong) sampleMap.get(Constants.SAMPLE_NUM_CLUSTERS);
-          ml.add(Long.valueOf(numClusters));
-          sampleMap.put(Constants.SAMPLE_NUM_CLUSTERS, ml);
-        }
+        sampleMap.setNumClusters(sampleMap.getNumClusters() + numClusters);
       }
 
       project.put(sampName, sampleMap);
@@ -64,18 +52,16 @@ public class Indices implements Serializable {
     indices.put(projName, project);
   }
 
-  private HashMap<String, Object> setSample(int readNr, int laneNr, int numClusters, String idx) {
-    HashMap<String, Object> sampleMap = new HashMap<String, Object>();
-    sampleMap.put(Constants.SAMPLE_READNUM, readNr);
-    MutableLong clusters = new MutableLong();
-    clusters.add(Long.valueOf(numClusters));
-    sampleMap.put(Constants.SAMPLE_NUM_CLUSTERS, clusters);
-    sampleMap.put(Constants.SAMPLE_LANE, laneNr);
-    sampleMap.put(Constants.SAMPLE_INDEX, idx);
+  private SampleInfo setSample(int readNr, int laneNr, int numClusters, String idx) {
+    SampleInfo si = new SampleInfo();
+    si.setReadNum(readNr);
+    si.setNumClusters(numClusters);
+    si.setLaneNum(laneNr);
+    si.setIndexBarcode(idx);
 
-    addTotalClusters(Long.valueOf(clusters.get()));
+    addTotalClusters(numClusters);
 
-    return sampleMap;
+    return si;
   }
 
   public long getTotalClusters() {

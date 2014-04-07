@@ -29,6 +29,13 @@ public class QualityMetrics extends GenericIlluminaParser {
     super(QualityMetrics.class, source, state);
   }
 
+  public QualityScores getQualityScores() {
+    if (qScores == null) {
+      qScores = digestData();
+    }
+    return qScores;
+  }
+
 	/*
    * Binary structure:
 	 *	byte 0: file version number (4)
@@ -40,7 +47,7 @@ public class QualityMetrics extends GenericIlluminaParser {
 	 *	4 x 50 bytes: number of clusters assigned score (uint32) Q1 through Q50
 	 */
 
-  public QualityScores digestData(Reads rds) {
+  public QualityScores digestData() {
     qScores = new QualityScores();
 
     try {
@@ -111,9 +118,7 @@ public class QualityMetrics extends GenericIlluminaParser {
 
   @SuppressWarnings("unchecked")
   public void iterateQS() {
-
     if (qScores != null) {
-
       Iterator qit = qScores.getQScoreIterator();
 
       while (qit.hasNext()) {

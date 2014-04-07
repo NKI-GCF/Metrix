@@ -14,11 +14,20 @@ import nki.objects.Indices;
 import nki.util.LoggerWrapper;
 
 public class IndexMetrics extends GenericIlluminaParser {
+  private Indices indices;
+
   // Instantiate Logger
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
   public IndexMetrics(String source, int state) {
     super(IndexMetrics.class, source, state);
+  }
+
+  public Indices getIndices() {
+    if (indices == null) {
+      indices = digestData();
+    }
+    return indices;
   }
 
 	/*
@@ -41,7 +50,7 @@ public class IndexMetrics extends GenericIlluminaParser {
     if (fileMissing) {
       return new Indices();
     }
-    Indices indices = new Indices();
+    indices = new Indices();
 
     // First catch version of metrics file.
     try {

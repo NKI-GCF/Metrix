@@ -23,6 +23,13 @@ public class ErrorMetrics extends GenericIlluminaParser {
     super(ErrorMetrics.class, source, state);
   }
 
+  public ErrorCollection getErrorScores() {
+    if (eScores == null) {
+      eScores = digestData();
+    }
+    return eScores;
+  }
+
   /*
    * Binary structure:
    * 	byte 0: file version number (3)

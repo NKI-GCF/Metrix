@@ -233,7 +233,8 @@ public final class CommandProcessor {
               TileMetrics tm = new TileMetrics(tileMetrics, 0);
 
               if (!tm.getFileMissing()) {                // If TileMetrics File is present - process.
-                tm.digestData(rds);
+                //tm.digestData(rds);
+                tm.digestData();
                 sum.setClusterDensity(tm.getCDmap());
                 sum.setClusterDensityPF(tm.getCDpfMap());
                 sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
@@ -249,7 +250,8 @@ public final class CommandProcessor {
             if (!sum.hasQScores() || timeCheck) {
               QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
               if (!qm.getFileMissing()) {
-                QualityScores qsOut = qm.digestData(rds);
+                //QualityScores qsOut = qm.digestData(rds);
+                QualityScores qsOut = qm.digestData();
                 //	sum.setQScores(qsOut);
                 // Calculate distribution
                 QScoreDist qScoreDist = qsOut.getQScoreDistribution();

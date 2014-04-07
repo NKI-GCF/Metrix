@@ -36,13 +36,14 @@ public class GenericIlluminaParser {
       // Check for last modified date
       setLastModifiedSource();
     }
-    catch (FileNotFoundException IO) {
+    catch (FileNotFoundException fnfe) {
+      fnfe.printStackTrace();
       // Set fileMissing = true. --> Parse again later.
       setFileMissing(true);
       metrixLogger.log.log(Level.WARNING, "{0} file not available for {1}", new Object[]{c.getSimpleName(), source});
     }
-    catch (InterruptedException IEX) {
-
+    catch (InterruptedException ie) {
+      ie.printStackTrace();
     }
   }
 
@@ -99,8 +100,9 @@ public class GenericIlluminaParser {
       try {
         this.leis.close();
       }
-      catch (IOException Ex) {
-        metrixLogger.log.log(Level.WARNING, "Error in closing the source stream: {0}", Ex.toString());
+      catch (IOException ioe) {
+        ioe.printStackTrace();
+        metrixLogger.log.log(Level.WARNING, "Error in closing the source stream: {0}", ioe.toString());
       }
     }
   }

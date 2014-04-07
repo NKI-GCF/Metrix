@@ -27,6 +27,13 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
     super(CorrectedIntensityMetrics.class, source, state);
   }
 
+  public IntensityScores getIntensityScores() {
+    if (iScores == null) {
+      iScores = digestData();
+    }
+    return iScores;
+  }
+
 	/*
    * Binary structure:
 	 * 	byte 0: file version number (2)

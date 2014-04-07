@@ -92,7 +92,7 @@ public class TileMetrics extends GenericIlluminaParser {
 		code 400: control lane
 	 */
 
-  public void digestData(Reads rds) {
+  public void digestData() {
     try {
       setVersion(leis.readByte());
       setRecordLength(leis.readByte());

@@ -1,38 +1,18 @@
 package nki.core;
 
+import net.sf.json.JSON;
+import net.sf.json.JSONObject;
+import nki.decorators.MetrixContainerDecorator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.regex.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import java.text.*;
-
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import nki.constants.Constants;
-import nki.objects.QualityScores;
-import nki.objects.QScoreDist;
-import nki.objects.IntensityScores;
-import nki.objects.IntensityDist;
-import nki.objects.Indices;
-import nki.objects.ClusterDensity;
-import nki.objects.PhasingCollection;
-import nki.objects.ErrorCollection;
-import nki.objects.ErrorDist;
-import nki.objects.Summary;
-import nki.objects.Reads;
-import nki.parsers.illumina.QualityMetrics;
-import nki.parsers.illumina.TileMetrics;
-import nki.parsers.illumina.CorrectedIntensityMetrics;
-import nki.parsers.illumina.IndexMetrics;
-import nki.parsers.illumina.ErrorMetrics;
-import nki.parsers.illumina.ExtractionMetrics;
-import nki.parsers.xml.XmlDriver;
 
 public class Metrix {
+  protected static final Logger log = LoggerFactory.getLogger(Metrix.class);
 
   public static void main(String[] args) {
     Properties configFile;
@@ -195,199 +175,10 @@ public class Metrix {
   }
 
   public static void processResult(String runName) {
-    DecimalFormat df = new DecimalFormat("##.##");
-    Summary sum = new Summary();
+    MetrixContainer mc = new MetrixContainer(runName);
+    mc.outputSummaryLog();
 
-    // Required paths
-    String extractionMetrics = runName + "/InterOp/" + Constants.EXTRACTION_METRICS;
-    String tileMetrics = runName + "/InterOp/" + Constants.TILE_METRICS;
-    String qualityMetrics = runName + "/InterOp/" + Constants.QMETRICS_METRICS;
-    String intensityMetrics = runName + "/InterOp/" + Constants.CORRECTED_INT_METRICS;
-    String indexMetrics = runName + "/InterOp/" + Constants.INDEX_METRICS;
-    String errorMetrics = runName + "/InterOp/" + Constants.ERROR_METRICS;
-
-    // Process result
-    TileMetrics tm = new TileMetrics(tileMetrics, 0);
-    QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
-    CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
-    IndexMetrics im = new IndexMetrics(indexMetrics, 0);
-    ErrorMetrics em = new ErrorMetrics(errorMetrics, 0);
-    ExtractionMetrics exm = new ExtractionMetrics(extractionMetrics, 0);
-
-    // Collections
-    ClusterDensity clusterDensity;
-    ClusterDensity clusterDensityPF;
-    PhasingCollection phasingMap;
-    PhasingCollection prephasingMap;
-    QScoreDist qScoreDist;
-    HashMap<Integer, QScoreDist> qScoreLaneDist;
-    ErrorDist eDist;
-
-    IntensityDist iDistAvg;
-    IntensityDist iDistCCAvg;
-    QualityScores qsOut;
-    IntensityScores isOut;
-    ErrorCollection ecOut;
-    Indices indices;
-
-
-    System.out.println("Processing Run Details");
-    try {
-      if (!sum.getXmlInfo()) {
-        XmlDriver xmd = new XmlDriver(runName, sum);
-        if (xmd.parseRunInfo()) {
-          sum = xmd.getSummary();
-        }
-        else {
-          sum.setXmlInfo(false);
-        }
-      }
-    }
-    catch (SAXException SAX) {
-      System.out.println("Error Parsing XML Info");
-    }
-    catch (IOException Ex) {
-      System.out.println("IOException in parsing XML Info");
-    }
-    catch (ParserConfigurationException PXE) {
-      System.out.println("Parser Configuration Exception");
-    }
-
-    Reads rds = sum.getReads();
-
-    // Metrics digestion
-    System.out.println("Processing Tile Metrics");
-    if (!tm.getFileMissing()) {
-      tm.digestData(rds);
-      clusterDensity = tm.getCDmap();
-      clusterDensityPF = tm.getCDpfMap();
-      phasingMap = tm.getPhasingMap();
-      prephasingMap = tm.getPrephasingMap();
-    }
-    else {
-      System.out.println("Unable to process Tile Metrics");
-      clusterDensity = null;
-      clusterDensityPF = null;
-      phasingMap = null;
-      prephasingMap = null;
-    }
-
-    System.out.println("Processing Quality Metrics");
-    if (!qm.getFileMissing()) {
-      qsOut = qm.digestData(rds);
-      qScoreDist = qsOut.getQScoreDistribution();
-      qScoreLaneDist = qsOut.getQScoreDistributionByLane();
-    }
-    else {
-      System.out.println("Unable to process Quality Metrics");
-      qScoreDist = null;
-      qScoreLaneDist = null;
-    }
-
-    System.out.println("Processing Corrected Intensity Metrics");
-    if (!cim.getFileMissing()) {
-      isOut = cim.digestData();
-      iDistAvg = isOut.getAvgCorIntDist();
-      iDistCCAvg = isOut.getAvgCorIntCCDist();
-    }
-    else {
-      System.out.println("Unable to process Corrected Intensity Metrics");
-    }
-
-    System.out.println("Processing Error Metrics");
-    if (!em.getFileMissing()) {
-      ecOut = em.digestData();
-      eDist = ecOut.getErrorDistribution();
-    }
-    else {
-      System.out.println("Unable to process Error Metrics");
-      eDist = null;
-    }
-
-    System.out.println("Processing Extraction Metrics");
-    if (!exm.getFileMissing()) {
-      sum.setCurrentCycle(exm.getLastCycle());
-    }
-    else {
-      System.out.println("Unable to process Extraction Metrics");
-    }
-
-    System.out.println("Processing Index Metrics");
-    if (!im.getFileMissing()) {
-      indices = im.digestData();
-    }
-    else {
-      System.out.println("Unable to process Tile Metrics");
-      indices = null;
-    }
-
-    System.out.println("\n== Combined Read Q-Scores ==");
-    if (qScoreDist != null) {
-      System.out.println("- %>=Q20 = " + df.format(qScoreDist.aboveQ(20)) + "%");
-      System.out.println("- %>=Q30 = " + df.format(qScoreDist.aboveQ(30)) + "%\n");
-    }
-    else {
-      System.out.println("- %>=Q20 = N/A");
-      System.out.println("- %>=Q30 = N/A");
-    }
-
-    System.out.println("== Q-Score distribution per lane %>Q20/%>Q30 ==");
-    if (qScoreDist != null) {
-      for (Map.Entry<Integer, QScoreDist> laneDist : qScoreLaneDist.entrySet()) {
-        int lane = laneDist.getKey();
-        QScoreDist dist = laneDist.getValue();
-
-        System.out.println(lane + "\t" + df.format(dist.aboveQ(20)) + "%/" + df.format(dist.aboveQ(30)) + "%");
-      }
-    }
-    else {
-      System.out.println("Currently not available.");
-    }
-
-    System.out.println("\n== Phasing / Prephasing Scores ==");
-    if (phasingMap != null) {
-      System.out.println("Lane\tRead\tScore");
-      System.out.println(phasingMap.toTab(prephasingMap, rds));
-    }
-    else {
-      System.out.println("Currently not available.");
-    }
-
-    System.out.println("== Cluster Density / Cluster Density Passing Filter (k/mm2) ==");
-    if (clusterDensity != null) {
-      System.out.println(clusterDensity.toTab(clusterDensityPF));
-    }
-    else {
-      System.out.println("Currently not available.");
-    }
-
-    System.out.println("== Index Metrics ==");
-    if (indices != null) {
-      System.out.println(indices.toTab());
-    }
-    else {
-      System.out.println("No Information available.\n");
-    }
-
-    System.out.println("== Error Metrics ==");
-    if (eDist != null) {
-      System.out.println(eDist.toTab("rate"));
-    }
-    else {
-      System.out.println("Currently not available.");
-    }
-
-    System.out.println("== Run Progress of " + sum.getRunId() + "(" + sum.getRunType() + " - " + sum.getTotalCycles() + "bp)==");
-    if (sum.getCurrentCycle() == sum.getTotalCycles()) {
-      System.out.println("Run has finished: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
-    }
-    else if (sum.getRunType().equals("Paired End")) {
-      if (sum.getCurrentCycle() == rds.getPairedTurnCycle()) {
-        System.out.println("Run needs turning. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
-      }
-    }
-    else {
-      System.out.println("Run has not finished yet. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
-    }
+    JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
+    log.info(allOut.toString());
   }
 }
