@@ -91,91 +91,96 @@ public class TileMetrics extends GenericIlluminaParser {
 	 */
 
   public void digestData() {
-    try {
-      setVersion(leis.readByte());
-      setRecordLength(leis.readByte());
+    if (fileMissing) {
+      metrixLogger.log.log(Level.SEVERE, "Unable to parse Tile Metrics");
     }
-    catch (IOException Ex) {
-      metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
-    }
-
-    boolean eofCheck = true;
-
-    try {
-      int record = 1;
-      int laneCheck = 0;
-      while (eofCheck) {
-        int laneNr = leis.readUnsignedShort();
-        int tileNr = leis.readUnsignedShort();
-        int metricCode = leis.readUnsignedShort();
-        //float metricValue = leis.readFloat();
-        double metricValue = leis.readFloat();
-
-        // Cluster Density Parsing
-        if (metricCode == CLUSTER_DENSITY) {
-          cdMap.setMetric(laneNr, metricValue);
-        }
-        else if (metricCode == CLUSTER_DENSITY_PF) {
-          cdPFMap.setMetric(laneNr, metricValue);
-        }
-
-        //
-        // Possible catch number of clusters here (code 102 && 103)
-        //
-        List<Integer> codeMap = digits(metricCode);
-
-        // Next in loop because were not looking at phasing or prephasing.
-        if (metricCode == (102 | 103)) {
-          continue;
-        }
-
-        // Calc Phasing code / Prephasing code
-        int PHAPRE = (metricCode - 200) % 2;
-        // Calc readnumber from metriccode
-        int readNum = (int) Math.floor((metricCode - 200) / 2) + 1;
-
-        //		if(rds.isIndexedRead(readNum)){
-        //			continue;
-        //		}
-
-        //		if(metricValue == 0){
-        //			continue;
-        //		}
-
-        // Phasing / Pre-phasing Parsing
-        if (codeMap.get(2) == 2) {  // Metric code starts with 2
-          // Phasing
-          if (PHAPRE == 0) {
-            pMap.setPhasing(laneNr, readNum, metricValue);
-          }
-
-          // Prephasing
-          if (PHAPRE == 1) {
-            preMap.setPhasing(laneNr, readNum, metricValue);
-          }
-        }
-        else {  // Skip the other codes
-          continue;
-        }
-        record++;
+    else {
+      try {
+        setVersion(leis.readByte());
+        setRecordLength(leis.readByte());
       }
-    }
-    catch (EOFException EOFEx) {
-      eofCheck = false;
-    }
-    catch (IOException Ex) {
-      eofCheck = false;
-    }
+      catch (IOException Ex) {
+        metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
+      }
 
-    // Set the collection objects.
-    cdMap.setType("CD");
-    setCDmap(cdMap);
-    cdPFMap.setType("PF");
-    setCDpfMap(cdPFMap);
-    pMap.setType("PH");
-    setPhasingMap(pMap);
-    preMap.setType("PREPH");
-    setPrephasingMap(preMap);
+      boolean eofCheck = true;
+
+      try {
+        int record = 1;
+        int laneCheck = 0;
+        while (eofCheck) {
+          int laneNr = leis.readUnsignedShort();
+          int tileNr = leis.readUnsignedShort();
+          int metricCode = leis.readUnsignedShort();
+          //float metricValue = leis.readFloat();
+          double metricValue = leis.readFloat();
+
+          // Cluster Density Parsing
+          if (metricCode == CLUSTER_DENSITY) {
+            cdMap.setMetric(laneNr, metricValue);
+          }
+          else if (metricCode == CLUSTER_DENSITY_PF) {
+            cdPFMap.setMetric(laneNr, metricValue);
+          }
+
+          //
+          // Possible catch number of clusters here (code 102 && 103)
+          //
+          List<Integer> codeMap = digits(metricCode);
+
+          // Next in loop because were not looking at phasing or prephasing.
+          if (metricCode == (102 | 103)) {
+            continue;
+          }
+
+          // Calc Phasing code / Prephasing code
+          int PHAPRE = (metricCode - 200) % 2;
+          // Calc readnumber from metriccode
+          int readNum = (int) Math.floor((metricCode - 200) / 2) + 1;
+
+          //		if(rds.isIndexedRead(readNum)){
+          //			continue;
+          //		}
+
+          //		if(metricValue == 0){
+          //			continue;
+          //		}
+
+          // Phasing / Pre-phasing Parsing
+          if (codeMap.get(2) == 2) {  // Metric code starts with 2
+            // Phasing
+            if (PHAPRE == 0) {
+              pMap.setPhasing(laneNr, readNum, metricValue);
+            }
+
+            // Prephasing
+            if (PHAPRE == 1) {
+              preMap.setPhasing(laneNr, readNum, metricValue);
+            }
+          }
+          else {  // Skip the other codes
+            continue;
+          }
+          record++;
+        }
+      }
+      catch (EOFException EOFEx) {
+        eofCheck = false;
+      }
+      catch (IOException Ex) {
+        eofCheck = false;
+      }
+
+      // Set the collection objects.
+      cdMap.setType("CD");
+      setCDmap(cdMap);
+      cdPFMap.setType("PF");
+      setCDpfMap(cdPFMap);
+      pMap.setType("PH");
+      setPhasingMap(pMap);
+      preMap.setType("PREPH");
+      setPrephasingMap(preMap);
+    }
   }
 
   private String parseMetricCode(int code) {

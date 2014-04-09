@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Created-By: Bernd van der Veen (Netherlands Cancer Institute)
-Main-Class: metrix.Metrix

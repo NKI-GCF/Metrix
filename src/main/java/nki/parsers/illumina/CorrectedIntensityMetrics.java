@@ -58,6 +58,9 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
 
   public IntensityScores digestData() {
     iScores = new IntensityScores();
+    if (fileMissing) {
+      return iScores;
+    }
 
     try {
       iScores.setVersion(leis.readByte());

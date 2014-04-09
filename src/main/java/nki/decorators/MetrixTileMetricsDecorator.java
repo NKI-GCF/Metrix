@@ -44,7 +44,7 @@ public class MetrixTileMetricsDecorator {
       cdLane.put("densityPassingFilter", df.format(extMetric.calcMean() / 1000));
       cdLane.put("densityPassingFilterSD", df.format(extMetric.calcSD() / 1000));
       cdLane.put("densityPercentPassed", dfTwo.format(((extMetric.calcMean() / 1000) / (locMetric.calcMean() / 1000)) * 100));
-      cdLane.put("units", "k/mm2");
+      cdLane.put("units", "K/mm2");
       clusterDensities.add(cdLane);
     }
     json.put("clusterDensities", clusterDensities);

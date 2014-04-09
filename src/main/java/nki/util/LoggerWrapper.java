@@ -17,20 +17,30 @@ public class LoggerWrapper {
 
   static {
     configFile = new Properties();
+    InputStream fin = null;
     // Use external properties file, outside of jar location.
-    if (System.getProperty("properties") == null) {
-      System.out.println("[Metrix] Error - 'properties' argument not specified at runtime. Use -Dproperties={Path to properties file}. ");
-      System.exit(1);
+    if (System.getProperty("properties") != null) {
+      String externalFileName = System.getProperty("properties");
+      String absFile = (new File(externalFileName)).getAbsolutePath();
+      try {
+        fin = new FileInputStream(new File(absFile));
+      }
+      catch (FileNotFoundException fnfe) {
+        System.out.println("[ERROR] Properties file not found: " + fnfe.getMessage());
+        System.exit(1);
+      }
     }
-    String externalFileName = System.getProperty("properties");
-    String absFile = (new File(externalFileName)).getAbsolutePath();
+    else {
+      System.out.println("[Metrix] Error - 'properties' argument not specified at runtime. Attempting to load default internal properties... ");
+      fin = LoggerWrapper.class.getResourceAsStream("/metrix.properties");
+      if (fin == null) {
+        System.out.println("[ERROR] Internal properties file not found");
+        System.exit(1);
+      }
+    }
 
-    try (InputStream fin = new FileInputStream(new File(absFile))) {
+    try {
       configFile.load(fin);
-    }
-    catch (FileNotFoundException FNFE) {
-      System.out.println("[ERROR] Properties file not found.");
-      System.exit(1);
     }
     catch (IOException Ex) {
       System.out.println("[ERROR] Reading properties file. " + Ex.toString());

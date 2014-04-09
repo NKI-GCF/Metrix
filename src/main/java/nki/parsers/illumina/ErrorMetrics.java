@@ -49,6 +49,10 @@ public class ErrorMetrics extends GenericIlluminaParser {
    */
   public ErrorCollection digestData() {
     eScores = new ErrorCollection();
+    if (fileMissing) {
+      return eScores;
+    }
+
     Map<Integer, ErrorMap> cycleMap;
 
     try {

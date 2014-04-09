@@ -70,6 +70,22 @@ public class LittleEndianInputStream extends FilterInputStream {
            + ((byte1 << 24) >>> 24);
   }
 
+  //TODO testing for IndexMetrics num clusters
+  public long readUint32() throws IOException {
+    long byte1 = in.read();
+    long byte2 = in.read();
+    long byte3 = in.read();
+    long byte4 = in.read();
+    if (byte4 == -1) {
+      throw new EOFException();
+    }
+
+    return (byte1&0XFF << 24) |
+           (byte2&0XFF << 16) |
+           (byte3&0XFF << 8)  |
+           (byte4&0xFF);
+  }
+
   public long readLong() throws IOException {
     long byte1 = in.read();
     long byte2 = in.read();

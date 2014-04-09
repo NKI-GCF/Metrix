@@ -49,10 +49,10 @@ public class IndexMetrics extends GenericIlluminaParser {
 	 */
 
   public Indices digestData() {
-    if (fileMissing) {
-      return new Indices();
-    }
     indices = new Indices();
+    if (fileMissing) {
+      return indices;
+    }
 
     // First catch version of metrics file.
     try {
@@ -74,7 +74,7 @@ public class IndexMetrics extends GenericIlluminaParser {
 
         String indexSeq = leis.readUTF8String(numBytesIdx);
 
-        int numClustersIdx = leis.readInt();
+        long numClustersIdx = (long)leis.readFloat();
         int numBytesSample = leis.readUnsignedShort();
 
         String sampleSeq = leis.readUTF8String(numBytesSample);
@@ -84,6 +84,8 @@ public class IndexMetrics extends GenericIlluminaParser {
         String projectSeq = leis.readUTF8String(numBytesProject);
 
         indices.setIndex(projectSeq, sampleSeq, indexSeq, numClustersIdx, laneNr, readNr);
+
+        //System.out.println(laneNr + "\t" + tileNr + "\t" + numClustersIdx);
       }
     }
     catch (IOException ExMain) {

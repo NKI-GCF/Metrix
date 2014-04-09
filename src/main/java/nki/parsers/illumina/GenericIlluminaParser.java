@@ -37,7 +37,7 @@ public class GenericIlluminaParser {
       setLastModifiedSource();
     }
     catch (FileNotFoundException fnfe) {
-      fnfe.printStackTrace();
+      //fnfe.printStackTrace();
       // Set fileMissing = true. --> Parse again later.
       setFileMissing(true);
       metrixLogger.log.log(Level.WARNING, "{0} file not available for {1}", new Object[]{c.getSimpleName(), source});

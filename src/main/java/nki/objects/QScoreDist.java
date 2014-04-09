@@ -79,7 +79,11 @@ public class QScoreDist implements Serializable {
       }
       totalClus += (double) metric.get();
     }
-    return (aboveClus / totalClus) * 100;
+
+    if (totalClus != 0) {
+      return (aboveClus / totalClus) * 100;
+    }
+    return -1d;
   }
 
   public Map<Integer, MutableLong> getQualityScoreDist() {

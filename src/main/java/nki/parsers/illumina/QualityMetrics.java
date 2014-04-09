@@ -48,6 +48,9 @@ public class QualityMetrics extends GenericIlluminaParser {
 
   public QualityScores digestData() {
     qScores = new QualityScores();
+    if (fileMissing) {
+      return qScores;
+    }
 
     try {
       setVersion(leis.readByte());

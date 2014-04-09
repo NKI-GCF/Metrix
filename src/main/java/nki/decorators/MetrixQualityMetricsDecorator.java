@@ -29,8 +29,12 @@ public class MetrixQualityMetricsDecorator {
 
     JSONObject combQs = new JSONObject();
     QScoreDist qScoreDist = qualityScores.getQScoreDistribution();
-    combQs.put(">Q20", qScoreDist.aboveQ(20));
-    combQs.put(">Q30", qScoreDist.aboveQ(30));
+    if (qScoreDist.aboveQ(20) != -1d) {
+      combQs.put(">Q20", qScoreDist.aboveQ(20));
+    }
+    if (qScoreDist.aboveQ(30) != -1d) {
+      combQs.put(">Q30", qScoreDist.aboveQ(30));
+    }
     json.put("combinedReadQualityScores", combQs);
 
     JSONArray laneQualities = new JSONArray();

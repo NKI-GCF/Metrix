@@ -40,7 +40,11 @@ public class ExtractionMetrics extends GenericIlluminaParser {
 	 *
 	 */
 
-  public void digestData() {
+  public List<Integer> digestData() {
+    if (fileMissing) {
+      return cycles;
+    }
+
     try {
       setVersion(leis.readByte());
       setRecordLength(leis.readByte());
@@ -73,6 +77,8 @@ public class ExtractionMetrics extends GenericIlluminaParser {
       exMain.printStackTrace();
       metrixLogger.log.log(Level.SEVERE, "Error in main parsing of metrics data: {0}", exMain.toString());
     }
+
+    return cycles;
   }
 
   public List<Integer> getUniqueCycles() {
