@@ -4,21 +4,35 @@
   <groupId>nki</groupId>
   <artifactId>metrix</artifactId>
   <packaging>jar</packaging>
-  <version>0.9-2014</version>
+  <version>0.9-2014-SNAPSHOT</version>
   <name>Metrix Illumina InterOp server/client framework</name>
   <url>https://github.com/NKI-GCF/Metrix</url>
 
   <scm>
     <connection>
-      scm:git:https://www.github.com/NKI-GCF/Metrix
+      scm:git:https://www.github.com/froggleston/Metrix
     </connection>
     <developerConnection>
-      scm:git:ssh://www.github.com/NKI-GCF/Metrix
+      scm:git:ssh://www.github.com/froggleston/Metrix
     </developerConnection>
     <url>
-      https://www.github.com/NKI-GCF/Metrix
+      https://www.github.com/froggleston/Metrix
     </url>
   </scm>
+
+  <distributionManagement>
+    <downloadUrl>https://repos.tgac.ac.uk/maven/repo</downloadUrl>
+    <repository>
+      <id>metrix-releases</id>
+      <name>Metrix repository</name>
+      <url>scp://repos.tgac.ac.uk/storage/html/maven/metrix/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>metrix-snapshots</id>
+      <name>Metrix snapshot repository</name>
+      <url>scp://repos.tgac.ac.uk/storage/html/maven/metrix/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <repositories>  
     <repository>
