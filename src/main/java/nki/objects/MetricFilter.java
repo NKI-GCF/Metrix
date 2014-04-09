@@ -8,32 +8,28 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.*;
 
 import nki.constants.Constants;
-import nki.objects.Threshold;
 
 public class MetricFilter implements Serializable {
   public static final long serialVersionUID = 42L;
-  private ArrayList<String> runIds = new ArrayList<String>();
+  private List<String> runIds = new ArrayList<>();
   // Thresholds:
   // Key: Constant value of requested metric threshold type
   // Value: Threshold object setting boundaries.
 
-  private HashMap<String, Threshold> thresholds = new HashMap<String, Threshold>();
+  private Map<String, Threshold> thresholds = new HashMap<>();
 
   public void appendRunId(String runId) {
     runIds.add(runId);
   }
 
-  public ArrayList<String> getRunIds() {
+  public List<String> getRunIds() {
     return this.runIds;
   }
 
-  public void setRunIds(ArrayList<String> runIds) {
+  public void setRunIds(List<String> runIds) {
     this.runIds = runIds;
   }
 
@@ -50,14 +46,6 @@ public class MetricFilter implements Serializable {
   }
 
   public boolean checkType(String metricType) {
-    boolean check = false;
-
-    if (Arrays.asList(Constants.METRIC_TYPE_REQUEST).contains(metricType)) {
-      check = true;
-    }
-
-    return check;
+    return Arrays.asList(Constants.METRIC_TYPE_REQUEST).contains(metricType);
   }
-
-
 }

@@ -8,11 +8,7 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 import java.text.*;
 
 import nki.objects.MutableLong;
@@ -29,7 +25,7 @@ public class QScoreDist implements Serializable {
   public static final long serialVersionUID = 42L;
 
   // QualityMap - Integer scores
-  private HashMap<Integer, MutableLong> qScoreDist = new HashMap<Integer, MutableLong>();
+  private Map<Integer, MutableLong> qScoreDist = new HashMap<>();
   private long totalClusters = 0;
 
   public MutableLong getScore(int qScore) {
@@ -61,16 +57,6 @@ public class QScoreDist implements Serializable {
     return sumXml;
   }
 
-  private Element createElement(Document doc, String name, String text) {
-    Element e = doc.createElement(name);
-    if (text == null) {
-      text = "";
-    }
-    e.appendChild(doc.createTextNode(text));
-
-    return e;
-  }
-
   public String toTab() {
     String out = "";
 
@@ -83,7 +69,6 @@ public class QScoreDist implements Serializable {
   }
 
   public double aboveQ(int qscore) {
-    double percentage = 0;
     double aboveClus = 0;
     double totalClus = 0;
 
@@ -94,10 +79,10 @@ public class QScoreDist implements Serializable {
       }
       totalClus += (double) metric.get();
     }
-    return (double) ((aboveClus / totalClus) * 100);
+    return (aboveClus / totalClus) * 100;
   }
 
-  public HashMap<Integer, MutableLong> toObj() {
+  public Map<Integer, MutableLong> getQualityScoreDist() {
     return qScoreDist;
   }
 
@@ -108,5 +93,4 @@ public class QScoreDist implements Serializable {
   public void addTotalClusters(long metric) {
     this.totalClusters += metric;
   }
-
 }

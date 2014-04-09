@@ -10,24 +10,24 @@ package nki.objects;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class QualityMap implements Serializable {
 
   public static final long serialVersionUID = 42L;
 
   // Lane - Integer scores
-  private HashMap<Integer, HashMap<Integer, Integer>> sMap = new HashMap<Integer, HashMap<Integer, Integer>>();
+  private Map<Integer, Map<Integer, Integer>> sMap = new HashMap<>();
 
   public void addMapping(int tilenr, int qmetric, int qscore) {
-
-    HashMap<Integer, Integer> qMap;
+    Map<Integer, Integer> qMap;
     if (sMap.containsKey(tilenr)) {
       // Get subMap from hashmap.
       qMap = sMap.get(tilenr);
     }
     else {
       // Create new readnum entry and populate with new hashmap
-      qMap = new HashMap<Integer, Integer>();
+      qMap = new HashMap<>();
     }
 
     qMap.put(qmetric, qscore);
@@ -38,7 +38,7 @@ public class QualityMap implements Serializable {
     return sMap.size();
   }
 
-  public Iterator getScoreIterator() {
-    return sMap.entrySet().iterator();
+  public Map<Integer, Map<Integer, Integer>> getMappings() {
+    return sMap;
   }
 }

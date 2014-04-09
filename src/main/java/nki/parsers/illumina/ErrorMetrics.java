@@ -10,6 +10,7 @@ package nki.parsers.illumina;
 import java.io.IOException;
 import java.io.EOFException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import nki.objects.ErrorCollection;
@@ -48,7 +49,7 @@ public class ErrorMetrics extends GenericIlluminaParser {
    */
   public ErrorCollection digestData() {
     eScores = new ErrorCollection();
-    HashMap<Integer, ErrorMap> cycleMap;
+    Map<Integer, ErrorMap> cycleMap;
 
     try {
       eScores.setVersion(leis.readByte());
@@ -59,8 +60,7 @@ public class ErrorMetrics extends GenericIlluminaParser {
     }
 
     try {
-      int record = 1;
-      ErrorMap eMap = new ErrorMap();
+      ErrorMap eMap;
 
       while (true) {
         int laneNr = leis.readUnsignedShort();
@@ -84,11 +84,11 @@ public class ErrorMetrics extends GenericIlluminaParser {
         }
 
         float errorRate = leis.readFloat();
-        float numPerfectReads = (float) leis.readInt();
-        float numReads1E = (float) leis.readInt();
-        float numReads2E = (float) leis.readInt();
-        float numReads3E = (float) leis.readInt();
-        float numReads4E = (float) leis.readInt();
+        double numPerfectReads = leis.readFloat();
+        double numReads1E = leis.readFloat();
+        double numReads2E = leis.readFloat();
+        double numReads3E = leis.readFloat();
+        double numReads4E = leis.readFloat();
 
         eMap.addMetric(tileNr, -1, errorRate);
         eMap.addMetric(tileNr, 0, numPerfectReads);
@@ -99,8 +99,7 @@ public class ErrorMetrics extends GenericIlluminaParser {
 
         cycleMap.put(cycleNr, eMap);
         eScores.setLane(cycleMap, laneNr);
-        //			System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr + "\t" + errorRate + "\t" + numPerfectReads + "\t" + numReads1E + "\t" + numReads2E + "\t" + numReads3E + "\t" + numReads4E);
-
+        //System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr + "\t" + errorRate + "\t" + numPerfectReads + "\t" + numReads1E + "\t" + numReads2E + "\t" + numReads3E + "\t" + numReads4E);
       }
     }
     catch (EOFException EOFEx) {

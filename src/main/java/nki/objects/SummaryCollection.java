@@ -8,14 +8,8 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.ListIterator;
+import java.util.*;
 
-import nki.objects.Summary;
-import nki.objects.MutableInt;
 import nki.constants.Constants;
 import nki.util.LoggerWrapper;
 
@@ -34,8 +28,8 @@ public class SummaryCollection implements Serializable {
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
   // Object Collection
-  private ArrayList<Summary> summaryCollection = new ArrayList<Summary>();
-  private HashMap<Integer, MutableInt> summaryStateMapping = new HashMap<Integer, MutableInt>();
+  private List<Summary> summaryCollection = new ArrayList<>();
+  private Map<Integer, MutableInt> summaryStateMapping = new HashMap<>();
   private String collectionFormat = Constants.COM_FORMAT_OBJ;      // Default
 
   public void appendSummary(Summary sum) {
@@ -68,12 +62,7 @@ public class SummaryCollection implements Serializable {
       root.setAttribute("turn", convertStateInt(Constants.STATE_TURN));
       root.setAttribute("init", convertStateInt(Constants.STATE_INIT));
 
-      ListIterator litr = this.getSummaryIterator();
-
-      // Iterate over Summary Collection and add values to XmlDocFac
-      while (litr.hasNext()) {
-        Summary sumObj = (Summary) litr.next();
-
+      for (Summary sumObj : summaryCollection) {
         // If state is 12, fetch all objects.
         if (sumObj.getState() == com.getState() || com.getState() == Constants.STATE_ALL_PSEUDO) {
           Element sumXml = xmlDoc.createElement("Summary");
@@ -110,7 +99,6 @@ public class SummaryCollection implements Serializable {
 	 */
 
   private Element summaryAsSimple(Summary sumObj, Element sumXml, Document xmlDoc) {
-
     sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
     sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
     sumXml.appendChild(createElement(xmlDoc, "runState", sumObj.getState() + ""));
@@ -118,12 +106,10 @@ public class SummaryCollection implements Serializable {
     sumXml.appendChild(createElement(xmlDoc, "runDate", sumObj.getRunDate() + ""));
     sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles() + ""));
     sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));
-
     return sumXml;
   }
 
   private Element summaryAsDetailed(Summary sumObj, Element sumXml, Document xmlDoc) {
-
     sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
     sumXml.appendChild(createElement(xmlDoc, "runType", sumObj.getRunType()));
     sumXml.appendChild(createElement(xmlDoc, "flowcellId", sumObj.getFlowcellID()));
@@ -135,9 +121,7 @@ public class SummaryCollection implements Serializable {
     sumXml.appendChild(createElement(xmlDoc, "currentCycle", sumObj.getCurrentCycle() + ""));
     sumXml.appendChild(createElement(xmlDoc, "totalCycle", sumObj.getTotalCycles() + ""));
     sumXml.appendChild(createElement(xmlDoc, "instrument", sumObj.getInstrument()));
-
     return sumXml;
-
   }
 
   private Element summaryAsMetric(Summary sumObj, Element sumXml, Document xmlDoc) {
@@ -178,10 +162,8 @@ public class SummaryCollection implements Serializable {
       if (sumObj.hasPhasing()) {
         sumXml = sumObj.getPhasingMap().toXML(sumXml, xmlDoc);
       }
-
     }
     else {
-
       sumXml = xmlDoc.createElement("ParseError");
       sumXml.setAttribute("runId", sumObj.getRunId());
     }
@@ -192,15 +174,11 @@ public class SummaryCollection implements Serializable {
 	/*
 	 *  Helpers
 	 */
-
   private String convertStateInt(int mapping) {
-
     if (summaryStateMapping.containsKey(mapping)) {
       return Integer.toString(summaryStateMapping.get(mapping).get());
     }
-    else {
-      return "";
-    }
+    return "";
   }
 
   private Element createElement(Document doc, String name, String text) {
@@ -216,18 +194,10 @@ public class SummaryCollection implements Serializable {
 	/*
 	 *	Converters 
 	 */
-
-
   public String toTab(Command com) {
-    ListIterator litr = this.getSummaryIterator();
-
-    // Iterate over Summary Collection convert to tab separated format.
-    while (litr.hasNext()) {
-      Summary sumObj = (Summary) litr.next();
-
+    for (Summary sumObj : summaryCollection) {
 
     }
-
     return "";
   }
 
@@ -256,10 +226,6 @@ public class SummaryCollection implements Serializable {
     return writer.toString();
   }
 
-	/*
-	 *	Getters / Setters
-	 */
-
   public void setCollectionFormat(String format) {
     this.collectionFormat = format;
   }
@@ -268,17 +234,11 @@ public class SummaryCollection implements Serializable {
     return collectionFormat;
   }
 
-  public ListIterator<Summary> getSummaryIterator() {
-    return summaryCollection.listIterator();
-  }
-
   public int getCollectionCount() {
     return summaryCollection.size();
   }
 
-  public Iterator getStateCount() {
-    return summaryStateMapping.entrySet().iterator();
+  public List<Summary> getSummaryCollection() {
+    return summaryCollection;
   }
-
-
 }

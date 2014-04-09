@@ -34,8 +34,6 @@ public class TileMetrics extends GenericIlluminaParser {
   // LANE --> READ --> PrePhasingScores
   private PhasingCollection preMap = new PhasingCollection();
 
-  ArrayList<Integer> cycles = new ArrayList<>();
-
   public TileMetrics(String source, int state) {
     super(TileMetrics.class, source, state);
   }
@@ -110,7 +108,8 @@ public class TileMetrics extends GenericIlluminaParser {
         int laneNr = leis.readUnsignedShort();
         int tileNr = leis.readUnsignedShort();
         int metricCode = leis.readUnsignedShort();
-        float metricValue = leis.readFloat();
+        //float metricValue = leis.readFloat();
+        double metricValue = leis.readFloat();
 
         // Cluster Density Parsing
         if (metricCode == CLUSTER_DENSITY) {
@@ -123,7 +122,6 @@ public class TileMetrics extends GenericIlluminaParser {
         //
         // Possible catch number of clusters here (code 102 && 103)
         //
-
         List<Integer> codeMap = digits(metricCode);
 
         // Next in loop because were not looking at phasing or prephasing.
@@ -161,7 +159,6 @@ public class TileMetrics extends GenericIlluminaParser {
         }
         record++;
       }
-
     }
     catch (EOFException EOFEx) {
       eofCheck = false;
@@ -212,7 +209,6 @@ public class TileMetrics extends GenericIlluminaParser {
     }
 
     return metricValue;
-
   }
 
   private List<Integer> digits(int i) {
@@ -223,5 +219,4 @@ public class TileMetrics extends GenericIlluminaParser {
     }
     return digits;
   }
-
 }

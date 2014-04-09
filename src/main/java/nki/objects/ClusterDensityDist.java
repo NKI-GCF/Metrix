@@ -8,11 +8,7 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 import nki.objects.MutableLong;
 
@@ -28,7 +24,7 @@ public class ClusterDensityDist implements Serializable {
   public static final long serialVersionUID = 42L;
 
   // QualityMap - Integer scores
-  private HashMap<Integer, MutableLong> qScoreDist = new HashMap<Integer, MutableLong>();
+  private Map<Integer, MutableLong> qScoreDist = new HashMap<>();
 
   public MutableLong getScore(int qScore) {
     return qScoreDist.get(qScore);
@@ -56,7 +52,6 @@ public class ClusterDensityDist implements Serializable {
       scoreEle.appendChild(score);
       scoreEle.appendChild(clusters);
       distXml.appendChild(scoreEle);
-
       sumXml.appendChild(distXml);
     }
 
@@ -75,16 +70,14 @@ public class ClusterDensityDist implements Serializable {
 
   public String toTab() {
     String out = "";
-
     for (int score : qScoreDist.keySet()) {
       MutableLong metric = this.getScore(score);
       out += score + "\t" + metric.get() + "\n";
     }
-
     return out;
   }
 
-  public HashMap<Integer, MutableLong> toObj() {
+  public Map<Integer, MutableLong> getClusterDensityDist() {
     return qScoreDist;
   }
 

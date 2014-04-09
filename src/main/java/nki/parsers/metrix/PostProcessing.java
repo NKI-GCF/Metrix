@@ -13,10 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import javax.xml.parsers.DocumentBuilder;
@@ -45,18 +42,17 @@ import static java.nio.file.StandardCopyOption.*;
 import java.util.logging.Level;
 
 public class PostProcessing {
-
   private DocumentBuilderFactory documentBuilderFactory;
   private DocumentBuilder documentBuilder;
   private Document doc;
   private Summary sum;
   private String xmlFile;
-  private ArrayList<PostProcess> blockList = new ArrayList<>();
-  private ArrayList<PostProcess> processList = new ArrayList<>();
+  private List<PostProcess> blockList = new ArrayList<>();
+  private List<PostProcess> processList = new ArrayList<>();
   private boolean isValid = true;
   private boolean hasFinished = false;
 
-  private HashMap<String, String> tm = new HashMap<>();  // Template mapping collection for placeholder substitutions.
+  private Map<String, String> tm = new HashMap<>();  // Template mapping collection for placeholder substitutions.
   // Instantiate Logger
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
   // Properties config
@@ -426,7 +422,7 @@ public class PostProcessing {
       // Is globbing used?
       if (fo.hasGlobbing()) {
         LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Using globbing pattern: {0}", fo.getGlobbing());
-        ArrayList<Path> foundFiles = findFilesGlobbing(Paths.get(fo.getSource()), fo.getGlobbing());
+        List<Path> foundFiles = findFilesGlobbing(Paths.get(fo.getSource()), fo.getGlobbing());
 
         // Execute the basic copy  operation for files that have been found with a pattern.
         exitStatus = executeGlobbingCopy(fo, foundFiles);
@@ -524,7 +520,7 @@ public class PostProcessing {
     return exitStatus;
   }
 
-  private ArrayList<Path> findFilesGlobbing(Path sourcePath, String pattern) {
+  private List<Path> findFilesGlobbing(Path sourcePath, String pattern) {
     LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Finding files with globbing pattern: {0} in {1}", new Object[]{pattern, sourcePath});
     FileOperations fileops = new FileOperations(sourcePath, pattern);
 
@@ -539,7 +535,7 @@ public class PostProcessing {
     return fileops.getResults();
   }
 
-  private int executeGlobbingCopy(FileOperation fo, ArrayList<Path> fileList) {
+  private int executeGlobbingCopy(FileOperation fo, List<Path> fileList) {
     File destinationFile = new File(fo.getDestination());
     int exitStatus = 0;
 

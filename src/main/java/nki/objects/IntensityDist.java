@@ -18,15 +18,13 @@ public class IntensityDist implements Serializable {
 
   public static final long serialVersionUID = 42L;
 
-  private final HashMap<Integer, HashMap<Integer, HashMap<String, MutableInt>>> iDist = new HashMap<>();
+  private final Map<Integer, Map<Integer, Map<String, MutableInt>>> iDist = new HashMap<>();
 
-  public void setIntensity(int lane, int cycle, HashMap<String, MutableInt> iMapM) {
-    HashMap<Integer, HashMap<String, MutableInt>> oMap = iDist.get(lane);
-
-//		System.out.println("Setting Int for: " + lane + "\tCycle: " + cycle + "Avg: " + iMapp.getCycleAverageInt());
+  public void setIntensity(int lane, int cycle, Map<String, MutableInt> iMapM) {
+    Map<Integer, Map<String, MutableInt>> oMap = iDist.get(lane);
 
     if (oMap == null) {
-      HashMap<Integer, HashMap<String, MutableInt>> cMap = new HashMap<>();
+      Map<Integer, Map<String, MutableInt>> cMap = new HashMap<>();
       cMap.put(cycle, iMapM);
       iDist.put(lane, cMap);
     }
@@ -37,6 +35,10 @@ public class IntensityDist implements Serializable {
 
       iDist.put(lane, oMap);
     }
+  }
+
+  public Map<Integer, Map<Integer, Map<String, MutableInt>>> getIntensities() {
+    return iDist;
   }
 
   @SuppressWarnings("unchecked")
@@ -122,9 +124,4 @@ public class IntensityDist implements Serializable {
     }
     return out;
   }
-
-/*	public HashMap<Integer, MutableLong> toObj(){
-		return iDist;
-	}
-*/
 }

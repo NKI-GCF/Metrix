@@ -200,13 +200,10 @@ public final class CommandProcessor {
           throw new EmptyResultSetCollection("No Results for your search query.");
         }
 
-        ListIterator litr = sc.getSummaryIterator();
         int curCount = 1;
-
-        while (litr.hasNext()) {
-          Summary sum = (Summary) litr.next();
+        for (Summary sum : sc.getSummaryCollection()) {
           LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
-          if (!sum.equals(null)) {
+          if (sum != null) {
             Boolean update = false;
             String runDir = sum.getRunDirectory();
             if (runDir.equals("")) {
@@ -274,8 +271,8 @@ public final class CommandProcessor {
                 //sum.setIScores(isOut);
 
                 // Calculate distribution
-                sum.setIntensityDistAvg(isOut.getAvgCorIntDist());
-                sum.setIntensityDistCCAvg(isOut.getAvgCorIntCCDist());
+                sum.setIntensityDistAvg(isOut.getAverageCorrectedIntensityDist());
+                sum.setIntensityDistCCAvg(isOut.getCalledClustersAverageCorrectedIntensityDist());
                 update = true;
               }
               cim.closeSourceStream();

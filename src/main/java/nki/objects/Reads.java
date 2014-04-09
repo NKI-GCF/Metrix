@@ -10,29 +10,25 @@ package nki.objects;
 import java.net.*;
 import java.io.*;
 import java.lang.*;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.TreeMap;
+import java.util.*;
 
 public class Reads implements Serializable {
 
   public static final long serialVersionUID = 42L;
 
-  private TreeMap<Integer, ArrayList<String>> readMap = new TreeMap<Integer, ArrayList<String>>();
-  private ArrayList<Integer> nonIndexList = new ArrayList<Integer>();
+  private Map<Integer, List<String>> readMap = new TreeMap<>();
+  private List<Integer> nonIndexList = new ArrayList<>();
   private int lastCycle = 1;
 
   public void insertMapping(int readNum, String cycles, String isIndexed) {
-    ArrayList<String> subMap;
+    List<String> subMap;
     if (readMap.containsKey(readNum)) {
       // Get subMap from hashmap.
       subMap = readMap.get(readNum);
     }
     else {
       // Create new readnum entry and popup late with new hashmap
-      subMap = new ArrayList<String>();
+      subMap = new ArrayList<>();
     }
     subMap.add(cycles);
     subMap.add(isIndexed);
@@ -67,12 +63,7 @@ public class Reads implements Serializable {
   }
 
   public boolean cycleIsIndex(int cycle) {
-    if (!Arrays.asList(nonIndexList).contains(cycle)) {
-      return true;
-    }
-    else {
-      return false;
-    }
+    return !Arrays.asList(nonIndexList).contains(cycle);
   }
 
   public boolean isIndexedRead(int readNum) {
@@ -89,7 +80,7 @@ public class Reads implements Serializable {
 
   public String getDemultiplexIndex() {
     String demuxIndex = "";
-    for (ArrayList<String> l : readMap.values()) {
+    for (List<String> l : readMap.values()) {
       if (l.get(1).equals("N")) {
         demuxIndex += "y";  // Read is not an index
       }

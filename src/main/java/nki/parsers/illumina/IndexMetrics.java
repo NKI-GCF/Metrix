@@ -8,6 +8,8 @@
 package nki.parsers.illumina;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import nki.objects.Indices;
@@ -82,8 +84,6 @@ public class IndexMetrics extends GenericIlluminaParser {
         String projectSeq = leis.readUTF8String(numBytesProject);
 
         indices.setIndex(projectSeq, sampleSeq, indexSeq, numClustersIdx, laneNr, readNr);
-//				System.out.println(laneNr + "\t" + tileNr + "\t" + readNr + "\t" + projectSeq + "\t" + sampleSeq + "\t" + indexSeq + "\n");
-
       }
     }
     catch (IOException ExMain) {

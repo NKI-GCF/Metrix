@@ -10,11 +10,11 @@ package nki.util;
 import java.util.*;
 
 public class ArrayUtils {
-  public static float sum(List<Float> a) {
+  public static double sum(List<Double> a) {
     if (a.size() > 0) {
-      float sum = 0;
+      double sum = 0;
 
-      for (Float i : a) {
+      for (Double i : a) {
         sum += i;
       }
       return sum;
@@ -22,14 +22,14 @@ public class ArrayUtils {
     return 0;
   }
 
-  public static double mean(List<Float> a) {
-    float sum = sum(a);
+  public static double mean(List<Double> a) {
+    double sum = sum(a);
     double mean = 0;
     mean = sum / (a.size() * 1.0);
     return mean;
   }
 
-  public static double median(List<Float> a) {
+  public static double median(List<Double> a) {
     int middle = a.size() / 2;
 
     if (a.size() % 2 == 1) {
@@ -40,16 +40,16 @@ public class ArrayUtils {
     }
   }
 
-  public static double sd(List<Float> a) {
-    float sum = 0;
+  public static double sd(List<Double> a) {
+    double sum = 0;
     double mean = mean(a);
 
-    for (Float i : a)
+    for (Double i : a)
       sum += Math.pow((i - mean), 2);
     return Math.sqrt(sum / (a.size() - 1)); // sample
   }
 
-  public double getVariance(List<Float> data) {
+  public double getVariance(List<Double> data) {
     double mean = mean(data);
     double temp = 0;
     double size = data.size();

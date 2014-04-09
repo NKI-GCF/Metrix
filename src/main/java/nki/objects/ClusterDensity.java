@@ -14,6 +14,7 @@ import java.util.Iterator;
 import nki.objects.Metric;
 
 import java.text.*;
+import java.util.Map;
 
 import org.w3c.dom.*;
 
@@ -28,11 +29,11 @@ public class ClusterDensity implements Serializable {
   private int tiles = 0;
   public long totalClusters = 0;
 
-  public HashMap<Integer, Metric> clusterDensity = new HashMap<Integer, Metric>();
+  public Map<Integer, Metric> clusterDensity = new HashMap<>();
 
   public String type = "";
 
-  public void setMetric(int lane, Float metricScore) {
+  public void setMetric(int lane, Double metricScore) {
     Metric m;
     if (clusterDensity.get(lane) != null) {
       m = clusterDensity.get(lane);
@@ -141,7 +142,7 @@ public class ClusterDensity implements Serializable {
 
   }
 
-  public HashMap<Integer, Metric> toObj() {
+  public Map<Integer, Metric> toObj() {
     return clusterDensity;
   }
 

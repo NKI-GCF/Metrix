@@ -17,7 +17,7 @@ import java.util.logging.Level;
 import nki.util.LoggerWrapper;
 
 public class ExtractionMetrics extends GenericIlluminaParser {
-  ArrayList<Integer> cycles = new ArrayList<>();
+  List<Integer> cycles = new ArrayList<>();
 
   // Instantiate Logger
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
@@ -45,8 +45,9 @@ public class ExtractionMetrics extends GenericIlluminaParser {
       setVersion(leis.readByte());
       setRecordLength(leis.readByte());
     }
-    catch (IOException Ex) {
-      metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", Ex.toString());
+    catch (IOException ex) {
+      ex.printStackTrace();
+      metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", ex.toString());
     }
 
     try {
@@ -68,13 +69,13 @@ public class ExtractionMetrics extends GenericIlluminaParser {
         long dateTime = leis.readLong();
       }
     }
-    catch (IOException ExMain) {
-      metrixLogger.log.log(Level.SEVERE, "Error in main parsing of metrics data: {0}", ExMain.toString());
+    catch (IOException exMain) {
+      exMain.printStackTrace();
+      metrixLogger.log.log(Level.SEVERE, "Error in main parsing of metrics data: {0}", exMain.toString());
     }
   }
 
   public List<Integer> getUniqueCycles() {
-
     try {
       leis.skipBytes(6);
 
@@ -84,11 +85,12 @@ public class ExtractionMetrics extends GenericIlluminaParser {
         leis.skipBytes(36);
       }
     }
-    catch (IOException Ex) {
-      metrixLogger.log.log(Level.SEVERE, "IOException in Unique Cycles {0}", Ex.toString());
+    catch (IOException ex) {
+      ex.printStackTrace();
+      metrixLogger.log.log(Level.SEVERE, "IOException in Unique Cycles {0}", ex.toString());
     }
 
-    List<Integer> newList = new ArrayList<Integer>(new HashSet<>(cycles));
+    List<Integer> newList = new ArrayList<>(new HashSet<>(cycles));
     Collections.sort(newList);
 
     return newList;
@@ -109,7 +111,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
         leis.close();
       }
     }
-    catch (IOException Ex) {
+    catch (IOException ex) {
 
     }
 
@@ -122,6 +124,4 @@ public class ExtractionMetrics extends GenericIlluminaParser {
     }
     return max;
   }
-
-
 }

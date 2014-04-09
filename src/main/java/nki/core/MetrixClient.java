@@ -25,7 +25,6 @@ import nki.exceptions.MissingCommandDetailException;
 import nki.exceptions.UnimplementedCommandException;
 import nki.exceptions.InvalidCredentialsException;
 
-import java.util.*;
 import java.io.*;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -101,11 +100,7 @@ public class MetrixClient {
 
             if (serverAnswer instanceof SummaryCollection) {
               SummaryCollection sc = (SummaryCollection) serverAnswer;
-              ListIterator litr = sc.getSummaryIterator();
-
-              while (litr.hasNext()) {
-                Summary sum = (Summary) litr.next();
-
+              for (Summary sum : sc.getSummaryCollection()) {
                 // The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
                 System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
                 listen = false;
@@ -219,7 +214,5 @@ public class MetrixClient {
     catch (EOFException | NoConnectionPendingException | AsynchronousCloseException ex) {
       LoggerWrapper.log.log(Level.INFO, "[CLIENT] Connection closed. ({0})", ex.toString());
     }
-
-
   }
 }

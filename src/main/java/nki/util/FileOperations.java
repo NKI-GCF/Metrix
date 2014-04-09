@@ -13,7 +13,7 @@ public class FileOperations {
   private Path destination;
   private String pattern;
   private CopyOption[] options;
-  private ArrayList<Path> results;
+  private List<Path> results;
   private List<Path> exclusions;
 
   public FileOperations(Path source, Path destination, CopyOption[] options) {
@@ -38,7 +38,6 @@ public class FileOperations {
     }
 
     if (Files.isDirectory(source)) {
-
       Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
 
         @Override
@@ -103,7 +102,7 @@ public class FileOperations {
     }
   }
 
-  public ArrayList<Path> getResults() {
+  public List<Path> getResults() {
     return results;
   }
 

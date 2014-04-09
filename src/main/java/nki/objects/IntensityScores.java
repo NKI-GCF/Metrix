@@ -23,7 +23,7 @@ public class IntensityScores implements Serializable {
   public int version;
   public int recordLength;
   public String source;
-  public HashMap<Integer, HashMap<Integer, IntensityMap>> iScores = new HashMap<Integer, HashMap<Integer, IntensityMap>>();
+  public Map<Integer, Map<Integer, IntensityMap>> iScores = new HashMap<>();
 
   public void setVersion(int version) {
     this.version = version;
@@ -34,12 +34,7 @@ public class IntensityScores implements Serializable {
   }
 
   public boolean isEmpty() {
-    if (iScores.size() == 0) {
-      return true;
-    }
-    else {
-      return false;
-    }
+    return iScores.isEmpty();
   }
 
   public void setRecordLength(int recordLength) {
@@ -58,22 +53,21 @@ public class IntensityScores implements Serializable {
     return source;
   }
 
-  public void setLane(HashMap<Integer, IntensityMap> content, int lanenr) {
-
-    HashMap<Integer, IntensityMap> cycleMap = iScores.get(lanenr);
+  public void setLane(Map<Integer, IntensityMap> content, int lanenr) {
+    Map<Integer, IntensityMap> cycleMap = iScores.get(lanenr);
 
     if (cycleMap == null) {
       iScores.put(lanenr, content);
     }
     else {  // Merge maps and replace existing entries
-      HashMap<Integer, IntensityMap> tmpMap = new HashMap<Integer, IntensityMap>(content);
+      Map<Integer, IntensityMap> tmpMap = new HashMap<>(content);
       tmpMap.keySet().removeAll(cycleMap.keySet());
       cycleMap.putAll(content);
       iScores.put(lanenr, cycleMap);
     }
   }
 
-  public HashMap<Integer, IntensityMap> getLane(int lanenr) {
+  public Map<Integer, IntensityMap> getLane(int lanenr) {
     return iScores.get(lanenr);
   }
 
@@ -85,55 +79,34 @@ public class IntensityScores implements Serializable {
     iScores.get(lane).put(cycle, map);
   }
 
-  public Iterator getIScoreIterator() {
-    return iScores.entrySet().iterator();
-  }
-
-
-  /*
-   *	Lane -> Cycle -> Intensity Set
-   */
-  @SuppressWarnings("unchecked")
-  public IntensityDist getAvgCorIntDist() {
-    Iterator iit = this.getIScoreIterator();
+  public IntensityDist getAverageCorrectedIntensityDist() {
     IntensityDist iDistAvg = new IntensityDist();
 
     // Lane -> CycleMap
-    while (iit.hasNext()) {
-      Map.Entry scorePairs = (Map.Entry) iit.next();
-      int lane = (Integer) scorePairs.getKey();
-      HashMap<Integer, IntensityMap> laneScores = (HashMap<Integer, IntensityMap>) scorePairs.getValue();
+    for (int lane : iScores.keySet()) {
+      Map<Integer, IntensityMap> laneScores = iScores.get(lane);
       // Cycle -> IntensityMap
-      for (Map.Entry<Integer, IntensityMap> entry : laneScores.entrySet()) {
-        int cycle = (Integer) entry.getKey();
-        IntensityMap qmap = (IntensityMap) entry.getValue();
-
-        HashMap<String, MutableInt> iMapMAvg = qmap.getCycleAverageInt();
-        iDistAvg.setIntensity(lane, cycle, (HashMap<String, MutableInt>) iMapMAvg);
+      for (int cycle : laneScores.keySet()) {
+        IntensityMap qmap = laneScores.get(cycle);
+        Map<String, MutableInt> iMapMAvg = qmap.getCycleAverageInt();
+        iDistAvg.setIntensity(lane, cycle, iMapMAvg);
       }
     }
 
     return iDistAvg;
   }
 
-  @SuppressWarnings("unchecked")
-  public IntensityDist getAvgCorIntCCDist() {
-    Iterator iit = this.getIScoreIterator();
+  public IntensityDist getCalledClustersAverageCorrectedIntensityDist() {
     IntensityDist iDistAvgCC = new IntensityDist();
 
     // Lane -> CycleMap
-    while (iit.hasNext()) {
-      Map.Entry scorePairs = (Map.Entry) iit.next();
-      int lane = (Integer) scorePairs.getKey();
-      HashMap<Integer, IntensityMap> laneScores = (HashMap<Integer, IntensityMap>) scorePairs.getValue();
-
+    for (int lane : iScores.keySet()) {
+      Map<Integer, IntensityMap> laneScores = iScores.get(lane);
       // Cycle -> IntensityMap
-      for (Map.Entry<Integer, IntensityMap> entry : laneScores.entrySet()) {
-        int cycle = (Integer) entry.getKey();
-        IntensityMap qmap = (IntensityMap) entry.getValue();
-
-        HashMap<String, MutableInt> iMapMAvgCC = qmap.getCycleAverageCCInt();
-        iDistAvgCC.setIntensity(lane, cycle, (HashMap<String, MutableInt>) iMapMAvgCC);
+      for (int cycle : laneScores.keySet()) {
+        IntensityMap qmap = laneScores.get(cycle);
+        Map<String, MutableInt> iMapMAvgCC = qmap.getCycleAverageCCInt();
+        iDistAvgCC.setIntensity(lane, cycle, iMapMAvgCC);
       }
     }
 

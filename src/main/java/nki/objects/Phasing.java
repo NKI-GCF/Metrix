@@ -15,16 +15,16 @@ import nki.util.ArrayUtils;
 public class Phasing implements Serializable {
 
   public static final long serialVersionUID = 42L;
-  private Float phasing = 0.0f;
+  private Double phasing = 0.0d;
   private int tiles = 0;
-  private List<Float> tileScores = new ArrayList<Float>();
+  private List<Double> tileScores = new ArrayList<>();
 
-  public void setPhasing(Float phasingScore) {
+  public void setPhasing(Double phasingScore) {
     this.phasing = phasingScore;
     this.incrementTiles();
   }
 
-  public Float getPhasing() {
+  public Double getPhasing() {
     return phasing;
   }
 
@@ -36,7 +36,7 @@ public class Phasing implements Serializable {
     return tiles;
   }
 
-  public void incrementPhasing(Float phasingScore) {
+  public void incrementPhasing(Double phasingScore) {
     this.phasing += phasingScore;
     this.incrementTiles();
   }
@@ -45,11 +45,11 @@ public class Phasing implements Serializable {
     this.tiles += 1;
   }
 
-  public Float getLaneAvg() {
+  public Double getLaneAvg() {
     return (phasing / tiles);
   }
 
-  public Float calcSum() {
+  public Double calcSum() {
     return ArrayUtils.sum(tileScores);
   }
 

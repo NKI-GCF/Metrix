@@ -8,7 +8,6 @@ import java.util.logging.LogRecord;
 import java.text.SimpleDateFormat;
 
 public final class SingleLineFormatter extends Formatter {
-
   private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
   @Override

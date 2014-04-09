@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.logging.Level;
 
 import nki.objects.QualityScores;
@@ -59,14 +58,14 @@ public class QualityMetrics extends GenericIlluminaParser {
     }
 
     try {
-      HashMap<Integer, QualityMap> cycleMap = new HashMap<>();
+      Map<Integer, QualityMap> cycleMap;
 
       qScores.setSource(this.getSource());
       qScores.setVersion(this.getVersion());
       qScores.setRecordLength(this.getRecordLength());
 
-      boolean qcFlag = false;
-      QualityMap qMap = new QualityMap();
+      boolean qcFlag;
+      QualityMap qMap;
       while (true) {
         int laneNr = leis.readUnsignedShort();
         int tileNr = leis.readUnsignedShort();
@@ -116,30 +115,16 @@ public class QualityMetrics extends GenericIlluminaParser {
     return qScores;
   }
 
-  @SuppressWarnings("unchecked")
   public void iterateQS() {
     if (qScores != null) {
-      Iterator qit = qScores.getQScoreIterator();
-
-      while (qit.hasNext()) {
-        Map.Entry scorePairs = (Map.Entry) qit.next();
-        int lane = (Integer) scorePairs.getKey();
-        HashMap<Integer, QualityMap> laneScores = (HashMap<Integer, QualityMap>) scorePairs.getValue();
-
-        for (Map.Entry<Integer, QualityMap> entry : laneScores.entrySet()) {
-          int cycle = (Integer) entry.getKey();
-          QualityMap qmap = (QualityMap) entry.getValue();
-
-          Iterator qmapIt = qmap.getScoreIterator();
-
-          while (qmapIt.hasNext()) {
-            Map.Entry qmapPairs = (Map.Entry) qmapIt.next();
-            int tile = (Integer) qmapPairs.getKey();
-            HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
-
-            for (Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()) {
-              int metric = (Integer) qmetric.getKey();
-              int value = (Integer) qmetric.getValue();
+      for (Integer lane : qScores.getRawScores().keySet()) {
+        Map<Integer, QualityMap> laneScores = qScores.getRawScores().get(lane);
+        for (int cycle : laneScores.keySet()) {
+          QualityMap qmap = laneScores.get(cycle);
+          for (int tile : qmap.getMappings().keySet()) {
+            Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
+            for (int metric : qmetricMap.keySet()) {
+              int value = qmetricMap.get(metric);
               System.out.println("Lane: " + lane + "\tCycle: " + cycle + "\tTile: " + tile + "\tQMetric: " + metric + "\t#Clust\\wScore: " + value);
             }
           }

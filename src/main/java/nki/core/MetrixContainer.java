@@ -3,6 +3,7 @@ package nki.core;
 import java.io.*;
 import java.util.HashMap;
 import java.text.*;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class MetrixContainer {
   private PhasingCollection phasingMap;
   private PhasingCollection prephasingMap;
   private QScoreDist qScoreDist;
-  private HashMap<Integer, QScoreDist> qScoreLaneDist;
+  private Map<Integer, QScoreDist> qScoreLaneDist;
   private ErrorDist eDist;
 
   private IntensityDist iDistAvg;
@@ -69,7 +70,7 @@ public class MetrixContainer {
     // Process result
     tm = new TileMetrics(tileMetrics, 0);
     qm = new QualityMetrics(qualityMetrics, 0);
-    cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
+    //cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
     im = new IndexMetrics(indexMetrics, 0);
     em = new ErrorMetrics(errorMetrics, 0);
     exm = new ExtractionMetrics(extractionMetrics, 0);
@@ -134,15 +135,17 @@ public class MetrixContainer {
       qScoreLaneDist = null;
     }
 
+    /*
     log.debug("Processing Corrected Intensity Metrics");
     if (!cim.getFileMissing()) {
       isOut = cim.digestData();
-      iDistAvg = isOut.getAvgCorIntDist();
-      iDistCCAvg = isOut.getAvgCorIntCCDist();
+      iDistAvg = isOut.getAverageCorrectedIntensityDist();
+      iDistCCAvg = isOut.getCalledClustersAverageCorrectedIntensityDist();
     }
     else {
       log.error("Unable to process Corrected Intensity Metrics: "  + Constants.CORRECTED_INT_METRICS + " file is missing.");
     }
+    */
 
     log.debug("Processing Error Metrics");
     if (!em.getFileMissing()) {
@@ -198,58 +201,6 @@ public class MetrixContainer {
 
   public ExtractionMetrics getExtractionMetrics() {
     return exm;
-  }
-
-  public ClusterDensity getClusterDensity() {
-    return clusterDensity;
-  }
-
-  public ClusterDensity getClusterDensityPassingFilter() {
-    return clusterDensityPassingFilter;
-  }
-
-  public PhasingCollection getPhasingMap() {
-    return phasingMap;
-  }
-
-  public PhasingCollection getPrephasingMap() {
-    return prephasingMap;
-  }
-
-  public QScoreDist getQScoreDist() {
-    return qScoreDist;
-  }
-
-  public HashMap<Integer, QScoreDist> getQScoreByLane() {
-    return qScoreLaneDist;
-  }
-
-  public ErrorDist getErrorDist() {
-    return eDist;
-  }
-
-  public IntensityDist getIntensityDist() {
-    return iDistAvg;
-  }
-
-  public IntensityDist getIntensityDistAverage() {
-    return iDistCCAvg;
-  }
-
-  public QualityScores getQualityScores() {
-    return qsOut;
-  }
-
-  public IntensityScores getIntensityScores() {
-    return isOut;
-  }
-
-  public ErrorCollection getErrorCollection() {
-    return ecOut;
-  }
-
-  public Indices getIndices() {
-    return indices;
   }
 
   public void outputSummaryLog() {

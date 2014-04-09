@@ -95,7 +95,6 @@ public class GenericIlluminaParser {
   }
 
   public void closeSourceStream() {
-
     if (leis != null) {
       try {
         this.leis.close();

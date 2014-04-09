@@ -10,21 +10,22 @@ package nki.objects;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class ErrorMap implements Serializable {
   public static final long serialVersionUID = 42L;
 
-  private HashMap<Integer, HashMap<Integer, Float>> eMap = new HashMap<Integer, HashMap<Integer, Float>>();
+  private Map<Integer, Map<Integer, Double>> eMap = new HashMap<>();
 
-  public void addMetric(int tilenr, int numE, float eVal) {
-    HashMap<Integer, Float> eSubMap;
+  public void addMetric(int tilenr, int numE, double eVal) {
+    Map<Integer, Double> eSubMap;
     if (eMap.containsKey(tilenr)) {
       // Get subMap from hashmap.
       eSubMap = eMap.get(tilenr);
     }
     else {
       // Create new readnum entry and popup late with new hashmap
-      eSubMap = new HashMap<Integer, Float>();
+      eSubMap = new HashMap<>();
     }
     eSubMap.put(numE, eVal);
     eMap.put(tilenr, eSubMap);
@@ -34,8 +35,7 @@ public class ErrorMap implements Serializable {
     return eMap.size();
   }
 
-  public Iterator getErrorIterator() {
-    return eMap.entrySet().iterator();
+  public Map<Integer, Map<Integer, Double>> getErrorMappings() {
+    return eMap;
   }
-
 }

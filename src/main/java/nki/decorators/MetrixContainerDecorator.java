@@ -5,10 +5,7 @@ import nki.core.MetrixContainer;
 import nki.objects.Summary;
 
 /**
- * nki.decorators
- * <p/>
- * <p/>
- * Info
+ * Decorator for a MetrixContainer, comprising all JSON outputs of each individual decorator type.
  *
  * @author Rob Davey
  * @date 07/04/14
@@ -27,30 +24,20 @@ public class MetrixContainerDecorator {
     JSONObject summary = new MetrixSummaryDecorator(metrixContainer.getSummary()).toJSON();
     JSONObject tileMetrics = new MetrixTileMetricsDecorator(metrixContainer.getTileMetrics(), metrixContainer.getSummary().getReads()).toJSON();
     JSONObject qualityMetrics = new MetrixQualityMetricsDecorator(metrixContainer.getQualityMetrics().getQualityScores()).toJSON();
-    JSONObject intensityMetrics = new MetrixIntensityMetricsDecorator(metrixContainer.getCorrectedIntensityMetrics().getIntensityScores()).toJSON();
     JSONObject errorMetrics = new MetrixErrorMetricsDecorator(metrixContainer.getErrorMetrics().getErrorScores()).toJSON();
     JSONObject indexMetrics = new MetrixIndexMetricsDecorator(metrixContainer.getIndexMetrics().getIndices()).toJSON();
     JSONObject extractionMetrics = new MetrixExtractionMetricsDecorator(metrixContainer.getExtractionMetrics()).toJSON();
 
+    //TODO generates muchness output
+    //JSONObject intensityMetrics = new MetrixIntensityMetricsDecorator(metrixContainer.getCorrectedIntensityMetrics().getIntensityScores()).toJSON();
+    //metrixJson.put("intensityMetrics", intensityMetrics);
+
     metrixJson.put("summary", summary);
     metrixJson.put("tileMetrics", tileMetrics);
     metrixJson.put("qualityMetrics", qualityMetrics);
-    metrixJson.put("intensityMetrics", intensityMetrics);
     metrixJson.put("errorMetrics", errorMetrics);
     metrixJson.put("indexMetrics", indexMetrics);
     metrixJson.put("extractionMetrics", extractionMetrics);
-
-    /*
-    metrixContainer.getQScoreDist()
-    metrixContainer.getQScoreByLane()
-    metrixContainer.getErrorDist()
-    metrixContainer.getIntensityDist()
-    metrixContainer.getIntensityDistAverage()
-    metrixContainer.getQualityScores()
-    metrixContainer.getIntensityScores()
-    metrixContainer.getErrorCollection()
-    metrixContainer.getIndices()
-    */
 
     return metrixJson;
   }

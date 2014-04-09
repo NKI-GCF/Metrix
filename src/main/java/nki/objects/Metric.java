@@ -15,17 +15,17 @@ import nki.util.ArrayUtils;
 public class Metric implements Serializable {
 
   public static final long serialVersionUID = 42L;
-  private Float metric = 0.0f;
+  private Double metric = 0.0d;
   private int tiles = 0;
-  private List<Float> tileScores = new ArrayList<Float>();
+  private List<Double> tileScores = new ArrayList<>();
 
-  public void setMetric(Float metricScore) {
+  public void setMetric(Double metricScore) {
     this.metric = metricScore;
     this.incrementTiles();
   }
 
   // Total for whole lane
-  public Float getMetric() {
+  public Double getMetric() {
     return metric;
   }
 
@@ -37,7 +37,7 @@ public class Metric implements Serializable {
     return tiles;
   }
 
-  public void incrementMetric(Float metricScore) {
+  public void incrementMetric(Double metricScore) {
     this.metric += metricScore;
     this.tileScores.add(metricScore);
     this.incrementTiles();
@@ -48,11 +48,11 @@ public class Metric implements Serializable {
   }
 
   // ClusterDensity averaged (metric value / #tiles) .
-  public Float getLaneAvg() {
+  public Double getLaneAvg() {
     return (metric / tiles);
   }
 
-  public Float calcSum() {
+  public Double calcSum() {
     return ArrayUtils.sum(tileScores);
   }
 

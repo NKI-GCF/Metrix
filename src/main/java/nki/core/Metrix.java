@@ -1,6 +1,5 @@
 package nki.core;
 
-import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import nki.decorators.MetrixContainerDecorator;
 import org.slf4j.Logger;

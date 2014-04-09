@@ -57,7 +57,6 @@ public class LittleEndianInputStream extends FilterInputStream {
   }
 
   public int readInt() throws IOException {
-
     int byte1 = in.read();
     int byte2 = in.read();
     int byte3 = in.read();
@@ -69,11 +68,9 @@ public class LittleEndianInputStream extends FilterInputStream {
            + ((byte3 << 24) >>> 8)
            + ((byte2 << 24) >>> 16)
            + ((byte1 << 24) >>> 24);
-
   }
 
   public long readLong() throws IOException {
-
     long byte1 = in.read();
     long byte2 = in.read();
     long byte3 = in.read();
@@ -93,7 +90,6 @@ public class LittleEndianInputStream extends FilterInputStream {
            + ((byte3 << 56) >>> 40)
            + ((byte2 << 56) >>> 48)
            + ((byte1 << 56) >>> 56);
-
   }
 
   public final String readUTF8String(int numBytes) throws IOException {
@@ -104,7 +100,6 @@ public class LittleEndianInputStream extends FilterInputStream {
     }
 
     return new String(bytes, "UTF-8");
-
   }
 
   public final double readDouble() throws IOException {
@@ -119,5 +114,4 @@ public class LittleEndianInputStream extends FilterInputStream {
     for (int i = 0; i < n; i += (int) skip(n - i)) ;
     return n;
   }
-
 }

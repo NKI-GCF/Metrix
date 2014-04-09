@@ -23,7 +23,7 @@ public class QualityScores implements Serializable {
   public int recordLength;
   public String source;
   // Lane - QScore - QMap
-  public HashMap<Integer, HashMap<Integer, QualityMap>> qScores = new HashMap<Integer, HashMap<Integer, QualityMap>>();
+  public Map<Integer, Map<Integer, QualityMap>> qScores = new HashMap<>();
   private QScoreDist qScoreDist = new QScoreDist();
 
   public void setVersion(int version) {
@@ -35,12 +35,7 @@ public class QualityScores implements Serializable {
   }
 
   public boolean isEmpty() {
-    if (qScores.size() == 0) {
-      return true;
-    }
-    else {
-      return false;
-    }
+    return qScores.isEmpty();
   }
 
   public void setRecordLength(int recordLength) {
@@ -59,22 +54,21 @@ public class QualityScores implements Serializable {
     return source;
   }
 
-  public void setLane(HashMap<Integer, QualityMap> content, int lanenr) {
-
-    HashMap<Integer, QualityMap> cycleMap = qScores.get(lanenr);
+  public void setLane(Map<Integer, QualityMap> content, int lanenr) {
+    Map<Integer, QualityMap> cycleMap = qScores.get(lanenr);
 
     if (cycleMap == null) {
       qScores.put(lanenr, content);
     }
     else {  // Merge maps and replace existing entries
-      HashMap<Integer, QualityMap> tmpMap = new HashMap<Integer, QualityMap>(content);
+      Map<Integer, QualityMap> tmpMap = new HashMap<>(content);
       tmpMap.keySet().removeAll(cycleMap.keySet());
       cycleMap.putAll(content);
       qScores.put(lanenr, cycleMap);
     }
   }
 
-  public HashMap<Integer, QualityMap> getLane(int lanenr) {
+  public Map<Integer, QualityMap> getLane(int lanenr) {
     return qScores.get(lanenr);
   }
 
@@ -86,82 +80,52 @@ public class QualityScores implements Serializable {
     qScores.get(lane).put(cycle, map);
   }
 
-  public Iterator getQScoreIterator() {
-    return qScores.entrySet().iterator();
-  }
-
-  @SuppressWarnings("unchecked")
   public QScoreDist getQScoreDistribution() {
-    Iterator qit = this.getQScoreIterator();
-
-    while (qit.hasNext()) {
-      Map.Entry scorePairs = (Map.Entry) qit.next();
-      int lane = (Integer) scorePairs.getKey();
-      HashMap<Integer, QualityMap> laneScores = (HashMap<Integer, QualityMap>) scorePairs.getValue();
-      for (Map.Entry<Integer, QualityMap> entry : laneScores.entrySet()) {
-        int cycle = (Integer) entry.getKey();
-        QualityMap qmap = (QualityMap) entry.getValue();
-        Iterator qmapIt = qmap.getScoreIterator();
-
-        while (qmapIt.hasNext()) {
-          Map.Entry qmapPairs = (Map.Entry) qmapIt.next();
-          int tile = (Integer) qmapPairs.getKey();
-          HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
-
-          for (Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()) {
-            int qScore = (Integer) qmetric.getKey();
-            long metric = Long.valueOf(qmetric.getValue());
+    for (Integer lane : qScores.keySet()) {
+      Map<Integer, QualityMap> laneScores = qScores.get(lane);
+      for (Integer cycle : laneScores.keySet()) {
+        QualityMap qmap = laneScores.get(cycle);
+        for (Integer tile : qmap.getMappings().keySet()) {
+          Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
+          for (Integer qScore : qmetricMap.keySet()) {
+            long metric = Long.valueOf(qmetricMap.get(qScore));
             if (metric == 0) {
               continue;
             }
-
             qScoreDist.setScore(qScore, metric);  // Set the metric in the QScore Distribution
-
           }
         }
       }
-
-
     }
     return qScoreDist;
   }
 
-  @SuppressWarnings("unchecked")
-  public HashMap<Integer, QScoreDist> getQScoreDistributionByLane() {
-    Iterator qit = this.getQScoreIterator();
-    HashMap<Integer, QScoreDist> laneDist = new HashMap<Integer, QScoreDist>();
+  public Map<Integer, QScoreDist> getQScoreDistributionByLane() {
+    Map<Integer, QScoreDist> laneDist = new HashMap<>();
 
-    while (qit.hasNext()) {
-      Map.Entry scorePairs = (Map.Entry) qit.next();
-      int lane = (Integer) scorePairs.getKey();
-      HashMap<Integer, QualityMap> laneScores = (HashMap<Integer, QualityMap>) scorePairs.getValue();
+    for (Integer lane : qScores.keySet()) {
+      Map<Integer, QualityMap> laneScores = qScores.get(lane);
       QScoreDist qScoreDistLane = new QScoreDist();
-
-      for (Map.Entry<Integer, QualityMap> entry : laneScores.entrySet()) {
-        int cycle = (Integer) entry.getKey();
-        QualityMap qmap = (QualityMap) entry.getValue();
-        Iterator qmapIt = qmap.getScoreIterator();
-
-        while (qmapIt.hasNext()) {
-          Map.Entry qmapPairs = (Map.Entry) qmapIt.next();
-          int tile = (Integer) qmapPairs.getKey();
-          HashMap<Integer, Integer> qmetricMap = (HashMap<Integer, Integer>) qmapPairs.getValue();
-
-          for (Map.Entry<Integer, Integer> qmetric : qmetricMap.entrySet()) {
-            int qScore = (Integer) qmetric.getKey();
-            long metric = Long.valueOf(qmetric.getValue());
+      for (Integer cycle : laneScores.keySet()) {
+        QualityMap qmap = laneScores.get(cycle);
+        for (Integer tile : qmap.getMappings().keySet()) {
+          Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
+          for (Integer qScore : qmetricMap.keySet()) {
+            long metric = Long.valueOf(qmetricMap.get(qScore));
             if (metric == 0) {
               continue;
             }
-
             qScoreDistLane.setScore(qScore, metric);  // Set the metric in the QScore Distribution
-
           }
         }
       }
-
       laneDist.put(lane, qScoreDistLane);
     }
+
     return laneDist;
+  }
+
+  public Map<Integer, Map<Integer, QualityMap>> getRawScores() {
+    return qScores;
   }
 }

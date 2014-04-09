@@ -10,6 +10,7 @@ package nki.parsers.illumina;
 import java.io.IOException;
 import java.io.EOFException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import nki.objects.IntensityScores;
@@ -68,9 +69,8 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
     }
 
     try {
-      HashMap<Integer, IntensityMap> cycleMap = new HashMap<>();
-      IntensityMap iMap = new IntensityMap();
-      int cnt = 0;
+      Map<Integer, IntensityMap> cycleMap;
+      IntensityMap iMap;
 
       while (true) {
         int laneNr = leis.readUnsignedShort();
@@ -92,59 +92,60 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
         }
 
         // Avg Corrected Int
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI, (double)leis.readUnsignedShort());
 
         //-- Avg Corrected Int A
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_A, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_A, (double)leis.readUnsignedShort());
 
         // Avg Corrected Int C
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_C, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_C, (double)leis.readUnsignedShort());
 
         // Avg Corrected Int G
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_G, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_G, (double)leis.readUnsignedShort());
 
         // Avg Corrected Int T
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_T, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_T, (double)leis.readUnsignedShort());
 
         //-- Avg Corrected Int Called Clusters A
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_A, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_A, (double)leis.readUnsignedShort());
 
         // Avg Corrected Int Called Clusters C
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_C, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_C, (double)leis.readUnsignedShort());
 
         // Avg Corrected Int Called Clusters G
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_G, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_G, (double)leis.readUnsignedShort());
 
         // Avg Corrected Int Called Clusters T
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_T, leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_T, (double)leis.readUnsignedShort());
 
         //-- Num of base calls for No Call (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_NC, leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_NC, (double)leis.readFloat());
 
         // Num of base calls for A (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_A, leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_A, (double)leis.readFloat());
 
         // Num of base calls for C (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_C, leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_C, (double)leis.readFloat());
 
         // Num of base calls for G (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_G, leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_G, (double)leis.readFloat());
 
         // Num of base calls for T (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_T, leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_T, (double)leis.readFloat());
 
         // Signal to noise ratio
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_SIGNOISE, leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_SIGNOISE, (double)leis.readFloat());
 
         cycleMap.put(cycleNr, iMap);
         iScores.setLane(cycleMap, laneNr);
       }
     }
-    catch (EOFException EOFEx) {
+    catch (EOFException eof) {
       // Reached end of file
       // Lazy EOF - Ignore checking.
     }
-    catch (IOException Ex) {
+    catch (IOException ex) {
+      ex.printStackTrace();
       LoggerWrapper.log.severe("IO Error - CorrectedIntensityMetrics digest");
     }
 

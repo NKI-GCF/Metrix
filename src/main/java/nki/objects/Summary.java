@@ -423,43 +423,43 @@ public class Summary implements Serializable {
   }
 
   public boolean hasClusterDensity() {
-    return clusterDensity == null ? false : true;
+    return clusterDensity != null;
   }
 
   public boolean hasClusterDensityPF() {
-    return clusterDensityPF == null ? false : true;
+    return clusterDensityPF != null;
   }
 
   public boolean hasPrephasing() {
-    return prephasingMap == null ? false : true;
+    return prephasingMap != null;
   }
 
   public boolean hasPhasing() {
-    return phasingMap == null ? false : true;
+    return phasingMap != null;
   }
 
   public boolean hasQScores() {
-    return qScores == null ? false : true;
+    return qScores != null;
   }
 
   public boolean hasQScoreDist() {
-    return qScoreDist == null ? false : true;
+    return qScoreDist != null;
   }
 
   public boolean hasIScores() {
-    return iScores == null ? false : true;
+    return iScores != null;
   }
 
   public boolean hasIntensityDistAvg() {
-    return iDistAvg == null ? false : true;
+    return iDistAvg != null;
   }
 
   public boolean hasIntensityDistCCAvg() {
-    return iDistCCAvg == null ? false : true;
+    return iDistCCAvg != null;
   }
 
   public boolean hasSampleInfo() {
-    return sampleInfo == null ? false : true;
+    return sampleInfo != null;
   }
 
   public void setParseError(int parseError) {
@@ -483,22 +483,7 @@ public class Summary implements Serializable {
   }
 
   public boolean getPairedTurnCheck() {
-    if (this.getRunType().equals("Paired End")) {
-      if (this.getState() != Constants.STATE_HANG) {
-        if (this.getCurrentCycle() == this.getTurnCycle()) {
-          return true;
-        }
-        else {
-          return false;
-        }
-      }
-      else {
-        return false;
-      }
-    }
-    else {  // Nextera is excluded
-      return false;
-    }
+    return this.getRunType().equals("Paired End") && this.getState() != Constants.STATE_HANG && this.getCurrentCycle() == this.getTurnCycle();
   }
 }
 

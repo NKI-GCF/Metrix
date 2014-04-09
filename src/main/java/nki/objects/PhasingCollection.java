@@ -11,6 +11,7 @@ import java.io.*;
 import java.text.*;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import nki.objects.Phasing;
 import nki.objects.Reads;
@@ -25,15 +26,14 @@ import javax.xml.transform.stream.*;
 public class PhasingCollection implements Serializable {
 
   public static final long serialVersionUID = 42L;
-  private int tiles = 0;
 
   // Lane -> Read Num (1, 2, 3 or 4) -> Phasing Map for read.
-  public HashMap<Integer, HashMap<Integer, Phasing>> phasingPerLane = new HashMap<Integer, HashMap<Integer, Phasing>>();
+  public Map<Integer, Map<Integer, Phasing>> phasingPerLane = new HashMap<>();
 
   public String type = "";
 
-  public void setPhasing(int lane, int readNum, Float phasingScore) {
-    HashMap<Integer, Phasing> lanePhaseMap;
+  public void setPhasing(int lane, int readNum, Double phasingScore) {
+    Map<Integer, Phasing> lanePhaseMap;
 
     Phasing m;
     lanePhaseMap = phasingPerLane.get(lane);
@@ -46,7 +46,7 @@ public class PhasingCollection implements Serializable {
       m.incrementPhasing(phasingScore);
     }
     else {
-      lanePhaseMap = new HashMap<Integer, Phasing>();
+      lanePhaseMap = new HashMap<>();
       m = new Phasing();
       m.incrementPhasing(phasingScore);
     }
@@ -62,10 +62,6 @@ public class PhasingCollection implements Serializable {
 
   public Phasing getPhasing(int lane, int readNum, PhasingCollection pc) {
     return pc.phasingPerLane.get(lane).get(readNum);
-  }
-
-  public Iterator getLanePhasingIterator() {
-    return phasingPerLane.entrySet().iterator();
   }
 
   public Element toXML(Element sumXml, Document xmlDoc) {
@@ -94,16 +90,6 @@ public class PhasingCollection implements Serializable {
     return sumXml;
   }
 
-  private Element createElement(Document doc, String name, String text) {
-    Element e = doc.createElement(name);
-    if (text == null) {
-      text = "";
-    }
-    e.appendChild(doc.createTextNode(text));
-
-    return e;
-  }
-
   public String toTab() {
     String out = "";
     DecimalFormat df = new DecimalFormat("#.###");
@@ -122,7 +108,7 @@ public class PhasingCollection implements Serializable {
     DecimalFormat df = new DecimalFormat("#.###");
 
     // Write merged prephasing / phasing collection
-    if (ext instanceof PhasingCollection) {
+    if (ext != null) {
       if (phasingPerLane.size() != ext.phasingPerLane.size()) {
         return "Incompatible list size.";
       }
@@ -146,7 +132,7 @@ public class PhasingCollection implements Serializable {
     return out;
   }
 
-  public HashMap<Integer, HashMap<Integer, Phasing>> toObj() {
+  public Map<Integer, Map<Integer, Phasing>> toObj() {
     return phasingPerLane;
   }
 
@@ -157,6 +143,4 @@ public class PhasingCollection implements Serializable {
   public String getType() {
     return type;
   }
-
-
 }
