@@ -23,14 +23,14 @@
   <distributionManagement>
     <downloadUrl>https://repos.tgac.ac.uk/maven/repo</downloadUrl>
     <repository>
-      <id>metrix-releases</id>
-      <name>Metrix repository</name>
-      <url>scp://repos.tgac.ac.uk/storage/html/maven/metrix/releases</url>
+      <id>tgac-repo</id>
+      <name>TGAC Maven Repository</name>
+      <url>scp://repos.tgac.ac.uk/storage/html/maven/repo</url>
     </repository>
     <snapshotRepository>
-      <id>metrix-snapshots</id>
-      <name>Metrix snapshot repository</name>
-      <url>scp://repos.tgac.ac.uk/storage/html/maven/metrix/snapshots</url>
+      <id>tgac-repo</id>
+      <name>TGAC Maven Repository</name>
+      <url>scp://repos.tgac.ac.uk/storage/html/maven/repo</url>
     </snapshotRepository>
   </distributionManagement>
 
