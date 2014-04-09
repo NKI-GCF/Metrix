@@ -19,9 +19,13 @@ public class MetrixSummaryDecorator {
 
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
+
     json.put("runType", summary.getRunType());
     json.put("totalCycles", summary.getTotalCycles());
     json.put("currentCycle", summary.getCurrentCycle());
+    json.put("demultiplexIndex", summary.getReads().getDemultiplexIndex());
+    json.put("flowcellId", summary.getFlowcellID());
+
     return json;
   }
 }
