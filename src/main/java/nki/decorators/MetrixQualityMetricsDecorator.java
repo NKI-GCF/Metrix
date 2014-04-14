@@ -29,6 +29,7 @@ public class MetrixQualityMetricsDecorator {
 
     JSONObject combQs = new JSONObject();
     QScoreDist qScoreDist = qualityScores.getQScoreDistribution();
+
     if (qScoreDist.aboveQ(20) != -1d) {
       combQs.put(">Q20", qScoreDist.aboveQ(20));
     }
@@ -43,8 +44,16 @@ public class MetrixQualityMetricsDecorator {
       JSONObject lqLane = new JSONObject();
       QScoreDist dist = qScoreLaneDist.get(lane);
       lqLane.put("lane", lane);
-      lqLane.put(">Q20", df.format(dist.aboveQ(20)));
-      lqLane.put(">Q30", df.format(dist.aboveQ(30)));
+      JSONArray a = new JSONArray();
+      for (Integer i : dist.getQualityScoreDist().keySet()) {
+        JSONObject j = new JSONObject();
+        j.put(i, df.format(dist.getQualityScoreDist().get(i).get()));
+        a.add(j);
+      }
+      lqLane.put("raw", a);
+      lqLane.put(">Q20", dist.aboveQ(20));
+      lqLane.put(">Q30", dist.aboveQ(30));
+      lqLane.put(">Q40", dist.aboveQ(40));
       laneQualities.add(lqLane);
     }
     json.put("perLaneQualityScores", laneQualities);
