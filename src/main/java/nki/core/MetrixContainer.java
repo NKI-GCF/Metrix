@@ -70,7 +70,7 @@ public class MetrixContainer {
     // Process result
     tm = new TileMetrics(tileMetrics, 0);
     qm = new QualityMetrics(qualityMetrics, 0);
-    //cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
+    cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
     im = new IndexMetrics(indexMetrics, 0);
     em = new ErrorMetrics(errorMetrics, 0);
     exm = new ExtractionMetrics(extractionMetrics, 0);
@@ -100,8 +100,6 @@ public class MetrixContainer {
       log.error("Error in XML parser configuration: " + pce.getMessage());
     }
 
-    //Reads rds = sum.getReads();
-
     // Metrics digestion
     log.debug("Processing tile metrics");
     if (!tm.getFileMissing()) {
@@ -121,40 +119,42 @@ public class MetrixContainer {
       prephasingMap = null;
     }
 
-    log.debug("Processing Quality Metrics");
-    if (!qm.getFileMissing()) {
-      //TODO - reads previously required
-      //qsOut = qm.digestData(rds);
-      qsOut = qm.digestData();
-      qScoreDist = qsOut.getQScoreDistribution();
-      qScoreLaneDist = qsOut.getQScoreDistributionByLane();
-    }
-    else {
-      log.error("Unable to process Quality Metrics: " + Constants.QMETRICS_METRICS + " file is missing.");
-      qScoreDist = null;
-      qScoreLaneDist = null;
+    if (sum.getCurrentCycle() > 25) {
+      log.debug("Processing Quality Metrics");
+      if (!qm.getFileMissing()) {
+        //TODO - reads previously required
+        //qsOut = qm.digestData(rds);
+        qsOut = qm.digestData();
+        qScoreDist = qsOut.getQScoreDistribution();
+        qScoreLaneDist = qsOut.getQScoreDistributionByLane();
+      }
+      else {
+        log.error("Unable to process Quality Metrics: " + Constants.QMETRICS_METRICS + " file is missing.");
+        qScoreDist = null;
+        qScoreLaneDist = null;
+      }
+
+      log.debug("Processing Corrected Intensity Metrics");
+      if (!cim.getFileMissing()) {
+        isOut = cim.digestData();
+        iDistAvg = isOut.getAverageCorrectedIntensityDist();
+        iDistCCAvg = isOut.getCalledClustersAverageCorrectedIntensityDist();
+      }
+      else {
+        log.error("Unable to process Corrected Intensity Metrics: "  + Constants.CORRECTED_INT_METRICS + " file is missing.");
+      }
     }
 
-    /*
-    log.debug("Processing Corrected Intensity Metrics");
-    if (!cim.getFileMissing()) {
-      isOut = cim.digestData();
-      iDistAvg = isOut.getAverageCorrectedIntensityDist();
-      iDistCCAvg = isOut.getCalledClustersAverageCorrectedIntensityDist();
-    }
-    else {
-      log.error("Unable to process Corrected Intensity Metrics: "  + Constants.CORRECTED_INT_METRICS + " file is missing.");
-    }
-    */
-
-    log.debug("Processing Error Metrics");
-    if (!em.getFileMissing()) {
-      ecOut = em.digestData();
-      eDist = ecOut.getErrorDistribution();
-    }
-    else {
-      log.error("Unable to process Error Metrics: "  + Constants.ERROR_METRICS + " file is missing.");
-      eDist = null;
+    if (sum.getCurrentCycle() > 52) {
+      log.debug("Processing Error Metrics");
+      if (!em.getFileMissing()) {
+        ecOut = em.digestData();
+        eDist = ecOut.getErrorDistribution();
+      }
+      else {
+        log.error("Unable to process Error Metrics: "  + Constants.ERROR_METRICS + " file is missing.");
+        eDist = null;
+      }
     }
 
     log.debug("Processing Extraction Metrics");
@@ -251,7 +251,7 @@ public class MetrixContainer {
       log.info(indices.toTab());
     }
     else {
-      log.error("No Index Matrics information available.");
+      log.error("No Index Metrics information available.");
     }
 
     log.info("== Error Metrics ==");

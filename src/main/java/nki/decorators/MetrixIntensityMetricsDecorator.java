@@ -2,6 +2,7 @@ package nki.decorators;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import nki.constants.Constants;
 import nki.objects.IntensityDist;
 import nki.objects.IntensityScores;
 import nki.objects.MutableInt;
@@ -24,8 +25,8 @@ public class MetrixIntensityMetricsDecorator {
 
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
+    /*
     IntensityDist iDistAvg = intensityScores.getAverageCorrectedIntensityDist();
-    IntensityDist iDistCCAvg = intensityScores.getCalledClustersAverageCorrectedIntensityDist();
 
     JSONArray averages = new JSONArray();
     for (int lane : iDistAvg.getIntensities().keySet()) {
@@ -48,28 +49,47 @@ public class MetrixIntensityMetricsDecorator {
       averages.add(l);
     }
 
+    json.put("averages", averages);
+    */
+
+    IntensityDist iDistCCAvg = intensityScores.getCalledClustersAverageCorrectedIntensityDist();
+
     JSONArray cclanes = new JSONArray();
     for (int lane : iDistCCAvg.getIntensities().keySet()) {
       JSONObject l = new JSONObject();
       Map<Integer, Map<String, MutableInt>> cycleContent = iDistCCAvg.getIntensities().get(lane);
 
-      JSONArray cycles = new JSONArray();
+      JSONArray cyclesA = new JSONArray();
+      JSONArray cyclesC = new JSONArray();
+      JSONArray cyclesT = new JSONArray();
+      JSONArray cyclesG = new JSONArray();
+
       for (int cycle : cycleContent.keySet()) {
-        JSONObject cyc = new JSONObject();
-        cyc.put("cycle", cycle);
         Map<String, MutableInt> cycleIntensities = cycleContent.get(cycle);
         for (String intensity : cycleIntensities.keySet()) {
-          cyc.put(intensity, cycleIntensities.get(intensity));
+          if (intensity.equals(Constants.METRIC_VAR_ACICC_A)) {
+            cyclesA.add(cycleIntensities.get(intensity).get());
+          }
+          if (intensity.equals(Constants.METRIC_VAR_ACICC_C)) {
+            cyclesC.add(cycleIntensities.get(intensity).get());
+          }
+          if (intensity.equals(Constants.METRIC_VAR_ACICC_T)) {
+            cyclesT.add(cycleIntensities.get(intensity).get());
+          }
+          if (intensity.equals(Constants.METRIC_VAR_ACICC_G)) {
+            cyclesG.add(cycleIntensities.get(intensity).get());
+          }
         }
-        cycles.add(cyc);
       }
 
       l.put("lane", lane);
-      l.put("cycles", cycles);
+      l.put("ccAvgA", cyclesA);
+      l.put("ccAvgC", cyclesC);
+      l.put("ccAvgT", cyclesT);
+      l.put("ccAvgG", cyclesG);
       cclanes.add(l);
     }
 
-    json.put("averages", averages);
     json.put("calledClusterAverages", cclanes);
 
    return json;

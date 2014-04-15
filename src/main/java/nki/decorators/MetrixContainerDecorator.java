@@ -29,8 +29,8 @@ public class MetrixContainerDecorator {
     JSONObject extractionMetrics = new MetrixExtractionMetricsDecorator(metrixContainer.getExtractionMetrics()).toJSON();
 
     //TODO generates muchness output
-    //JSONObject intensityMetrics = new MetrixIntensityMetricsDecorator(metrixContainer.getCorrectedIntensityMetrics().getIntensityScores()).toJSON();
-    //metrixJson.put("intensityMetrics", intensityMetrics);
+    JSONObject intensityMetrics = new MetrixIntensityMetricsDecorator(metrixContainer.getCorrectedIntensityMetrics().getIntensityScores()).toJSON();
+    metrixJson.put("intensityMetrics", intensityMetrics);
 
     metrixJson.put("summary", summary);
     metrixJson.put("tileMetrics", tileMetrics);
