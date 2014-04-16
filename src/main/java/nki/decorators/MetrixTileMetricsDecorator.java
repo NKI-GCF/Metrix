@@ -39,11 +39,19 @@ public class MetrixTileMetricsDecorator {
       Metric locMetric = clusterDensity.getDensity(lane);
       Metric extMetric = clusterDensityPassingFilter.getDensity(lane);
       cdLane.put("lane", lane);
-      cdLane.put("density", df.format(locMetric.calcMean() / 1000));
-      cdLane.put("densitySD", df.format(locMetric.calcSD() / 1000));
-      cdLane.put("densityPassingFilter", df.format(extMetric.calcMean() / 1000));
-      cdLane.put("densityPassingFilterSD", df.format(extMetric.calcSD() / 1000));
-      cdLane.put("densityPercentPassed", dfTwo.format(((extMetric.calcMean() / 1000) / (locMetric.calcMean() / 1000)) * 100));
+      cdLane.put("density", Double.valueOf(df.format(locMetric.calcMedian() / 1000)));
+      cdLane.put("densityMax", Double.valueOf(df.format(locMetric.calcMax() / 1000)));
+      cdLane.put("densityMin", Double.valueOf(df.format(locMetric.calcMin() / 1000)));
+      cdLane.put("densityQ1", Double.valueOf(df.format(locMetric.calcQ1() / 1000)));
+      cdLane.put("densityQ3", Double.valueOf(df.format(locMetric.calcQ3() / 1000)));
+      cdLane.put("densitySD", Double.valueOf(df.format(locMetric.calcSD() / 1000)));
+      cdLane.put("densityPassingFilter", Double.valueOf(df.format(extMetric.calcMedian() / 1000)));
+      cdLane.put("densityPassingFilterMax", Double.valueOf(df.format(extMetric.calcMax() / 1000)));
+      cdLane.put("densityPassingFilterMin", Double.valueOf(df.format(extMetric.calcMin() / 1000)));
+      cdLane.put("densityPassingFilterQ1", Double.valueOf(df.format(extMetric.calcQ1() / 1000)));
+      cdLane.put("densityPassingFilterQ3", Double.valueOf(df.format(extMetric.calcQ3() / 1000)));
+      cdLane.put("densityPassingFilterSD", Double.valueOf(df.format(extMetric.calcSD() / 1000)));
+      cdLane.put("densityPercentPassed", Double.valueOf(dfTwo.format(((extMetric.calcMean() / 1000) / (locMetric.calcMean() / 1000)) * 100)));
       cdLane.put("units", "K/mm2");
       clusterDensities.add(cdLane);
     }

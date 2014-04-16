@@ -25,7 +25,7 @@ public class MetrixIntensityMetricsDecorator {
 
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
-    /*
+
     IntensityDist iDistAvg = intensityScores.getAverageCorrectedIntensityDist();
 
     JSONArray averages = new JSONArray();
@@ -33,25 +33,40 @@ public class MetrixIntensityMetricsDecorator {
       JSONObject l = new JSONObject();
       Map<Integer, Map<String, MutableInt>> cycleContent = iDistAvg.getIntensities().get(lane);
 
-      JSONArray cycles = new JSONArray();
+      JSONArray cyclesA = new JSONArray();
+      JSONArray cyclesC = new JSONArray();
+      JSONArray cyclesT = new JSONArray();
+      JSONArray cyclesG = new JSONArray();
+
       for (int cycle : cycleContent.keySet()) {
-        JSONObject cyc = new JSONObject();
-        cyc.put("cycle", cycle);
         Map<String, MutableInt> cycleIntensities = cycleContent.get(cycle);
         for (String intensity : cycleIntensities.keySet()) {
-          cyc.put(intensity, cycleIntensities.get(intensity));
+          if (intensity.equals(Constants.METRIC_VAR_ACI_A)) {
+            cyclesA.add(cycleIntensities.get(intensity).get());
+          }
+          if (intensity.equals(Constants.METRIC_VAR_ACI_C)) {
+            cyclesC.add(cycleIntensities.get(intensity).get());
+          }
+          if (intensity.equals(Constants.METRIC_VAR_ACI_T)) {
+            cyclesT.add(cycleIntensities.get(intensity).get());
+          }
+          if (intensity.equals(Constants.METRIC_VAR_ACI_G)) {
+            cyclesG.add(cycleIntensities.get(intensity).get());
+          }
         }
-        cycles.add(cyc);
       }
 
       l.put("lane", lane);
-      l.put("cycles", cycles);
+      l.put("intA", cyclesA);
+      l.put("intC", cyclesC);
+      l.put("intT", cyclesT);
+      l.put("intG", cyclesG);
       averages.add(l);
     }
 
     json.put("averages", averages);
-    */
 
+    /*
     IntensityDist iDistCCAvg = intensityScores.getCalledClustersAverageCorrectedIntensityDist();
 
     JSONArray cclanes = new JSONArray();
@@ -83,15 +98,16 @@ public class MetrixIntensityMetricsDecorator {
       }
 
       l.put("lane", lane);
-      l.put("ccAvgA", cyclesA);
-      l.put("ccAvgC", cyclesC);
-      l.put("ccAvgT", cyclesT);
-      l.put("ccAvgG", cyclesG);
+      l.put("intA", cyclesA);
+      l.put("intC", cyclesC);
+      l.put("intT", cyclesT);
+      l.put("intG", cyclesG);
       cclanes.add(l);
     }
 
     json.put("calledClusterAverages", cclanes);
+    */
 
-   return json;
+    return json;
   }
 }

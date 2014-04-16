@@ -56,12 +56,28 @@ public class Metric implements Serializable {
     return ArrayUtils.sum(tileScores);
   }
 
+  public double calcQ1() {
+    return ArrayUtils.quartile(tileScores, 25);
+  }
+
+  public double calcQ3() {
+    return ArrayUtils.quartile(tileScores, 75);
+  }
+
   public double calcMean() {
     return ArrayUtils.mean(tileScores);
   }
 
   public double calcMedian() {
     return ArrayUtils.median(tileScores);
+  }
+
+  public double calcMax() {
+    return ArrayUtils.max(tileScores);
+  }
+
+  public double calcMin() {
+    return ArrayUtils.min(tileScores);
   }
 
   public double calcSD() {

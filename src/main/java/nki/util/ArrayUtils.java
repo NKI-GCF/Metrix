@@ -40,6 +40,14 @@ public class ArrayUtils {
     }
   }
 
+  public static double max(List<Double> a) {
+    return Collections.max(a);
+  }
+
+  public static double min(List<Double> a) {
+    return Collections.min(a);
+  }
+
   public static double sd(List<Double> a) {
     double sum = 0;
     double mean = mean(a);
@@ -47,6 +55,39 @@ public class ArrayUtils {
     for (Double i : a)
       sum += Math.pow((i - mean), 2);
     return Math.sqrt(sum / (a.size() - 1)); // sample
+  }
+
+  public static double quartile(double[] values, double lowerPercent) {
+      if (values == null || values.length == 0) {
+          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+      }
+
+      // Rank order the values
+      double[] v = new double[values.length];
+      System.arraycopy(values, 0, v, 0, values.length);
+      Arrays.sort(v);
+
+      int n = (int) Math.round(v.length * lowerPercent / 100);
+
+      return v[n];
+  }
+
+  public static double quartile(List<Double> values, double lowerPercent) {
+      if (values == null || values.size() == 0) {
+          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+      }
+
+      double[] prival = new double[values.size()];
+      for (int i = 0; i < values.size(); i++) {
+        prival[i] = values.get(i);
+      }
+
+      // Rank order the values
+      Arrays.sort(prival);
+
+      int n = (int) Math.round(prival.length * lowerPercent / 100);
+
+      return prival[n];
   }
 
   public double getVariance(List<Double> data) {
