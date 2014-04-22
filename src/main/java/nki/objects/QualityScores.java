@@ -89,9 +89,9 @@ public class QualityScores implements Serializable {
           Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
           for (Integer qScore : qmetricMap.keySet()) {
             long metric = Long.valueOf(qmetricMap.get(qScore));
-            if (metric == 0) {
-              continue;
-            }
+            //if (metric == 0) {
+//              continue;
+//            }
             qScoreDist.setScore(qScore, metric);  // Set the metric in the QScore Distribution
           }
         }
@@ -112,9 +112,9 @@ public class QualityScores implements Serializable {
           Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
           for (Integer qScore : qmetricMap.keySet()) {
             long metric = Long.valueOf(qmetricMap.get(qScore));
-            if (metric == 0) {
-              continue;
-            }
+  //          if (metric == 0) {
+//              continue;
+//            }
             qScoreDistLane.setScore(qScore, metric);  // Set the metric in the QScore Distribution
           }
         }

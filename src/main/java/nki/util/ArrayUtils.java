@@ -30,6 +30,8 @@ public class ArrayUtils {
   }
 
   public static double median(List<Double> a) {
+    Collections.sort(a);
+
     int middle = a.size() / 2;
 
     if (a.size() % 2 == 1) {
