@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 import org.w3c.dom.*;
 
@@ -18,13 +19,13 @@ public class IntensityDist implements Serializable {
 
   public static final long serialVersionUID = 42L;
 
-  private final Map<Integer, Map<Integer, Map<String, MutableInt>>> iDist = new HashMap<>();
+  private final Map<Integer, Map<Integer, Map<String, MutableInt>>> iDist = new TreeMap<>();
 
   public void setIntensity(int lane, int cycle, Map<String, MutableInt> iMapM) {
     Map<Integer, Map<String, MutableInt>> oMap = iDist.get(lane);
 
     if (oMap == null) {
-      Map<Integer, Map<String, MutableInt>> cMap = new HashMap<>();
+      Map<Integer, Map<String, MutableInt>> cMap = new TreeMap<>();
       cMap.put(cycle, iMapM);
       iDist.put(lane, cMap);
     }
@@ -94,28 +95,14 @@ public class IntensityDist implements Serializable {
   @SuppressWarnings("unchecked")
   public String toTab() {
     String out = "";
-    for (Map.Entry lanePairs : iDist.entrySet()) {
-      int lane = (Integer) lanePairs.getKey();
-
-      HashMap<Integer, HashMap<String, MutableInt>> cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
-      // Cycle Iterator
-      Iterator cit = (Iterator) cycleContent.entrySet().iterator();
-
-      while (cit.hasNext()) {
-        Map.Entry cycleEntries = (Map.Entry) cit.next();
-        int cycle = (Integer) cycleEntries.getKey();
-
-        // Nested Intensities HashMap
-        HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
-
-        Iterator iit = (Iterator) cycleInt.entrySet().iterator();
+    for (Integer lane : iDist.keySet()) {
+      Map<Integer, Map<String, MutableInt>> cycleContent = iDist.get(lane);
+      for (Integer cycle : cycleContent.keySet()) {
+        Map<String, MutableInt> cycleInt = cycleContent.get(cycle);
         out += lane + "\t" + cycle;
 
-        while (iit.hasNext()) {
-          Map.Entry intensityPairs = (Map.Entry) iit.next();
-          String constName = (String) intensityPairs.getKey();
-          MutableInt intValue = (MutableInt) intensityPairs.getValue();
-
+        for (String constName : cycleInt.keySet()) {
+          MutableInt intValue = cycleInt.get(constName);
           out += "\t" + constName + ":" + intValue;
         }
 

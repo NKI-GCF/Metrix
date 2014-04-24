@@ -8,6 +8,7 @@ import nki.objects.IntensityScores;
 import nki.objects.MutableInt;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
@@ -31,7 +32,7 @@ public class MetrixIntensityMetricsDecorator {
     JSONArray averages = new JSONArray();
     for (int lane : iDistAvg.getIntensities().keySet()) {
       JSONObject l = new JSONObject();
-      Map<Integer, Map<String, MutableInt>> cycleContent = iDistAvg.getIntensities().get(lane);
+      Map<Integer, Map<String, MutableInt>> cycleContent = new TreeMap<>(iDistAvg.getIntensities().get(lane));
 
       JSONArray cyclesA = new JSONArray();
       JSONArray cyclesC = new JSONArray();

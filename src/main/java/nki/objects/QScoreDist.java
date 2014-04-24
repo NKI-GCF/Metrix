@@ -25,7 +25,8 @@ public class QScoreDist implements Serializable {
   public static final long serialVersionUID = 42L;
 
   // QualityMap - Integer scores
-  private Map<Integer, MutableLong> qScoreDist = new HashMap<>();
+  private Map<Integer, MutableLong> qScoreDist = new TreeMap<>();
+
   private long totalClusters = 0;
 
   public MutableLong getScore(int qScore) {

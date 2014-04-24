@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.text.*;
 import java.util.Map;
 
+import nki.objects.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -12,17 +13,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import nki.constants.Constants;
-import nki.objects.QualityScores;
-import nki.objects.QScoreDist;
-import nki.objects.IntensityScores;
-import nki.objects.IntensityDist;
-import nki.objects.Indices;
-import nki.objects.ClusterDensity;
-import nki.objects.PhasingCollection;
-import nki.objects.ErrorCollection;
-import nki.objects.ErrorDist;
-import nki.objects.Summary;
-import nki.objects.Reads;
 import nki.parsers.illumina.QualityMetrics;
 import nki.parsers.illumina.TileMetrics;
 import nki.parsers.illumina.CorrectedIntensityMetrics;
@@ -100,6 +90,23 @@ public class MetrixContainer {
       log.error("Error in XML parser configuration: " + pce.getMessage());
     }
 
+    log.debug("Processing Extraction Metrics");
+    if (!exm.getFileMissing()) {
+      sum.setCurrentCycle(exm.getLastCycle());
+    }
+    else {
+      log.error("Unable to process Extraction Metrics: " + Constants.EXTRACTION_METRICS + " file is missing.");
+    }
+
+    log.debug("Processing Index Metrics");
+    if (!im.getFileMissing()) {
+      indices = im.digestData();
+    }
+    else {
+      log.error("Unable to process Index Metrics: " + Constants.INDEX_METRICS + " file is missing.");
+      indices = null;
+    }
+
     // Metrics digestion
     log.debug("Processing tile metrics");
     if (!tm.getFileMissing()) {
@@ -144,6 +151,9 @@ public class MetrixContainer {
         log.error("Unable to process Corrected Intensity Metrics: "  + Constants.CORRECTED_INT_METRICS + " file is missing.");
       }
     }
+    else {
+      log.info("Can only generate Quality and Intensity metrics after cycle 25. Current cycle is: " + sum.getCurrentCycle());
+    }
 
     if (sum.getCurrentCycle() > 52) {
       log.debug("Processing Error Metrics");
@@ -155,23 +165,6 @@ public class MetrixContainer {
         log.error("Unable to process Error Metrics: "  + Constants.ERROR_METRICS + " file is missing.");
         eDist = null;
       }
-    }
-
-    log.debug("Processing Extraction Metrics");
-    if (!exm.getFileMissing()) {
-      sum.setCurrentCycle(exm.getLastCycle());
-    }
-    else {
-      log.error("Unable to process Extraction Metrics: " + Constants.EXTRACTION_METRICS + " file is missing.");
-    }
-
-    log.debug("Processing Index Metrics");
-    if (!im.getFileMissing()) {
-      indices = im.digestData();
-    }
-    else {
-      log.error("Unable to process Index Metrics: " + Constants.INDEX_METRICS + " file is missing.");
-      indices = null;
     }
   }
 

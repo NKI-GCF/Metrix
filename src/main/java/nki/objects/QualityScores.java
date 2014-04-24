@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import nki.objects.QualityMap;
 import nki.objects.MutableLong;
@@ -89,9 +90,6 @@ public class QualityScores implements Serializable {
           Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
           for (Integer qScore : qmetricMap.keySet()) {
             long metric = Long.valueOf(qmetricMap.get(qScore));
-            //if (metric == 0) {
-//              continue;
-//            }
             qScoreDist.setScore(qScore, metric);  // Set the metric in the QScore Distribution
           }
         }
@@ -101,7 +99,7 @@ public class QualityScores implements Serializable {
   }
 
   public Map<Integer, QScoreDist> getQScoreDistributionByLane() {
-    Map<Integer, QScoreDist> laneDist = new HashMap<>();
+    Map<Integer, QScoreDist> laneDist = new TreeMap<>();
 
     for (Integer lane : qScores.keySet()) {
       Map<Integer, QualityMap> laneScores = qScores.get(lane);
@@ -112,9 +110,6 @@ public class QualityScores implements Serializable {
           Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
           for (Integer qScore : qmetricMap.keySet()) {
             long metric = Long.valueOf(qmetricMap.get(qScore));
-  //          if (metric == 0) {
-//              continue;
-//            }
             qScoreDistLane.setScore(qScore, metric);  // Set the metric in the QScore Distribution
           }
         }
@@ -123,6 +118,50 @@ public class QualityScores implements Serializable {
     }
 
     return laneDist;
+  }
+
+  public Map<Integer, Metric> getQScoreDistributionByCycle() {
+    Map<Integer, Metric> cycleDist = new TreeMap<>();
+
+    for (Integer lane : qScores.keySet()) {
+      Map<Integer, QualityMap> laneScores = new TreeMap<>(qScores.get(lane));
+
+      for (Integer cycle : laneScores.keySet()) {
+        QualityMap qmap = laneScores.get(cycle);
+        Metric m = new Metric();
+
+        for (Integer tile : qmap.getMappings().keySet()) {
+          Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
+
+          double aboveClus = 0;
+          double totalClus = 0;
+          double percent = 0d;
+
+          for (Integer qScore : qmetricMap.keySet()) {
+            double metric = Double.valueOf(qmetricMap.get(qScore));
+
+            if (qScore > 30) {
+              aboveClus += metric;
+            }
+            totalClus += metric;
+          }
+
+          if (totalClus != 0) {
+            percent = (aboveClus / totalClus) * 100;
+          }
+
+          if (cycleDist.get(cycle) != null) {
+            m = cycleDist.get(cycle);
+            m.incrementMetric(percent);
+          }
+          else {
+            m.setMetric(percent);
+          }
+        }
+        cycleDist.put(cycle, m);
+      }
+    }
+    return cycleDist;
   }
 
   public Map<Integer, Map<Integer, QualityMap>> getRawScores() {

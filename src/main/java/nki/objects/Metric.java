@@ -21,6 +21,7 @@ public class Metric implements Serializable {
 
   public void setMetric(Double metricScore) {
     this.metric = metricScore;
+    this.tileScores.add(metricScore);
     this.incrementTiles();
   }
 
@@ -35,6 +36,10 @@ public class Metric implements Serializable {
 
   public int getTiles() {
     return tiles;
+  }
+
+  public List<Double> getTileScores() {
+    return tileScores;
   }
 
   public void incrementMetric(Double metricScore) {
