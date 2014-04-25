@@ -23,7 +23,14 @@ public class MetrixSummaryDecorator {
     json.put("runType", summary.getRunType());
     json.put("totalCycles", summary.getTotalCycles());
     json.put("currentCycle", summary.getCurrentCycle());
-    json.put("demultiplexIndex", summary.getReads().getDemultiplexIndex());
+
+    if (summary.getReads() != null) {
+      json.put("demultiplexIndex", summary.getReads().getDemultiplexIndex());
+    }
+    else {
+      json.put("demultiplexIndex", "N/A");
+    }
+
     json.put("flowcellId", summary.getFlowcellID());
     json.put("numLanes", summary.getLaneCount());
 
