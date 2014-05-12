@@ -11,159 +11,103 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-import nki.objects.MutableLong;
-import nki.constants.Constants;
 
 import org.w3c.dom.*;
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
 
-public class Indices implements Serializable{
+public class Indices implements Serializable {
 
-	public static final long serialVersionUID = 42L;
-	
-	// Project - Sample - Index/Lane/Clusters
-	private HashMap<String, HashMap<String, HashMap<String, Object>>> indices = new HashMap<String, HashMap<String, HashMap<String, Object>>>();
-	private long totalClusters = 0;
+  public static final long serialVersionUID = 42L;
 
-	public void setIndex(String projName, String sampName, String idx, int numClusters, int laneNr, int readNr){
-		HashMap<String, HashMap<String, Object>> project = indices.get(projName);
-		HashMap<String, Object> sampleMap;
+  // Project - Sample - Index/Lane/Clusters
+  private Map<String, Map<String, SampleInfo>> indices = new HashMap<>();
+  private long totalClusters = 0;
 
-		if(project == null){
-			project = new HashMap<String, HashMap<String, Object>>();
-			sampleMap = setSample(readNr, laneNr, numClusters, idx);
+  public Map<String, Map<String, SampleInfo>> getIndices() {
+    return indices;
+  }
 
-			project.put(sampName, sampleMap);	
-		}else{
-			sampleMap = project.get(sampName);
+  public void setIndex(String projName, String sampName, String idx, long numClusters, int laneNr, int readNr) {
+    Map<String, SampleInfo> project = indices.get(projName);
+    SampleInfo sampleMap;
 
-			if(sampleMap == null){
-				sampleMap = setSample(readNr, laneNr, numClusters, idx);
-				project.put(sampName, sampleMap);
-			}else{	// Update num clusters.
-				if(sampleMap.get(Constants.SAMPLE_NUM_CLUSTERS) instanceof MutableLong){
-					MutableLong ml = (MutableLong) sampleMap.get(Constants.SAMPLE_NUM_CLUSTERS);
-					ml.add(Long.valueOf(numClusters));
-					sampleMap.put(Constants.SAMPLE_NUM_CLUSTERS, ml);
-				}
-			}
+    if (project == null) {
+      project = new HashMap<>();
+      sampleMap = setSample(readNr, laneNr, numClusters, idx);
+      project.put(sampName, sampleMap);
+    }
+    else {
+      sampleMap = project.get(sampName);
 
-			project.put(sampName, sampleMap);
-		}
+      if (sampleMap == null) {
+        sampleMap = setSample(readNr, laneNr, numClusters, idx);
+        project.put(sampName, sampleMap);
+      }
+      else {  // Update num clusters.
+        sampleMap.setNumClusters(sampleMap.getNumClusters() + numClusters);
+      }
 
-		indices.put(projName, project);
-	}
+      project.put(sampName, sampleMap);
+    }
 
-	private HashMap<String, Object> setSample(int readNr, int laneNr, int numClusters, String idx){
-			HashMap<String, Object> sampleMap = new HashMap<String, Object>();
-			sampleMap.put(Constants.SAMPLE_READNUM, readNr);
-			MutableLong clusters = new MutableLong();
-			clusters.add(Long.valueOf(numClusters));
-			sampleMap.put(Constants.SAMPLE_NUM_CLUSTERS, clusters);
-			sampleMap.put(Constants.SAMPLE_LANE, laneNr);
-			sampleMap.put(Constants.SAMPLE_INDEX, idx);
+    addTotalClusters(numClusters);
 
-			addTotalClusters(Long.valueOf(clusters.get()));
+    indices.put(projName, project);
+  }
 
-			return sampleMap;
-	}
+  private SampleInfo setSample(int readNr, int laneNr, long numClusters, String idx) {
+    SampleInfo si = new SampleInfo();
+    si.setReadNum(readNr);
+    si.setNumClusters(numClusters);
+    si.setLaneNum(laneNr);
+    si.setIndexBarcode(idx);
+    return si;
+  }
 
-	public long getTotalClusters(){
-		return totalClusters;
-	}
+  public long getTotalClusters() {
+    return totalClusters;
+  }
 
-	public void addTotalClusters(long metric){
-		this.totalClusters += metric;
-	}
+  public void addTotalClusters(long metric) {
+    this.totalClusters += metric;
+  }
 
-	@SuppressWarnings("unchecked")
-	public Element toXML(Element sumXml, Document xmlDoc){
-		Iterator pit = indices.entrySet().iterator();
+  public Element toXML(Element sumXml, Document xmlDoc) {
+    for (String projectName : indices.keySet()) {
+      Element projEle = xmlDoc.createElement("Project");
+      projEle.setAttribute("name", projectName);
 
-		while(pit.hasNext()){
-			Map.Entry projects = (Map.Entry) pit.next();
-			String project = (String) projects.getKey();
+      Map<String, SampleInfo> samples = indices.get(projectName);
+      for (String sampleName : samples.keySet()) {
+        Element sampleEle = xmlDoc.createElement("Sample");
+        sampleEle.setAttribute("name", sampleName);
 
-			Element projEle = xmlDoc.createElement("Project");
-			projEle.setAttribute("name", project);
+        SampleInfo si = samples.get(sampleName);
+        sampleEle.setAttribute("lane", String.valueOf(si.getLaneNum()));
+        sampleEle.setAttribute("read", String.valueOf(si.getReadNum()));
+        sampleEle.setAttribute("clusters", String.valueOf(si.getNumClusters()));
+        sampleEle.setAttribute("index", si.getIndexBarcode());
+        projEle.appendChild(sampleEle);
+      }
+      sumXml.appendChild(projEle);
+    }
+    return sumXml;
+  }
 
-			HashMap<String, HashMap<String, Object>> samples = (HashMap<String, HashMap<String, Object>>) projects.getValue();
-			Iterator sit = samples.entrySet().iterator();
+  public String toTab() {
+    StringBuilder out = new StringBuilder();
 
-			while(sit.hasNext()){
-				Map.Entry sample = (Map.Entry) sit.next();
-				String sampleName = (String) sample.getKey();
-
-				Element sampleEle = xmlDoc.createElement("Sample");
-				sampleEle.setAttribute("name", sampleName);
-
-				HashMap<String, Object> sampleProp = (HashMap<String, Object>) sample.getValue();
-				Iterator spit = sampleProp.entrySet().iterator();
-
-				while(spit.hasNext()){
-					Map.Entry prop = (Map.Entry) spit.next();
-
-					// Num Clusters
-					if(prop instanceof MutableLong){
-						MutableLong ml = (MutableLong) prop.getValue();
-						sampleEle.setAttribute(prop.getKey().toString(), ml.toString());
-					} // Other
-					else{
-						sampleEle.setAttribute(prop.getKey().toString(), prop.getValue().toString());
-					}
-				}
-				projEle.appendChild(sampleEle);
-			}
-			sumXml.appendChild(projEle);
-		}
-		return sumXml;
-	}
-
-	@SuppressWarnings("unchecked")
-	public String toTab(){
-		String out = "";
-
-		Iterator pit = indices.entrySet().iterator();
-
-		while(pit.hasNext()){
-			Map.Entry projects = (Map.Entry) pit.next();
-			String project = (String) projects.getKey();
-
-			HashMap<String, HashMap<String, Object>> samples = (HashMap<String, HashMap<String, Object>>) projects.getValue();
-			Iterator sit = samples.entrySet().iterator();
-
-			while(sit.hasNext()){
-				Map.Entry sample = (Map.Entry) sit.next();
-				String sampleName = (String) sample.getKey();
-
-				out += project + "\t" + sampleName;
-
-				HashMap<String, Object> sampleProp = (HashMap<String, Object>) sample.getValue();
-				Iterator spit = sampleProp.entrySet().iterator();
-
-				while(spit.hasNext()){
-					Map.Entry prop = (Map.Entry) spit.next();
-					
-					if(prop instanceof MutableLong){
-						MutableLong ml = (MutableLong) prop.getValue();
-						out += "\t" + prop.getKey() + ":" + ml.toString();
-					}else{
-						out += "\t" + prop.getKey() + ":" + prop.getValue().toString();
-					}
-				}
-
-				out += "\n";
-
-			}
-
-		}
-		return out;
-	}
+    for (String projectName : indices.keySet()) {
+      Map<String, SampleInfo> samples = indices.get(projectName);
+      for (String sampleName : samples.keySet()) {
+        SampleInfo si = samples.get(sampleName);
+        out.append(projectName + "\t" + sampleName);
+        out.append("\t lane :" + si.getLaneNum() + "\n");
+        out.append("\t read :" + si.getReadNum() + "\n");
+        out.append("\t clusters :" + si.getNumClusters() + "\n");
+        out.append("\t index :" + si.getIndexBarcode() + "\n\n");
+      }
+    }
+    return out.toString();
+  }
 
 }

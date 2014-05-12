@@ -6,16 +6,17 @@
 // under certain conditions; for more information please see LICENSE.txt
 
 import java.io.*;
- 
+
 public class MetrixDaemon {
 
-     public static void main(String[] args){
-		try{
-			MetrixServer ms = new MetrixServer();
-			ms.run();
-		}catch(IOException ex){
-			System.err.println("Error! : " + ex.toString());
-		}
-	}
+  public static void main(String[] args) {
+    try {
+      MetrixServer ms = new MetrixServer();
+      ms.run();
+    }
+    catch (IOException ex) {
+      System.err.println("Error! : " + ex.toString());
+    }
+  }
 }
 

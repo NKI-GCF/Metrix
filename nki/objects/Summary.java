@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+
 import nki.objects.ClusterDensity;
 import nki.objects.PhasingCollection;
 //import nki.objects.ErrorRate;
@@ -27,224 +28,226 @@ import nki.constants.Constants;
 
 public class Summary implements Serializable {
 
-	// Object Specific
-	private int		sumId = -1;
-	private static final long serialVersionUID = 42L;	
+  // Object Specific
+  private int sumId = -1;
+  private static final long serialVersionUID = 42L;
 
-	// Run Properties
-	private int 		currentCycle;			// Current cycle in run
-	private int 		totalCycles;			// Total amount of cycles 
-	private String		flowcellID;			// Flowcell ID
-	private String		side = "";				// Side of flowcell
-	private String		lastUpdated 	= "0";		// Last update time
-	private long		lastUpdatedEpoch = 0;
-	private String		phase; 				// Phase of run :: Imaging / Basecalling / RTAComplete
-	private String		runType		= "Single End";			// Run Type: Single / Paired End / Nextera
-	private int			indexLength;			// Length of index read
-	private int         tileCount;				// Number of Tiles
-	private int 		state		= 5;		// State 0: Hanging / State 1: Running / State 2: Complete / State 3: Unknown / State 4: Flowcell needs turning
-	private int			numReads;			// Total number of reads
-	private	boolean		isNextera	= false; 	// Is this a nextera run?
-	private boolean		isIndexed	= false;	// Is run indexed.
-	private boolean		xmlInfo		= false;	// Has xmlInfo been parsed?
-	private String		runId;				// Full run identifier
-	private int			date;				// Run date
-	private int			laneCount;			// Number of lanes
-	private int 		surfaceCount;			// Number of surface sides
-	private	int			swathCount;			// Number of swaths
-	private int			instrumentRunNumber;		// Nth number run on this instrument
-	private String		instrument;			// Name of instrument
-	private String		instrumentType = "";		// Type of instrument: HiSeq / MiSeq
-	private String		runNameOptional = "";
-	private Reads		reads;				// Read information
-	private boolean		hasTurned	= false;
-	private boolean		hasFinished	= false;	// Has the run finished?
-	private boolean		hasNotifyTurned	= false;
-	private String		runDirectory = "";		// RunDirectory path
-	private int			parseError	=	0;	// Number of parsing errors
+  // Run Properties
+  private int currentCycle;      // Current cycle in run
+  private int totalCycles;      // Total amount of cycles
+  private String flowcellID;      // Flowcell ID
+  private String side = "";        // Side of flowcell
+  private String lastUpdated = "0";    // Last update time
+  private long lastUpdatedEpoch = 0;
+  private String phase;        // Phase of run :: Imaging / Basecalling / RTAComplete
+  private String runType = "Single End";      // Run Type: Single / Paired End / Nextera
+  private int indexLength;      // Length of index read
+  private int tileCount;        // Number of Tiles
+  private int state = 5;    // State 0: Hanging / State 1: Running / State 2: Complete / State 3: Unknown / State 4: Flowcell needs turning
+  private int numReads;      // Total number of reads
+  private boolean isNextera = false;  // Is this a nextera run?
+  private boolean isIndexed = false;  // Is run indexed.
+  private boolean xmlInfo = false;  // Has xmlInfo been parsed?
+  private String runId;        // Full run identifier
+  private int date;        // Run date
+  private int laneCount;      // Number of lanes
+  private int surfaceCount;      // Number of surface sides
+  private int swathCount;      // Number of swaths
+  private int instrumentRunNumber;    // Nth number run on this instrument
+  private String instrument;      // Name of instrument
+  private String instrumentType = "";    // Type of instrument: HiSeq / MiSeq
+  private String runNameOptional = "";
+  private Reads reads;        // Read information
+  private boolean hasTurned = false;
+  private boolean hasFinished = false;  // Has the run finished?
+  private boolean hasNotifyTurned = false;
+  private String runDirectory = "";    // RunDirectory path
+  private int parseError = 0;  // Number of parsing errors
 
-	// Run Metrics
-	private ClusterDensity		clusterDensity;		// Contains Cluster Density for all lanes
-	private ClusterDensity		clusterDensityPF;			// Contains Cluster Density Passing Filter for all lanes
-	private PhasingCollection 	phasingMap;			// Phasing values per lane
-	private PhasingCollection 	prephasingMap;		// Prephasing values per lane
+  // Run Metrics
+  private ClusterDensity clusterDensity;    // Contains Cluster Density for all lanes
+  private ClusterDensity clusterDensityPF;      // Contains Cluster Density Passing Filter for all lanes
+  private PhasingCollection phasingMap;      // Phasing values per lane
+  private PhasingCollection prephasingMap;    // Prephasing values per lane
 
-	private QualityScores qScores;						// QualityScores per lane, per cycle, per tile
-	private QScoreDist qScoreDist;			// The stored distribution of num clusters / QScore
+  private QualityScores qScores;            // QualityScores per lane, per cycle, per tile
+  private QScoreDist qScoreDist;      // The stored distribution of num clusters / QScore
 
-	private IntensityScores iScores;
-	private IntensityDist iDistAvg;
-	private IntensityDist iDistCCAvg;
+  private IntensityScores iScores;
+  private IntensityDist iDistAvg;
+  private IntensityDist iDistCCAvg;
 
-	private Indices sampleInfo;
-	private int 		firstCycleIntensity;
+  private Indices sampleInfo;
+  private int firstCycleIntensity;
 
-	public void setSumId(int id){
-		this.sumId = id;
-	}
+  public void setSumId(int id) {
+    this.sumId = id;
+  }
 
-	public int getSumId(){
-		return sumId;
-	}
+  public int getSumId() {
+    return sumId;
+  }
 
-	public void setCurrentCycle(int cc){
-		if(cc >= this.currentCycle){
-			this.currentCycle = cc;		
-		}
-	}
+  public void setCurrentCycle(int cc) {
+    if (cc >= this.currentCycle) {
+      this.currentCycle = cc;
+    }
+  }
 
-	public int getCurrentCycle(){
-		return currentCycle;
-	}
+  public int getCurrentCycle() {
+    return currentCycle;
+  }
 
-	public void setTotalCycles(int tc){
-		this.totalCycles = tc;
-	}
+  public void setTotalCycles(int tc) {
+    this.totalCycles = tc;
+  }
 
-	public int getTotalCycles(){
-		return totalCycles;
-	}
-	
-	public void setFlowcellID(String FCID){
-		this.flowcellID = FCID;
-	}
-	
-	public String getFlowcellID(){
-		return flowcellID;
-	}
+  public int getTotalCycles() {
+    return totalCycles;
+  }
 
-	public void setInstrument(String instr){
-		this.instrument = instr;
-	}
-	
-	public String getInstrument(){
-		return instrument;
-	}
+  public void setFlowcellID(String FCID) {
+    this.flowcellID = FCID;
+  }
 
-	public void setSide(String s){
-		if(s.equals("A")){
-			this.side = "A";	
-		}else if(s.equals("B")){
-			this.side = "B";
-		}else{
-			this.side = "";
-		}
-	}
+  public String getFlowcellID() {
+    return flowcellID;
+  }
 
-	public String getSide(){
-		return side;
-	}
+  public void setInstrument(String instr) {
+    this.instrument = instr;
+  }
 
-	public void setLastUpdated(){
-		this.lastUpdatedEpoch = System.currentTimeMillis();
-		this.lastUpdated = convertEpochToTime(System.currentTimeMillis());
-	}
+  public String getInstrument() {
+    return instrument;
+  }
 
-	public String getLastUpdated(){
-		return lastUpdated;
-	}
+  public void setSide(String s) {
+    if (s.equals("A")) {
+      this.side = "A";
+    }
+    else if (s.equals("B")) {
+      this.side = "B";
+    }
+    else {
+      this.side = "";
+    }
+  }
 
-	public long getLastUpdatedEpoch(){
-		return this.lastUpdatedEpoch;
-	}
+  public String getSide() {
+    return side;
+  }
 
-	public void setPhase(String phs){ // Change with constants
-		this.phase = phs;
-	}
-	
-	public String getPhase(){
-		return phase;
-	}
+  public void setLastUpdated() {
+    this.lastUpdatedEpoch = System.currentTimeMillis();
+    this.lastUpdated = convertEpochToTime(System.currentTimeMillis());
+  }
 
-	public void setRunType(String rt){
-		this.runType = rt;
-	}	
+  public String getLastUpdated() {
+    return lastUpdated;
+  }
 
-	public String getRunType(){
-		return runType;
-	}
-	
-	public void setTileCount(String tiles){
-		this.tileCount = Integer.parseInt(tiles);
-	}
-	
-	public int getTileCount(){
-		return tileCount;
-	}
+  public long getLastUpdatedEpoch() {
+    return this.lastUpdatedEpoch;
+  }
 
-	public void setXmlInfo(boolean xmlInfo){
-		this.xmlInfo = xmlInfo;
-	}
+  public void setPhase(String phs) { // Change with constants
+    this.phase = phs;
+  }
 
-	public boolean getXmlInfo(){
-		return xmlInfo;
-	}
+  public String getPhase() {
+    return phase;
+  }
 
-	public void setRunDate(int runDate){
-		this.date = runDate;
-	}
+  public void setRunType(String rt) {
+    this.runType = rt;
+  }
 
-	public int getRunDate(){
-		return date;
-	}
+  public String getRunType() {
+    return runType;
+  }
 
-	public void setInstrumentRunNumber(String runnr){
-		this.instrumentRunNumber = Integer.parseInt(runnr);
-	}
-	
-	public int getInstrumentRunNumber(){
-		return instrumentRunNumber;
-	}
+  public void setTileCount(String tiles) {
+    this.tileCount = Integer.parseInt(tiles);
+  }
 
-	public void setInstrumentType(String instrumentType){
-		this.instrumentType = instrumentType;
-	}
+  public int getTileCount() {
+    return tileCount;
+  }
 
-	public String getInstrumentType(){
-		return instrumentType;
-	}
+  public void setXmlInfo(boolean xmlInfo) {
+    this.xmlInfo = xmlInfo;
+  }
 
-	public void setLaneCount(String numLanes){
-		this.laneCount = Integer.parseInt(numLanes);
-	}
+  public boolean getXmlInfo() {
+    return xmlInfo;
+  }
 
-	public int getLaneCount(){
-		return laneCount;
-	}
+  public void setRunDate(int runDate) {
+    this.date = runDate;
+  }
 
-	public void setSurfaceCount(String surfaceCount){
-		this.surfaceCount = Integer.parseInt(surfaceCount);
-	}
+  public int getRunDate() {
+    return date;
+  }
 
-	public int getSurfaceCount(){
-		return surfaceCount;
-	}
+  public void setInstrumentRunNumber(String runnr) {
+    this.instrumentRunNumber = Integer.parseInt(runnr);
+  }
 
-	public void setSwathCount(String swathCount){
-		this.swathCount = Integer.parseInt(swathCount);
-	}
+  public int getInstrumentRunNumber() {
+    return instrumentRunNumber;
+  }
 
-	public int getSwathCount(){
-		return swathCount;
-	}
-	
-	public void setClusterDensity(ClusterDensity cd){
-		cd.setType("CD");
-		this.clusterDensity = cd;
-	}
+  public void setInstrumentType(String instrumentType) {
+    this.instrumentType = instrumentType;
+  }
 
-	public ClusterDensity getClusterDensity(){
-		return clusterDensity;
-	}
+  public String getInstrumentType() {
+    return instrumentType;
+  }
 
-	public void setClusterDensityPF(ClusterDensity cdPf){
-		cdPf.setType("PF");
-		this.clusterDensityPF = cdPf;
-	}
+  public void setLaneCount(String numLanes) {
+    this.laneCount = Integer.parseInt(numLanes);
+  }
 
-	public ClusterDensity getClusterDensityPF(){
-		return clusterDensityPF;
-	}
+  public int getLaneCount() {
+    return laneCount;
+  }
+
+  public void setSurfaceCount(String surfaceCount) {
+    this.surfaceCount = Integer.parseInt(surfaceCount);
+  }
+
+  public int getSurfaceCount() {
+    return surfaceCount;
+  }
+
+  public void setSwathCount(String swathCount) {
+    this.swathCount = Integer.parseInt(swathCount);
+  }
+
+  public int getSwathCount() {
+    return swathCount;
+  }
+
+  public void setClusterDensity(ClusterDensity cd) {
+    cd.setType("CD");
+    this.clusterDensity = cd;
+  }
+
+  public ClusterDensity getClusterDensity() {
+    return clusterDensity;
+  }
+
+  public void setClusterDensityPF(ClusterDensity cdPf) {
+    cdPf.setType("PF");
+    this.clusterDensityPF = cdPf;
+  }
+
+  public ClusterDensity getClusterDensityPF() {
+    return clusterDensityPF;
+  }
 
 //	public void setErrorRate(HashMap<Object, ErrorRate> er){
 //		this.errorRate = er;
@@ -253,246 +256,234 @@ public class Summary implements Serializable {
 //	public HashMap<Object, ErrorRate> getErrorRate(){
 //		return errorRate;
 //	}
-	
-	public void setFirstCycleIntensity(int fci){
-		this.firstCycleIntensity = fci;
-	}
 
-	public int getFirstCycleintensity(){
-		return firstCycleIntensity;
-	}
+  public void setFirstCycleIntensity(int fci) {
+    this.firstCycleIntensity = fci;
+  }
 
-	public void setState(int runState){
-		this.state = runState;
-	}
+  public int getFirstCycleintensity() {
+    return firstCycleIntensity;
+  }
 
-	public int getState(){
-		return state;
-	}
+  public void setState(int runState) {
+    this.state = runState;
+  }
 
-	public void setNumReads(int nr){
-		this.numReads = nr;
-	}
+  public int getState() {
+    return state;
+  }
 
-	public int getNumReads(){
-		return numReads;
-	}	
-	
-	public void setIsNextera(boolean setNT){
-		this.isNextera = setNT;
-	}
+  public void setNumReads(int nr) {
+    this.numReads = nr;
+  }
 
-	public boolean getIsNextera(){
-		return isNextera;
-	}
+  public int getNumReads() {
+    return numReads;
+  }
 
-	public void setIsIndexed(boolean indexed){
-		this.isIndexed = indexed;
-	}
+  public void setIsNextera(boolean setNT) {
+    this.isNextera = setNT;
+  }
 
-	public boolean getIsIndexed(){
-		return isIndexed;
-	}
+  public boolean getIsNextera() {
+    return isNextera;
+  }
 
-	public void setPhasingMap(PhasingCollection map){
-		this.phasingMap = map;
-	}
+  public void setIsIndexed(boolean indexed) {
+    this.isIndexed = indexed;
+  }
 
-	public PhasingCollection getPhasingMap(){
-		return phasingMap;
-	}
-	
-	public void setPrephasingMap(PhasingCollection preMap){
-		this.prephasingMap = preMap;
-	}
+  public boolean getIsIndexed() {
+    return isIndexed;
+  }
 
-	public PhasingCollection getPrephasingMap(){
-		return prephasingMap;
-	}
+  public void setPhasingMap(PhasingCollection map) {
+    this.phasingMap = map;
+  }
 
-	public void setReads(Reads rds){
-		this.reads = rds;
-	}
+  public PhasingCollection getPhasingMap() {
+    return phasingMap;
+  }
 
-	public Reads getReads(){
-		return reads;
-	}
+  public void setPrephasingMap(PhasingCollection preMap) {
+    this.prephasingMap = preMap;
+  }
 
-	public void setRunId(String runID){
-		this.runId = runID;
-	}
+  public PhasingCollection getPrephasingMap() {
+    return prephasingMap;
+  }
 
-	public String getRunId(){
-		return runId;
-	}
+  public void setReads(Reads rds) {
+    this.reads = rds;
+  }
 
-	public void setRunNameOptional(String opt){
-		this.runNameOptional = opt;
-	}
+  public Reads getReads() {
+    return reads;
+  }
 
-	public String getRunNameOptional(){
-		return runNameOptional;
-	}
+  public void setRunId(String runID) {
+    this.runId = runID;
+  }
 
-	public int getTurnCycle(){
-		return reads.getPairedTurnCycle();
-	}
+  public String getRunId() {
+    return runId;
+  }
 
-	public void setHasTurned(boolean setTurned){
-		this.hasTurned = setTurned;
-	}
+  public void setRunNameOptional(String opt) {
+    this.runNameOptional = opt;
+  }
 
-	public boolean getHasTurned(){
-		return hasTurned;
-	}
+  public String getRunNameOptional() {
+    return runNameOptional;
+  }
 
-	public void setHasNotifyTurned(boolean setNotify){
-         this.hasNotifyTurned = setNotify;
-    }
+  public int getTurnCycle() {
+    return reads.getPairedTurnCycle();
+  }
 
-    public boolean getHasNotifyTurned(){
-         return hasNotifyTurned;
-    }
+  public void setHasTurned(boolean setTurned) {
+    this.hasTurned = setTurned;
+  }
 
-	private String convertEpochToTime(long epoch){
-		Date date = new Date(epoch);
-	    DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		TimeZone tz = Calendar.getInstance().getTimeZone();
-	    format.setTimeZone(tz.getTimeZone(tz.getID()));
-	    String formatted = format.format(date);
-		return formatted;
-	}
+  public boolean getHasTurned() {
+    return hasTurned;
+  }
 
-	public void setQScoreDist(QScoreDist qScoreDist){
-		this.qScoreDist = qScoreDist;
-	}
+  public void setHasNotifyTurned(boolean setNotify) {
+    this.hasNotifyTurned = setNotify;
+  }
 
-	public QScoreDist getQScoreDist(){
-		return qScoreDist;
-	}
+  public boolean getHasNotifyTurned() {
+    return hasNotifyTurned;
+  }
 
-	public void setQScores(QualityScores qScores){
-		this.qScores = qScores;
-	}
+  private String convertEpochToTime(long epoch) {
+    Date date = new Date(epoch);
+    DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    TimeZone tz = Calendar.getInstance().getTimeZone();
+    format.setTimeZone(tz.getTimeZone(tz.getID()));
+    String formatted = format.format(date);
+    return formatted;
+  }
 
-	public QualityScores getQScores(){
-		return qScores;
-	}
+  public void setQScoreDist(QScoreDist qScoreDist) {
+    this.qScoreDist = qScoreDist;
+  }
 
-	public void setIScores(IntensityScores iScores){
-		this.iScores = iScores;
-	}
+  public QScoreDist getQScoreDist() {
+    return qScoreDist;
+  }
 
-	public IntensityScores getIScores(){
-		return iScores;
-	}
-	
-	public void setIntensityDistAvg(IntensityDist iDistAvg){
-		this.iDistAvg = iDistAvg;
-	}
+  public void setQScores(QualityScores qScores) {
+    this.qScores = qScores;
+  }
 
-	public IntensityDist getIntensityDistAvg(){
-		return iDistAvg;
-	}
+  public QualityScores getQScores() {
+    return qScores;
+  }
 
-	public void setIntensityDistCCAvg(IntensityDist iDistCCAvg){
-		this.iDistCCAvg = iDistCCAvg;
-	}
+  public void setIScores(IntensityScores iScores) {
+    this.iScores = iScores;
+  }
 
-	public IntensityDist getIntensityDistCCAvg(){
-		return iDistCCAvg;
-	}
+  public IntensityScores getIScores() {
+    return iScores;
+  }
 
-	public void setSampleInfo(Indices sampleInfo){
-		this.sampleInfo = sampleInfo;
-	}
-	
-	public Indices getSampleInfo(){
-		return sampleInfo;
-	}
+  public void setIntensityDistAvg(IntensityDist iDistAvg) {
+    this.iDistAvg = iDistAvg;
+  }
 
-	public void setRunDirectory(String runDirectory){
-		this.runDirectory = runDirectory;
-	}
+  public IntensityDist getIntensityDistAvg() {
+    return iDistAvg;
+  }
 
-	public String getRunDirectory(){
-		return runDirectory;
-	}
+  public void setIntensityDistCCAvg(IntensityDist iDistCCAvg) {
+    this.iDistCCAvg = iDistCCAvg;
+  }
 
-	public boolean hasClusterDensity(){
-		return clusterDensity == null ? false : true;
-	}
+  public IntensityDist getIntensityDistCCAvg() {
+    return iDistCCAvg;
+  }
 
-	public boolean hasClusterDensityPF(){
-		return clusterDensityPF == null ? false : true;
-	}
+  public void setSampleInfo(Indices sampleInfo) {
+    this.sampleInfo = sampleInfo;
+  }
 
-	public boolean hasPrephasing(){
-		return prephasingMap == null ? false : true;
-	}
+  public Indices getSampleInfo() {
+    return sampleInfo;
+  }
 
-	public boolean hasPhasing(){
-		return phasingMap == null ? false : true;
-	}
+  public void setRunDirectory(String runDirectory) {
+    this.runDirectory = runDirectory;
+  }
 
-	public boolean hasQScores(){
-		return qScores == null ? false : true;
-	}
+  public String getRunDirectory() {
+    return runDirectory;
+  }
 
-	public boolean hasQScoreDist(){
-		return qScoreDist == null ? false : true; 
-	}
+  public boolean hasClusterDensity() {
+    return clusterDensity != null;
+  }
 
-	public boolean hasIScores(){
-		return iScores == null ? false : true;
-	}
+  public boolean hasClusterDensityPF() {
+    return clusterDensityPF != null;
+  }
 
-	public boolean hasIntensityDistAvg(){
-		return iDistAvg == null ? false : true;
-	}
+  public boolean hasPrephasing() {
+    return prephasingMap != null;
+  }
 
-	public boolean hasIntensityDistCCAvg(){
-		return iDistCCAvg == null ? false : true;
-	}
+  public boolean hasPhasing() {
+    return phasingMap != null;
+  }
 
-	public boolean hasSampleInfo(){
-		return sampleInfo == null ? false : true;
-	}
+  public boolean hasQScores() {
+    return qScores != null;
+  }
 
-	public void setParseError(int parseError){
-		this.parseError = parseError;
-	}
+  public boolean hasQScoreDist() {
+    return qScoreDist != null;
+  }
 
-	public void incParseError(){
-		this.parseError++;
-	}
-	
-	public int getParseError(){
-		return this.parseError;
-	}
+  public boolean hasIScores() {
+    return iScores != null;
+  }
 
-	public void setHasFinished(boolean hf){
-		this.hasFinished = hf;
-	}
+  public boolean hasIntensityDistAvg() {
+    return iDistAvg != null;
+  }
 
-	public boolean getHasFinished(){
-		return this.hasFinished;
-	}
+  public boolean hasIntensityDistCCAvg() {
+    return iDistCCAvg != null;
+  }
 
-	public boolean getPairedTurnCheck(){
-		if(this.getRunType().equals("Paired End")){
-			if(this.getState() != Constants.STATE_HANG){
-				if(this.getCurrentCycle() == this.getTurnCycle()){
-					return true;
-				}else{
-					return false;
-				}
-			}else{
-				return false;
-			}
-		}else{	// Nextera is excluded
-			return false;
-		}
-	}
+  public boolean hasSampleInfo() {
+    return sampleInfo != null;
+  }
+
+  public void setParseError(int parseError) {
+    this.parseError = parseError;
+  }
+
+  public void incParseError() {
+    this.parseError++;
+  }
+
+  public int getParseError() {
+    return this.parseError;
+  }
+
+  public void setHasFinished(boolean hf) {
+    this.hasFinished = hf;
+  }
+
+  public boolean getHasFinished() {
+    return this.hasFinished;
+  }
+
+  public boolean getPairedTurnCheck() {
+    return this.getRunType().equals("Paired End") && this.getState() != Constants.STATE_HANG && this.getCurrentCycle() == this.getTurnCycle();
+  }
 }
 

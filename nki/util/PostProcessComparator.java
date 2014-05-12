@@ -8,12 +8,12 @@
 package nki.util;
 
 import java.util.Comparator;
+
 import nki.objects.PostProcess;
 
 public class PostProcessComparator implements Comparator<PostProcess> {
-
   @Override
   public int compare(PostProcess p1, PostProcess p2) {
-	return (p1.getOrder() < p2.getOrder() ) ? -1 : (p1.getOrder() > p2.getOrder()) ? 1 : 0;
+    return (p1.getOrder() < p2.getOrder()) ? -1 : (p1.getOrder() > p2.getOrder()) ? 1 : 0;
   }
 }

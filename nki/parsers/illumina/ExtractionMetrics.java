@@ -13,20 +13,21 @@ import java.util.HashSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+
 import nki.util.LoggerWrapper;
 
-public class ExtractionMetrics extends GenericIlluminaParser{
-	ArrayList<Integer> cycles = new ArrayList<>();
+public class ExtractionMetrics extends GenericIlluminaParser {
+  List<Integer> cycles = new ArrayList<>();
 
-	// Instantiate Logger	
-	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  // Instantiate Logger
+  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
-	public ExtractionMetrics(String source, int state){
-		super(ExtractionMetrics.class, source, state);
-	}
+  public ExtractionMetrics(String source, int state) {
+    super(ExtractionMetrics.class, source, state);
+  }
 
 	/*
-	 * Binary structure:
+   * Binary structure:
 	 *	byte 0: file version number (2)
 	 *	byte 1: length of each record
 	 *	bytes (N * 38 + 2) - (N *38 + 39): record:
@@ -39,83 +40,94 @@ public class ExtractionMetrics extends GenericIlluminaParser{
 	 *
 	 */
 
-	public void digestData(){
-		try{
-			setVersion(leis.readByte());	
-			setRecordLength(leis.readByte()); 
-		}catch(IOException Ex){
-			metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", Ex.toString());
-		}
+  public List<Integer> digestData() {
+    if (fileMissing) {
+      return cycles;
+    }
 
-		try{
-			while(true){
-				int laneNr = leis.readUnsignedShort();
-				int tileNr = leis.readUnsignedShort();
-				int cycleNr = leis.readUnsignedShort();
-				
-				float fA = leis.readFloat();
-				float fC = leis.readFloat();
-				float fG = leis.readFloat();
-				float fT = leis.readFloat();
-				
-				int iA = leis.readUnsignedShort();
-				int iC = leis.readUnsignedShort();				
-				int iG = leis.readUnsignedShort();				
-				int iT = leis.readUnsignedShort();				
-				
-				long dateTime = leis.readLong();
-			}
-		}catch(IOException ExMain){
-			metrixLogger.log.log(Level.SEVERE, "Error in main parsing of metrics data: {0}", ExMain.toString());
-		}
-	}
+    try {
+      setVersion(leis.readByte());
+      setRecordLength(leis.readByte());
+    }
+    catch (IOException ex) {
+      ex.printStackTrace();
+      metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", ex.toString());
+    }
 
-	public List<Integer> getUniqueCycles(){
+    try {
+      while (true) {
+        int laneNr = leis.readUnsignedShort();
+        int tileNr = leis.readUnsignedShort();
+        int cycleNr = leis.readUnsignedShort();
 
-		try{
-			leis.skipBytes(6);
-			
-			while(true){
-				int cycleNr = leis.readUnsignedShort();
-				cycles.add(cycleNr);
-				leis.skipBytes(36);			
-			}
-		}catch(IOException Ex){
-			metrixLogger.log.log(Level.SEVERE, "IOException in Unique Cycles {0}", Ex.toString());
-		}		
-		
-		List<Integer> newList = new ArrayList<Integer>(new HashSet<>(cycles));
-		Collections.sort(newList);
+        float fA = leis.readFloat();
+        float fC = leis.readFloat();
+        float fG = leis.readFloat();
+        float fT = leis.readFloat();
 
-		return newList;
-	}
+        int iA = leis.readUnsignedShort();
+        int iC = leis.readUnsignedShort();
+        int iG = leis.readUnsignedShort();
+        int iT = leis.readUnsignedShort();
 
-	public int getLastCycle(){
-		try{
-			if(leis != null){
-				leis.skipBytes(6);
-			
-				while(true){
-					int cycleNr = leis.readUnsignedShort();
-					cycles.add(cycleNr);
-					leis.skipBytes(36);
-				}
-			}
-			if(leis != null){
-				leis.close();
-			}
-		}catch(IOException Ex){
-		
-		}
+        long dateTime = leis.readLong();
+      }
+    }
+    catch (IOException exMain) {
+      exMain.printStackTrace();
+      metrixLogger.log.log(Level.SEVERE, "Error in main parsing of metrics data: {0}", exMain.toString());
+    }
 
-		int max = 0;
+    return cycles;
+  }
 
-		for(int c : cycles){
-			if(c > max){ max = c; }
-		}
-		return max;
-	}
-		
-		
+  public List<Integer> getUniqueCycles() {
+    try {
+      leis.skipBytes(6);
 
+      while (true) {
+        int cycleNr = leis.readUnsignedShort();
+        cycles.add(cycleNr);
+        leis.skipBytes(36);
+      }
+    }
+    catch (IOException ex) {
+      ex.printStackTrace();
+      metrixLogger.log.log(Level.SEVERE, "IOException in Unique Cycles {0}", ex.toString());
+    }
+
+    List<Integer> newList = new ArrayList<>(new HashSet<>(cycles));
+    Collections.sort(newList);
+
+    return newList;
+  }
+
+  public int getLastCycle() {
+    try {
+      if (leis != null) {
+        leis.skipBytes(6);
+
+        while (true) {
+          int cycleNr = leis.readUnsignedShort();
+          cycles.add(cycleNr);
+          leis.skipBytes(36);
+        }
+      }
+      if (leis != null) {
+        leis.close();
+      }
+    }
+    catch (IOException ex) {
+
+    }
+
+    int max = 0;
+
+    for (int c : cycles) {
+      if (c > max) {
+        max = c;
+      }
+    }
+    return max;
+  }
 }

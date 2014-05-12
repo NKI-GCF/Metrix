@@ -8,69 +8,68 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 import java.text.*;
 
 import nki.util.ArrayUtils;
 
 import org.w3c.dom.*;
+
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 
-public class ErrorDist implements Serializable{
+public class ErrorDist implements Serializable {
 
-	public static final long serialVersionUID = 42L;
-	
-	// Num Errors - Error rate
-	private HashMap<Integer, List<Float>> 					eScoreDistRun 	= new HashMap<Integer, List<Float>>();
+  public static final long serialVersionUID = 42L;
 
-	// Lane - Num Errors - Num Reads with Error
-	private HashMap<Integer, HashMap<Integer, List<Float>>> 	eScoreDistLane 	= new HashMap<Integer, HashMap<Integer, List<Float>>>();
+  // Num Errors - Error rate
+  private Map<Integer, List<Double>> eScoreDistRun = new HashMap<>();
 
-	// Cycle - Num Errors - Num Reads with Error
-	private HashMap<Integer, HashMap<Integer, List<Float>>> 	eScoreDistCycle = new HashMap<Integer, HashMap<Integer, List<Float>>>();
+  // Lane - Num Errors - Num Reads with Error
+  private Map<Integer, Map<Integer, List<Double>>> eScoreDistLane = new HashMap<>();
 
-//	public float getScore(int qScore){
-//		return eScoreDistRun.get(qScore);
-//	}
+  // Cycle - Num Errors - Num Reads with Error
+  private Map<Integer, Map<Integer, List<Double>>> eScoreDistCycle = new HashMap<>();
 
-	public void setRunDistScore(int lane, float score){
-		if(eScoreDistRun.containsKey(lane)){
-			(eScoreDistRun.get(lane)).add(score);
-		}else{
-			List<Float> scores = new ArrayList<Float>();
-			scores.add(score);
-			eScoreDistRun.put(lane, scores);
-		}
-	}
-	public void setRunDistScoreByLane(int lane, int numErrors, float score){	
-		if(eScoreDistLane.containsKey(lane)){
-			if((eScoreDistLane.get(lane)).containsKey(numErrors)){
-				((eScoreDistLane.get(lane)).get(numErrors)).add(score);
-			}
-		}else{
-			List<Float> l = new ArrayList<Float>();
-			l.add(score);
-			HashMap<Integer, List<Float>> cycleM = new HashMap<Integer, List<Float>>();
-			cycleM.put(numErrors, l);
-			eScoreDistLane.put(lane, cycleM);
-		}
-	}
+  public void setRunDistScore(int lane, double score) {
+    if (eScoreDistRun.containsKey(lane)) {
+      (eScoreDistRun.get(lane)).add(score);
+    }
+    else {
+      List<Double> scores = new ArrayList<>();
+      scores.add(score);
+      eScoreDistRun.put(lane, scores);
+    }
+  }
 
-	public void setRunDistScoreByCycle(int cycle, int numErrors, float score){
-//	System.out.println("Cycle:" + cycle + "\tNum Errors: " + numErrors + "\tScore: " + score );
-//	if(cycle <11){
-//		System.out.println("Cycle:" + cycle + "\tNum Errors: " + numErrors + "\tScore: " + score );
-//	}
-		if(eScoreDistCycle.containsKey(cycle)){
-//			System.out.println("Cycle Exists (" + cycle + ")");
-		
+  public Map<Integer, List<Double>> getRunErrorDistribution() {
+    return eScoreDistRun;
+  }
+
+  public void setRunDistScoreByLane(int lane, int numErrors, double score) {
+    if (eScoreDistLane.containsKey(lane)) {
+      if ((eScoreDistLane.get(lane)).containsKey(numErrors)) {
+        ((eScoreDistLane.get(lane)).get(numErrors)).add(score);
+      }
+    }
+    else {
+      List<Double> l = new ArrayList<>();
+      l.add(score);
+      Map<Integer, List<Double>> cycleM = new HashMap<>();
+      cycleM.put(numErrors, l);
+      eScoreDistLane.put(lane, cycleM);
+    }
+  }
+
+  public Map<Integer, Map<Integer, List<Double>>> getRunErrorDistributionByLane() {
+    return eScoreDistLane;
+  }
+
+  public void setRunDistScoreByCycle(int cycle, int numErrors, double score) {
+    if (eScoreDistCycle.containsKey(cycle)) {
+
 		/*
 			if((eScoreDistCycle.get(cycle)).containsKey(numErrors)){
 				((eScoreDistCycle.get(cycle)).get(numErrors)).add(score);
@@ -82,85 +81,61 @@ public class ErrorDist implements Serializable{
 				eScoreDistCycle.put(cycle, eMap);
 			}
 		*/
-			HashMap<Integer, List<Float>> eMap = eScoreDistCycle.get(cycle);
-			
-			List<Float> l;
-			if((eScoreDistCycle.get(cycle)).containsKey(numErrors)){
-				l = (eScoreDistCycle.get(cycle)).get(numErrors);
-			}else{
-				l = new ArrayList<Float>();
-			}
-			l.add(score);
-//			System.out.println("Length of array: " + l.size());
-			eMap.put(numErrors, l);
-			eScoreDistCycle.put(cycle, eMap);
-		}else{
-//			System.out.println("New Cycle " + cycle); 
-			List<Float> l = new ArrayList<Float>();
-			l.add(score);
-			HashMap<Integer, List<Float>> cycleM = new HashMap<Integer, List<Float>>();
-			cycleM.put(numErrors, l);
-			eScoreDistCycle.put(cycle, cycleM);
-		}
-	}
+      Map<Integer, List<Double>> eMap = eScoreDistCycle.get(cycle);
 
-/*	public Element toXML(Element sumXml, Document xmlDoc){
-		for(int scoreVal : qScoreDist.keySet()){
-			Element scoreEle = xmlDoc.createElement("QScore");
-			scoreEle.setAttribute("score", scoreVal+"");
-			MutableLong metric = this.getScore(scoreVal);
-			scoreEle.setAttribute("clusters", metric.get()+"");
-			sumXml.appendChild(scoreEle);
-		}
+      List<Double> l;
+      if ((eScoreDistCycle.get(cycle)).containsKey(numErrors)) {
+        l = (eScoreDistCycle.get(cycle)).get(numErrors);
+      }
+      else {
+        l = new ArrayList<>();
+      }
+      l.add(score);
+      eMap.put(numErrors, l);
+      eScoreDistCycle.put(cycle, eMap);
+    }
+    else {
+      List<Double> l = new ArrayList<>();
+      l.add(score);
+      Map<Integer, List<Double>> cycleM = new HashMap<>();
+      cycleM.put(numErrors, l);
+      eScoreDistCycle.put(cycle, cycleM);
+    }
+  }
 
-		return sumXml;
-	}
+  public Map<Integer, Map<Integer, List<Double>>> getRunErrorDistributionByCycle() {
+    return eScoreDistCycle;
+  }
 
-	public void incrementCycleTrack(int lane, int cycle){
-		
-	}
-
-	private Element createElement(Document doc, String name, String text){
-		Element e = doc.createElement(name);
-		if(text == null){
-			text = "";
-		}
-		e.appendChild(doc.createTextNode(text));
-
-		return e;
-	}
-*/
-
-	public String toTab(String source){
-		String out = "";
-		DecimalFormat df = new DecimalFormat("0.00");
-		// Avg error rate per lane
-		if(source.equals("rate")){
-			for(int lane : eScoreDistRun.keySet()){	
-				out += lane +"\t" + df.format(ArrayUtils.mean(eScoreDistRun.get(lane))) + "\t(+/- "+ df.format(ArrayUtils.sd(eScoreDistRun.get(lane))) +")\n";
-			}	
-		}else if(source.equals("lane")){
-			for(int lane : eScoreDistLane.keySet()){
-				out += lane;
-				HashMap<Integer, List<Float>> errorMap = new HashMap<Integer, List<Float>>();
-				errorMap = eScoreDistLane.get(lane);
-				for(int numErrors : errorMap.keySet()){
-					out += "\t" + ArrayUtils.mean(errorMap.get(numErrors));
-				}
-				out += "\n";
-			}
-		}else if(source.equals("cycle")){
-			for(int cycle : eScoreDistCycle.keySet()){
-				out += cycle;
-				HashMap<Integer, List<Float>> errorMap = new HashMap<Integer, List<Float>>();
-				errorMap = eScoreDistCycle.get(cycle);
-				for(int numErrors : errorMap.keySet()){
-//					System.out.println("Num Errors: " + numErrors);
-					out += "\t" + Math.floor(ArrayUtils.mean(errorMap.get(numErrors)));
-				}
-				out += "\n";
-			}
-		}
-		return out;
-	}
+  public String toTab(String source) {
+    String out = "";
+    DecimalFormat df = new DecimalFormat("0.00");
+    // Avg error rate per lane
+    if (source.equals("rate")) {
+      for (int lane : eScoreDistRun.keySet()) {
+        out += lane + "\t" + df.format(ArrayUtils.mean(eScoreDistRun.get(lane))) + "\t(+/- " + df.format(ArrayUtils.sd(eScoreDistRun.get(lane))) + ")\n";
+      }
+    }
+    else if (source.equals("lane")) {
+      for (int lane : eScoreDistLane.keySet()) {
+        out += lane;
+        Map<Integer, List<Double>> errorMap = eScoreDistLane.get(lane);
+        for (int numErrors : errorMap.keySet()) {
+          out += "\t" + ArrayUtils.mean(errorMap.get(numErrors));
+        }
+        out += "\n";
+      }
+    }
+    else if (source.equals("cycle")) {
+      for (int cycle : eScoreDistCycle.keySet()) {
+        out += cycle;
+        Map<Integer, List<Double>> errorMap = eScoreDistCycle.get(cycle);
+        for (int numErrors : errorMap.keySet()) {
+          out += "\t" + Math.floor(ArrayUtils.mean(errorMap.get(numErrors)));
+        }
+        out += "\n";
+      }
+    }
+    return out;
+  }
 }

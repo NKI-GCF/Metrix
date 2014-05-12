@@ -12,48 +12,49 @@ import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import nki.objects.Summary;
 
 public class XmlDriver {
 
-	private Summary summary;
-	private String directory;
-	private DocumentBuilderFactory documentBuilderFactory;
-	private DocumentBuilder documentBuilder;
-	private Document doc;
+  private Summary summary;
+  private String directory;
+  private DocumentBuilderFactory documentBuilderFactory;
+  private DocumentBuilder documentBuilder;
+  private Document doc;
 
-	public XmlDriver (String dir, Summary sum){
-		this.directory = dir;
-		this.summary = sum;
-	}
+  public XmlDriver(String dir, Summary sum) {
+    this.directory = dir;
+    this.summary = sum;
+  }
 
-	public boolean parseRunInfo() throws SAXException, IOException, ParserConfigurationException{
-                File xmlFile = new File(directory+"/RunInfo.xml");
-				if(!xmlFile.isFile()){
-					return false;
-				}
-                documentBuilderFactory = DocumentBuilderFactory.newInstance();
-                documentBuilder = documentBuilderFactory.newDocumentBuilder();
-                doc = documentBuilder.parse(xmlFile);
-                doc.getDocumentElement().normalize();
+  public boolean parseRunInfo() throws SAXException, IOException, ParserConfigurationException {
+    File xmlFile = new File(directory + "/RunInfo.xml");
+    if (!xmlFile.isFile()) {
+      return false;
+    }
+    documentBuilderFactory = DocumentBuilderFactory.newInstance();
+    documentBuilder = documentBuilderFactory.newDocumentBuilder();
+    doc = documentBuilder.parse(xmlFile);
+    doc.getDocumentElement().normalize();
 
-				setSummary(RunInfoHandler.parseAll(doc, summary));
-                return summary.getXmlInfo();
-	}
+    setSummary(RunInfoHandler.parseAll(doc, summary));
+    return summary.getXmlInfo();
+  }
 
-	private void setSummary(Summary sum){
-		this.summary = sum;
-	}
+  private void setSummary(Summary sum) {
+    this.summary = sum;
+  }
 
-	public Summary getSummary(){
-		return summary;
-	}
+  public Summary getSummary() {
+    return summary;
+  }
 
-	public void closeAll(){
-		this.documentBuilderFactory = null;
-		this.documentBuilder = null;
-		this.doc = null;
-	}
+  public void closeAll() {
+    this.documentBuilderFactory = null;
+    this.documentBuilder = null;
+    this.doc = null;
+  }
 }

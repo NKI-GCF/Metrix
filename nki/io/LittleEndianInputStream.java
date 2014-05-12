@@ -57,7 +57,6 @@ public class LittleEndianInputStream extends FilterInputStream {
   }
 
   public int readInt() throws IOException {
-
     int byte1 = in.read();
     int byte2 = in.read();
     int byte3 = in.read();
@@ -65,15 +64,29 @@ public class LittleEndianInputStream extends FilterInputStream {
     if (byte4 == -1) {
       throw new EOFException();
     }
-    return (byte4 << 24) 
-     + ((byte3 << 24) >>> 8) 
-     + ((byte2 << 24) >>> 16) 
-     + ((byte1 << 24) >>> 24);
-    
+    return (byte4 << 24)
+           + ((byte3 << 24) >>> 8)
+           + ((byte2 << 24) >>> 16)
+           + ((byte1 << 24) >>> 24);
+  }
+
+  //TODO testing for IndexMetrics num clusters
+  public long readUint32() throws IOException {
+    long byte1 = in.read();
+    long byte2 = in.read();
+    long byte3 = in.read();
+    long byte4 = in.read();
+    if (byte4 == -1) {
+      throw new EOFException();
+    }
+
+    return (byte1&0XFF << 24) |
+           (byte2&0XFF << 16) |
+           (byte3&0XFF << 8)  |
+           (byte4&0xFF);
   }
 
   public long readLong() throws IOException {
-
     long byte1 = in.read();
     long byte2 = in.read();
     long byte3 = in.read();
@@ -85,39 +98,36 @@ public class LittleEndianInputStream extends FilterInputStream {
     if (byte8 == -1) {
       throw new EOFException();
     }
-    return (byte8 << 56) 
-     + ((byte7 << 56) >>> 8) 
-     + ((byte6 << 56) >>> 16) 
-     + ((byte5 << 56) >>> 24) 
-     + ((byte4 << 56) >>> 32) 
-     + ((byte3 << 56) >>> 40) 
-     + ((byte2 << 56) >>> 48) 
-     + ((byte1 << 56) >>> 56);
-    
+    return (byte8 << 56)
+           + ((byte7 << 56) >>> 8)
+           + ((byte6 << 56) >>> 16)
+           + ((byte5 << 56) >>> 24)
+           + ((byte4 << 56) >>> 32)
+           + ((byte3 << 56) >>> 40)
+           + ((byte2 << 56) >>> 48)
+           + ((byte1 << 56) >>> 56);
   }
 
   public final String readUTF8String(int numBytes) throws IOException {
     byte[] bytes = new byte[numBytes];
 
-	for(int i=0; i < numBytes; i++){
-		bytes[i] = (byte) in.read();
-	}
+    for (int i = 0; i < numBytes; i++) {
+      bytes[i] = (byte) in.read();
+    }
 
-	return new String(bytes, "UTF-8");
-
+    return new String(bytes, "UTF-8");
   }
 
   public final double readDouble() throws IOException {
     return Double.longBitsToDouble(this.readLong());
   }
-  
+
   public final float readFloat() throws IOException {
-    return Float.intBitsToFloat(this.readInt());  
+    return Float.intBitsToFloat(this.readInt());
   }
 
-  public final int skipBytes(int n) throws IOException { 
-    for (int i = 0; i < n; i += (int) skip(n - i));
-    return n;  
-  } 
-
+  public final int skipBytes(int n) throws IOException {
+    for (int i = 0; i < n; i += (int) skip(n - i)) ;
+    return n;
+  }
 }

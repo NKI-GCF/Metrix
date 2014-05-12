@@ -8,20 +8,32 @@
 package nki.parsers.illumina;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
+
 import nki.objects.Indices;
 import nki.util.LoggerWrapper;
 
 public class IndexMetrics extends GenericIlluminaParser {
-	// Instantiate Logger	
-	private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  private Indices indices;
 
-	public IndexMetrics(String source, int state){
-		super(IndexMetrics.class, source, state);
-	}
+  // Instantiate Logger
+  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+
+  public IndexMetrics(String source, int state) {
+    super(IndexMetrics.class, source, state);
+  }
+
+  public Indices getIndices() {
+    if (indices == null) {
+      indices = digestData();
+    }
+    return indices;
+  }
 
 	/*
-	 * Binary structure
+   * Binary structure
 	 * byte 0: file version number (1)
 	 * bytes (variable length): record:
 	 * 2 bytes: lane number (uint16)
@@ -36,49 +48,51 @@ public class IndexMetrics extends GenericIlluminaParser {
 	 * W bytes: sample project name string (string encoded in UTF-8
 	 */
 
-	public Indices digestData(){
-		if(fileMissing){
-			return new Indices();
-		}
-		Indices indices = new Indices();
+  public Indices digestData() {
+    indices = new Indices();
+    if (fileMissing) {
+      return indices;
+    }
 
-		// First catch version of metrics file.
-		try{
-			setVersion(leis.readByte());		// Set Version
-		}catch(IOException Ex){
-			LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", Ex.toString());
-		}
-		
-		boolean readBool = true;
+    // First catch version of metrics file.
+    try {
+      setVersion(leis.readByte());    // Set Version
+    }
+    catch (IOException Ex) {
+      LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", Ex.toString());
+    }
 
-		try{
-			while(readBool){
-				int laneNr = leis.readUnsignedShort();
-				int tileNr = leis.readUnsignedShort();
-				int readNr = leis.readUnsignedShort();
+    boolean readBool = true;
 
-				int numBytesIdx = leis.readUnsignedShort();
-				
-				String indexSeq = leis.readUTF8String(numBytesIdx);
+    try {
+      while (readBool) {
+        int laneNr = leis.readUnsignedShort();
+        int tileNr = leis.readUnsignedShort();
+        int readNr = leis.readUnsignedShort();
 
-				int numClustersIdx = leis.readInt();
-				int numBytesSample = leis.readUnsignedShort();
+        int numBytesIdx = leis.readUnsignedShort();
 
-				String sampleSeq = leis.readUTF8String(numBytesSample);
+        String indexSeq = leis.readUTF8String(numBytesIdx);
 
-				int numBytesProject = leis.readUnsignedShort();
-				
-				String projectSeq = leis.readUTF8String(numBytesProject);
+        long numClustersIdx = (long)leis.readFloat();
+        int numBytesSample = leis.readUnsignedShort();
 
-				indices.setIndex(projectSeq, sampleSeq, indexSeq, numClustersIdx, laneNr, readNr);
-//				System.out.println(laneNr + "\t" + tileNr + "\t" + readNr + "\t" + projectSeq + "\t" + sampleSeq + "\t" + indexSeq + "\n");
-				
-			}
-		}catch(IOException ExMain){
-			readBool = false;
-		}
+        String sampleSeq = leis.readUTF8String(numBytesSample);
 
-		return indices;
-	}
+        int numBytesProject = leis.readUnsignedShort();
+
+        String projectSeq = leis.readUTF8String(numBytesProject);
+
+        indices.setIndex(projectSeq, sampleSeq, indexSeq, numClustersIdx, laneNr, readNr);
+
+        //System.out.println(laneNr + "\t" + tileNr + "\t" + numClustersIdx);
+      }
+    }
+    catch (IOException ExMain) {
+      readBool = false;
+    }
+
+    return indices;
+  }
 
 }	

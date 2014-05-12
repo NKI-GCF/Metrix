@@ -11,119 +11,104 @@ import java.io.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 import org.w3c.dom.*;
 
-public class IntensityDist implements Serializable{
+public class IntensityDist implements Serializable {
 
-	public static final long serialVersionUID = 42L;
+  public static final long serialVersionUID = 42L;
 
-	private final HashMap<Integer, HashMap<Integer, HashMap<String, MutableInt>>> iDist = new HashMap<>();
+  private final Map<Integer, Map<Integer, Map<String, MutableInt>>> iDist = new TreeMap<>();
 
-	public void setIntensity(int lane, int cycle, HashMap<String, MutableInt> iMapM){
-		HashMap<Integer, HashMap<String, MutableInt>> oMap = iDist.get(lane);
+  public void setIntensity(int lane, int cycle, Map<String, MutableInt> iMapM) {
+    Map<Integer, Map<String, MutableInt>> oMap = iDist.get(lane);
 
-//		System.out.println("Setting Int for: " + lane + "\tCycle: " + cycle + "Avg: " + iMapp.getCycleAverageInt());
+    if (oMap == null) {
+      Map<Integer, Map<String, MutableInt>> cMap = new TreeMap<>();
+      cMap.put(cycle, iMapM);
+      iDist.put(lane, cMap);
+    }
+    else {
+      if (oMap.get(cycle) == null) {
+        oMap.put(cycle, iMapM);
+      }
 
-		if(oMap == null){
-			HashMap <Integer, HashMap<String, MutableInt>> cMap = new HashMap<>();
-			cMap.put(cycle, iMapM);
-			iDist.put(lane, cMap);
-		}else{
-			if(oMap.get(cycle) == null){
-				oMap.put(cycle, iMapM);
-			}
+      iDist.put(lane, oMap);
+    }
+  }
 
-			iDist.put(lane, oMap);
-		}
-	}
+  public Map<Integer, Map<Integer, Map<String, MutableInt>>> getIntensities() {
+    return iDist;
+  }
 
-	@SuppressWarnings("unchecked")
-	public Element toXML(Element sumXml, Document xmlDoc){
-		Iterator lit = iDist.entrySet().iterator();
-		/*
+  @SuppressWarnings("unchecked")
+  public Element toXML(Element sumXml, Document xmlDoc) {
+    Iterator lit = iDist.entrySet().iterator();
+    /*
 		 * Key   = Lane			- Integer
 		 * Value = CycleMap 	- HashMap<Integer, HashMap<String, Object>>
 		 */
-		while(lit.hasNext()){
-			Element laneEle = xmlDoc.createElement("Lane");
-			Map.Entry lanePairs = (Map.Entry) lit.next();
-			int lane = (Integer) lanePairs.getKey();
-			laneEle.setAttribute("lane", Integer.toString(lane));
+    while (lit.hasNext()) {
+      Element laneEle = xmlDoc.createElement("Lane");
+      Map.Entry lanePairs = (Map.Entry) lit.next();
+      int lane = (Integer) lanePairs.getKey();
+      laneEle.setAttribute("lane", Integer.toString(lane));
 
-			HashMap<Integer, HashMap<String, MutableInt>> cycleContent;
-            cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
-			// Cycle Iterator
-			Iterator cit = (Iterator) cycleContent.entrySet().iterator();
+      HashMap<Integer, HashMap<String, MutableInt>> cycleContent;
+      cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
+      // Cycle Iterator
+      Iterator cit = (Iterator) cycleContent.entrySet().iterator();
 
-			while(cit.hasNext()){
-				Element cycleEle = xmlDoc.createElement("Cycle");
-				Map.Entry cycleEntries = (Map.Entry) cit.next();
-				int cycle = (Integer) cycleEntries.getKey();
-				cycleEle.setAttribute("num", Integer.toString(cycle));
-			
-				// Nested Intensities HashMap
-				HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
+      while (cit.hasNext()) {
+        Element cycleEle = xmlDoc.createElement("Cycle");
+        Map.Entry cycleEntries = (Map.Entry) cit.next();
+        int cycle = (Integer) cycleEntries.getKey();
+        cycleEle.setAttribute("num", Integer.toString(cycle));
 
-				Iterator iit = (Iterator) cycleInt.entrySet().iterator();
-	
-				Element intEle = xmlDoc.createElement("Intensities");
-				while(iit.hasNext()){
-					Map.Entry intensityPairs = (Map.Entry) iit.next();
-					String constName = (String) intensityPairs.getKey();
-					MutableInt intValue = (MutableInt) intensityPairs.getValue();
+        // Nested Intensities HashMap
+        HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
 
-					if(intValue instanceof MutableInt){
-						MutableInt in = (MutableInt) intValue;
-						intEle.setAttribute(constName, Integer.toString(in.get()));
-					}
+        Iterator iit = (Iterator) cycleInt.entrySet().iterator();
 
-					cycleEle.appendChild(intEle);
-				}
-				laneEle.appendChild(cycleEle);
-			}
-			sumXml.appendChild(laneEle);
-		}
+        Element intEle = xmlDoc.createElement("Intensities");
+        while (iit.hasNext()) {
+          Map.Entry intensityPairs = (Map.Entry) iit.next();
+          String constName = (String) intensityPairs.getKey();
+          MutableInt intValue = (MutableInt) intensityPairs.getValue();
 
-		return sumXml;
-	}
+          if (intValue instanceof MutableInt) {
+            MutableInt in = (MutableInt) intValue;
+            intEle.setAttribute(constName, Integer.toString(in.get()));
+          }
 
-	@SuppressWarnings("unchecked")
-	public String toTab(){
-		String out = "";
-        for (Map.Entry lanePairs : iDist.entrySet()) {
-            int lane = (Integer) lanePairs.getKey();
-            
-            HashMap<Integer, HashMap<String, MutableInt>> cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
-            // Cycle Iterator
-            Iterator cit = (Iterator) cycleContent.entrySet().iterator();
-            
-            while(cit.hasNext()){
-                Map.Entry cycleEntries = (Map.Entry) cit.next();
-                int cycle = (Integer) cycleEntries.getKey();
-                
-                // Nested Intensities HashMap
-                HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
-                
-                Iterator iit = (Iterator) cycleInt.entrySet().iterator();
-                out += lane + "\t" + cycle;
-                
-                while(iit.hasNext()){
-                    Map.Entry intensityPairs = (Map.Entry) iit.next();
-                    String constName = (String) intensityPairs.getKey();
-                    MutableInt intValue = (MutableInt) intensityPairs.getValue();
-                    
-                    out += "\t" +constName + ":" + intValue;
-                }
-                
-                out += "\n";
-            }
+          cycleEle.appendChild(intEle);
         }
-		return out;
-	}
+        laneEle.appendChild(cycleEle);
+      }
+      sumXml.appendChild(laneEle);
+    }
 
-/*	public HashMap<Integer, MutableLong> toObj(){
-		return iDist;
-	}
-*/
+    return sumXml;
+  }
+
+  @SuppressWarnings("unchecked")
+  public String toTab() {
+    String out = "";
+    for (Integer lane : iDist.keySet()) {
+      Map<Integer, Map<String, MutableInt>> cycleContent = iDist.get(lane);
+      for (Integer cycle : cycleContent.keySet()) {
+        Map<String, MutableInt> cycleInt = cycleContent.get(cycle);
+        out += lane + "\t" + cycle;
+
+        for (String constName : cycleInt.keySet()) {
+          MutableInt intValue = cycleInt.get(constName);
+          out += "\t" + constName + ":" + intValue;
+        }
+
+        out += "\n";
+      }
+    }
+    return out;
+  }
 }
