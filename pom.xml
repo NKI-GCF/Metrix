@@ -5,18 +5,18 @@
   <artifactId>metrix</artifactId>
   <packaging>jar</packaging>
   <version>1.0-2014-SNAPSHOT</version>
-  <name>Metrix Illumina InterOp server/client framework</name>
+  <name>Metrix Illumina InterOp server/client framework GCFdb</name>
   <url>https://github.com/NKI-GCF/Metrix</url>
 
   <scm>
     <connection>
-      scm:git:https://www.github.com/froggleston/Metrix
+      scm:git:https://www.github.com/NKI-GCF/Metrix
     </connection>
     <developerConnection>
-      scm:git:ssh://www.github.com/froggleston/Metrix
+      scm:git:ssh://www.github.com/NKI-GCF/Metrix
     </developerConnection>
     <url>
-      https://www.github.com/froggleston/Metrix
+      https://www.github.com/NKI-GCF/Metrix
     </url>
   </scm>
 
@@ -71,6 +71,11 @@
     </pluginRepository>
 
     <pluginRepository>
+        <id>onejar-maven-plugin.googlecode.com</id>
+        <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+    </pluginRepository>
+
+    <pluginRepository>
       <id>Atlassian Maven Repository</id>
       <url>https://maven.atlassian.com/public</url>
     </pluginRepository>
@@ -94,7 +99,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>nki.core.Metrix</mainClass>
+              <mainClass>nki.core.MetrixDaemon</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -106,18 +111,60 @@
         <version>1.4.4</version>
         <executions>
           <execution>
+            <id>MetrixDaemon</id>
             <configuration>
-              <!-- Optional -->
               <onejarVersion>0.97</onejarVersion>
-              <!-- Optional, default is false -->
               <attachToBuild>true</attachToBuild>
-              <!-- Optional, default is "onejar" -->
               <classifier>onejar</classifier>
+              <mainClass>nki.core.MetrixDaemon</mainClass>
+              <filename>MetrixDaemon.jar</filename>
             </configuration>
             <goals>
               <goal>one-jar</goal>
             </goals>
           </execution>
+          
+          <execution>
+            <id>MetrixGCFdb</id>
+            <configuration>
+              <onejarVersion>0.97</onejarVersion>
+              <attachToBuild>true</attachToBuild>
+              <classifier>onejar</classifier>
+              <mainClass>nki.core.MetrixGCFdb</mainClass>
+              <filename>MetrixGCFdb.jar</filename>
+            </configuration>
+            <goals>
+              <goal>one-jar</goal>
+            </goals>
+          </execution>
+
+          <execution>
+            <id>MetrixLive</id>
+            <configuration>
+              <onejarVersion>0.97</onejarVersion>
+              <attachToBuild>true</attachToBuild>
+              <classifier>onejar</classifier>
+              <mainClass>nki.core.MetrixLive</mainClass>
+              <filename>MetrixLive.jar</filename>
+            </configuration>
+            <goals>
+              <goal>one-jar</goal>
+            </goals>
+          </execution>          
+                              
+          <execution>
+            <id>Metrix</id>
+            <configuration>
+              <onejarVersion>0.97</onejarVersion>
+              <attachToBuild>true</attachToBuild>
+              <classifier>onejar</classifier>
+              <mainClass>nki.core.Metrix</mainClass>
+              <filename>Metrix.jar</filename>
+            </configuration>
+            <goals>
+              <goal>one-jar</goal>
+            </goals>
+          </execution>                    
         </executions>
       </plugin>
 
@@ -143,6 +190,14 @@
       <version>2.4</version>
       <classifier>jdk15</classifier>
     </dependency>
+    
+    <dependency>
+	<groupId>mysql</groupId>
+	<artifactId>mysql-connector-java</artifactId>
+	<version>5.1.31</version>
+    </dependency>
+
+    
   </dependencies>
 
 </project>

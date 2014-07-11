@@ -94,7 +94,8 @@ public final class Constants {
   public static final String COM_FORMAT_XML = "XML";    // Return data in XML format
   public static final String COM_FORMAT_OBJ = "POJO";    // Return data as java object
   public static final String COM_FORMAT_TAB = "TAB";    // Return data in tab separated format
-
+  public static final String COM_FORMAT_JSON = "JSON";    // Return data in JSON format
+  
   // Command data request detail level
   public static final String COM_TYPE_SIMPLE = "SIMPLE";    // Level of requested detail of return output.
   public static final String COM_TYPE_METRIC = "METRIC";

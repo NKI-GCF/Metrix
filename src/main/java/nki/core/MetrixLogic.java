@@ -27,6 +27,7 @@ import nki.parsers.xml.XmlDriver;
 import nki.parsers.metrix.PostProcessing;
 
 import java.util.Properties;
+import java.util.logging.Level;
 
 public class MetrixLogic {
 
@@ -335,8 +336,12 @@ public class MetrixLogic {
 
   public boolean checkTimeout(String file) {
     File lastModCheck = new File(file + "/InterOp/");
+    if(summary.getState() == Constants.STATE_FINISHED){
+        metrixLogger.log.info("Run has finished. No need for update.");
+        return false;
+    }
     if (!lastModCheck.isDirectory()) {
-      metrixLogger.log.severe("Directory " + file + " does not exist.");
+      metrixLogger.log.warning("Directory " + file + " does not exist.");
       return false;
     }
 
@@ -369,7 +374,7 @@ public class MetrixLogic {
       fin.close();
     }
     catch (IOException Ex) {
-      metrixLogger.log.severe("IOException when loading config: " + Ex.toString());
+      LoggerWrapper.log.log(Level.SEVERE, "IOException when loading config: {0}", Ex.toString());
     }
 
   }
@@ -380,7 +385,7 @@ public class MetrixLogic {
     String execPP = configFile.getProperty("EXEC_POSTPROCESSING", "FALSE");
 
     if (execPP.equalsIgnoreCase("TRUE")) {
-      metrixLogger.log.info("Calling post processing module for: " + sum.getRunId());
+      metrixLogger.log.log(Level.INFO, "Calling post processing module for: {0}", sum.getRunId());
       PostProcessing pp = new PostProcessing(sum);
       pp.run();
 

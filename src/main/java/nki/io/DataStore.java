@@ -100,7 +100,7 @@ public class DataStore {
 
   public static long appendedWrite(Summary sum, String runId) throws Exception {
     String className = sum.getClass().getName();
-    PreparedStatement pstmt = conn.prepareStatement(WRITE_OBJECT_SQL);
+    PreparedStatement pstmt = conn.prepareStatement(WRITE_OBJECT_SQL, Statement.RETURN_GENERATED_KEYS);
 
     sum.setLastUpdated();
 
@@ -291,8 +291,9 @@ public class DataStore {
 
   public static int getMaxId() throws Exception {
     int maxID = 0;
-    Statement s2 = conn.createStatement();
-    s2.execute("SELECT MAX(id) FROM metrix_objects");
+    PreparedStatement s2 = conn.prepareStatement("SELECT MAX(id) FROM metrix_objects", Statement.RETURN_GENERATED_KEYS);
+//    s2.execute("SELECT MAX(id) FROM metrix_objects", Statement.RETURN_GENERATED_KEYS);
+    s2.executeQuery();
     ResultSet rs2 = s2.getResultSet(); //
     while (rs2.next()) {
       maxID = rs2.getInt(1);
