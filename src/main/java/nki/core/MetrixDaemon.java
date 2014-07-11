@@ -1,7 +1,7 @@
 package nki.core;
 
 // Metrix - A server / client interface for Illumina Sequencing Metrics.
-// Copyright (C) 2013 Bernd van der Veen
+// Copyright (C) 2014 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
 // This is free software, and you are welcome to redistribute it

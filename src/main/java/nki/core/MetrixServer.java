@@ -1,7 +1,7 @@
 package nki.core;
 
 // Metrix - A server / client interface for Illumina Sequencing Metrics.
-// Copyright (C) 2013 Bernd van der Veen
+// Copyright (C) 2014 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
 // This is free software, and you are welcome to redistribute it
@@ -64,7 +64,7 @@ public class MetrixServer {
 
     if (asDaemon.equals("false")) {
       System.out.println("Metrix - A server / client interface for Illumina Sequencing Metrics.");
-      System.out.println("Copyright (C) 2013 Bernd van der Veen\n");
+      System.out.println("Copyright (C) 2014 Bernd van der Veen\n");
       System.out.println("This program comes with ABSOLUTELY NO WARRANTY;");
       System.out.println("This is free software, and you are welcome to redistribute it");
       System.out.println("under certain conditions; for more information please see LICENSE.txt\n");

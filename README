@@ -4,7 +4,7 @@ Metrics are collected by parsing the binary InterOp sequencer statistics.
 Currently supports Illumina's HiSeq 2000 and MiSeq formats. 
 Tested on HiSeq 2000 and MiSeq.
 
-Copyright (C) 2013 Bernd van der Veen
+Copyright (C) 2014 Bernd van der Veen
 Email: b.vd.veen[at]nki.nl
 
 This program comes with ABSOLUTELY NO WARRANTY;

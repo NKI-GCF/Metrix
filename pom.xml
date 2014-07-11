@@ -20,34 +20,7 @@
     </url>
   </scm>
 
-  <distributionManagement>
-    <downloadUrl>https://repos.tgac.ac.uk/maven/repo</downloadUrl>
-    <repository>
-      <id>tgac-repo</id>
-      <name>TGAC Maven Repository</name>
-      <url>scp://repos.tgac.ac.uk/storage/html/maven/repo</url>
-    </repository>
-    <snapshotRepository>
-      <id>tgac-repo</id>
-      <name>TGAC Maven Repository</name>
-      <url>scp://repos.tgac.ac.uk/storage/html/maven/repo</url>
-    </snapshotRepository>
-  </distributionManagement>
-
   <repositories>  
-    <repository>
-      <id>tgac-repo</id>
-      <name>TGAC Maven Repository</name>
-      <url>https://repos.tgac.ac.uk/maven/repo</url>
-      <releases>
-        <updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-
     <repository>
       <id>Atlassian Maven Repository</id>
       <url>https://maven.atlassian.com/public</url>
@@ -55,12 +28,6 @@
   </repositories>
 
   <pluginRepositories>
-    <pluginRepository>
-      <id>tgac-repo</id>
-      <name>TGAC Maven Repository</name>
-      <url>https://repos.tgac.ac.uk/maven/repo</url>
-    </pluginRepository>
-
     <pluginRepository>
       <id>apache-snapshots</id>
       <name>apache snapshots repository</name>
@@ -173,6 +140,12 @@
 
   <dependencies>
     <dependency>
+	<groupId>mysql</groupId>
+	<artifactId>mysql-connector-java</artifactId>
+	<version>5.1.31</version>
+    </dependency>
+      
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.6.1</version>
@@ -189,12 +162,6 @@
       <artifactId>json-lib</artifactId>
       <version>2.4</version>
       <classifier>jdk15</classifier>
-    </dependency>
-    
-    <dependency>
-	<groupId>mysql</groupId>
-	<artifactId>mysql-connector-java</artifactId>
-	<version>5.1.31</version>
     </dependency>
 
     
