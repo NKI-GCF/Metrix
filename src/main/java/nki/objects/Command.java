@@ -43,7 +43,7 @@ public class Command implements Serializable {
   private String mode = Constants.COM_MODE_CALL;
   private String type = Constants.COM_TYPE_SIMPLE;
   private String format = Constants.COM_FORMAT_XML;
-  private String command = "";
+  private String command = Constants.COM_FUNCTION_FETCH;
   private int state = Constants.STATE_ALL_PSEUDO;
   private Object payload;
   private MetricFilter filter;
