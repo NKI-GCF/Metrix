@@ -45,17 +45,17 @@ public class MetrixLive {
     String externalFileName = System.getProperty("properties");
     String absFile = (new File(externalFileName)).getAbsolutePath();
 
-    String jsonArg = args[0];
+   // String jsonArg = args[0];
     
-    if(jsonArg == null || jsonArg.equals("")){
-        System.out.println("[ERROR] No input json argumented.");
-        System.exit(1);
-    }
+    //if(jsonArg == null || jsonArg.equals("")){
+    //    System.out.println("[ERROR] No input json argumented.");
+    //    System.exit(1);
+   // }
     
     // Convert jsonCommand to Metrix Command
     Command sendCommand = new Command();
 
-    final JSONObject json = (JSONObject) JSONSerializer.toJSON(jsonArg);
+  //  final JSONObject json = (JSONObject) JSONSerializer.toJSON(jsonArg);
 
      // Set a value for command
     sendCommand.setFormat(Constants.COM_FORMAT_JSON); // Always return JSON
