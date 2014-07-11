@@ -170,7 +170,7 @@ public class MetrixLive {
         }
         catch (IOException Ex) {
           //	System.out.println("Error" + Ex);
-          LoggerWrapper.log.log(Level.WARNING, "");
+          LoggerWrapper.log.log(Level.WARNING, "EXCEPTION! " + Ex.toString());
         }
       }
     }
