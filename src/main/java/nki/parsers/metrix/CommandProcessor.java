@@ -119,6 +119,7 @@ public final class CommandProcessor {
                         Exception {
     // If true validity, start.
     if (recCom.getCommand().equals(Constants.COM_FUNCTION_SET)) {
+      LoggerWrapper.log.log(Level.INFO, "Command exec for SET ");
       throw new UnimplementedCommandException("This command (" + recCom.getCommand() + ") has not been implemented. ");
     }
 
@@ -348,6 +349,8 @@ public final class CommandProcessor {
         DataStore.closeAll();
 
       }
+    }else{
+        LoggerWrapper.log.log(Level.INFO, "SOMETHING ELSE IS GOING ON...");
     }
 
     if (valCom) {
