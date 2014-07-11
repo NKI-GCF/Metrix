@@ -67,6 +67,7 @@ public final class CommandProcessor {
       // Set validity
       setIsValid(true);
       try {
+        LoggerWrapper.log.log(Level.WARNING, "EXECUTINGG!!!");
         execute();
       }
       catch (UnimplementedCommandException UCE) {
@@ -122,12 +123,12 @@ public final class CommandProcessor {
 
     if (recCom.getCommand().equals(Constants.COM_FUNCTION_FETCH)) {
 
-			/*	
-       *	Process a simple / detailed run info request.
-			*/
+	/*
+         *    Process a simple / detailed run info request.
+         */
 
       if (recCom.getType().equals(Constants.COM_TYPE_SIMPLE) || recCom.getType().equals(Constants.COM_TYPE_DETAIL)) {
-
+          LoggerWrapper.log.log(Level.WARNING, "SIMPLE thing");
         // Check is state is set and required.
         int state = -1;
         if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE) && !recCom.checkState(recCom.getState())) {
@@ -139,7 +140,7 @@ public final class CommandProcessor {
 
         // Setup new SummaryCollection and fill using command parameters (RunID or State)
         SummaryCollection sc = new SummaryCollection();
-
+        LoggerWrapper.log.log(Level.WARNING, "SUMMARY COL. ");
         if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)) {
           Summary sum = DataStore.getSummaryByRunName(recCom.getRunId());
           sc.appendSummary(sum);

@@ -60,7 +60,7 @@ public class MetrixLive {
      // Set a value for command
     sendCommand.setFormat(Constants.COM_FORMAT_JSON); // Always return JSON
     sendCommand.setState(Constants.STATE_ALL_PSEUDO); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
-    sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here.    
+    sendCommand.setType(Constants.COM_TYPE_METRIC); // You can also make use of the available Constants here.    
     
     try (InputStream fin = new FileInputStream(new File(absFile))) {
       configFile.load(fin);
@@ -100,7 +100,7 @@ public class MetrixLive {
 
           Object serverAnswer = new Object();
 
-          while (ois.available() > 0) {
+          while (ois != null) {
             serverAnswer = ois.readObject();
             if (serverAnswer instanceof Command) {  // Answer is a Command with info message.
               nki.objects.Command commandIn = (nki.objects.Command) serverAnswer;
@@ -127,7 +127,7 @@ public class MetrixLive {
 
             if (serverAnswer instanceof String) {      // Server returned a XML String with results.
               String srvResp = (String) serverAnswer;
-              System.out.println(srvResp);
+              System.out.println("RESPONSE " + srvResp);
               listen = false;
             }
 
