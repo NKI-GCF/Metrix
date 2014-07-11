@@ -91,7 +91,7 @@ public class MetrixLive {
         String prevUpdate = "";
 
         try {
-            System.out.println("Command: " + sendCommand.getCommand() + "\t  " + sendCommand.getState());
+            System.out.println("Command: " + sendCommand.getFormat() + "\t  " + sendCommand.getState());
           // Send the parsed command
           oos.writeObject(sendCommand);
           oos.flush();

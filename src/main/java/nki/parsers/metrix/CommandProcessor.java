@@ -145,7 +145,9 @@ public final class CommandProcessor {
           sc.appendSummary(sum);
         }
         else if (recCom.getState() == Constants.STATE_ALL_PSEUDO) {
+          metrixLogger.log.log(Level.FINER, "Getting All summaries from DB.");
           sc = DataStore.getSummaryCollections();
+          metrixLogger.log.log(Level.FINER, "outcome: "+ sc.getCollectionCount());
         }
         else {
           sc = DataStore.getSummaryCollectionByState(recCom.getState());
