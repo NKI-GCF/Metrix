@@ -58,7 +58,7 @@ public class MetrixLive {
   //  final JSONObject json = (JSONObject) JSONSerializer.toJSON(jsonArg);
 
      // Set a value for command
-    sendCommand.setFormat(Constants.COM_FORMAT_JSON); // Always return JSON
+    sendCommand.setFormat(Constants.COM_FORMAT_XML); // Always return JSON
     sendCommand.setState(Constants.STATE_FINISHED); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
     sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here.    
     

@@ -55,20 +55,18 @@ public final class CommandProcessor {
     this.recCom = command;
     this.oos = oos;
     this.ds = ds;
-    LoggerWrapper.log.log(Level.INFO, "API CHECKS");
+
     if (!checkAPI()) {
-        LoggerWrapper.log.log(Level.INFO, "API NOT OKE");
       InvalidCredentialsException ICE = new InvalidCredentialsException("The supplied API key is incorrect for this user. Please check.");
       oos.writeObject(ICE);    // Write to client
       throw ICE;          // Throw to server
     }
-    
+
     // Perform validity checks
     if (recCom.checkParams()) {
       // Set validity
       setIsValid(true);
       try {
-        LoggerWrapper.log.log(Level.WARNING, "EXECUTINGG!!!");
         execute();
       }
       catch (UnimplementedCommandException UCE) {
@@ -119,18 +117,17 @@ public final class CommandProcessor {
                         Exception {
     // If true validity, start.
     if (recCom.getCommand().equals(Constants.COM_FUNCTION_SET)) {
-      LoggerWrapper.log.log(Level.INFO, "Command exec for SET ");
       throw new UnimplementedCommandException("This command (" + recCom.getCommand() + ") has not been implemented. ");
     }
 
     if (recCom.getCommand().equals(Constants.COM_FUNCTION_FETCH)) {
-        LoggerWrapper.log.log(Level.INFO, "Command exec for FFETCH ");
-	/*
-         *    Process a simple / detailed run info request.
-         */
+
+			/*	
+       *	Process a simple / detailed run info request.
+			*/
 
       if (recCom.getType().equals(Constants.COM_TYPE_SIMPLE) || recCom.getType().equals(Constants.COM_TYPE_DETAIL)) {
-          LoggerWrapper.log.log(Level.WARNING, "SIMPLE thing");
+
         // Check is state is set and required.
         int state = -1;
         if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE) && !recCom.checkState(recCom.getState())) {
@@ -142,20 +139,16 @@ public final class CommandProcessor {
 
         // Setup new SummaryCollection and fill using command parameters (RunID or State)
         SummaryCollection sc = new SummaryCollection();
-        LoggerWrapper.log.log(Level.WARNING, "SUMMARY COL. ");
+
         if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)) {
           Summary sum = DataStore.getSummaryByRunName(recCom.getRunId());
           sc.appendSummary(sum);
         }
         else if (recCom.getState() == Constants.STATE_ALL_PSEUDO) {
-          metrixLogger.log.log(Level.FINER, "Getting All summaries from DB.");
           sc = DataStore.getSummaryCollections();
-          metrixLogger.log.log(Level.FINER, "outcome: "+ sc.getCollectionCount());
         }
         else {
-          metrixLogger.log.log(Level.FINER, "Getting Summaries by state. " + recCom.getState());
           sc = DataStore.getSummaryCollectionByState(recCom.getState());
-          metrixLogger.log.log(Level.FINER, "outcome: "+ sc.getCollectionCount());
         }
 
         // If no active runs present return command with details.
@@ -349,8 +342,6 @@ public final class CommandProcessor {
         DataStore.closeAll();
 
       }
-    }else{
-        LoggerWrapper.log.log(Level.INFO, "SOMETHING ELSE IS GOING ON...");
     }
 
     if (valCom) {
