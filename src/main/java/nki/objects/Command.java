@@ -31,9 +31,11 @@ import java.io.*;
 import java.lang.*;
 import java.util.Date;
 import java.util.Arrays;
+import java.util.logging.Level;
 
 import nki.objects.MetricFilter;
 import nki.constants.Constants;
+import nki.util.LoggerWrapper;
 
 public class Command implements Serializable {
 
@@ -185,10 +187,12 @@ public class Command implements Serializable {
 
   public boolean checkParams() {
     if (format == null || mode == null || type == null) {
+      LoggerWrapper.log.log(Level.INFO, "Something is null...");
       return false;
     }
 
     if (!checkState(state)) {
+      LoggerWrapper.log.log(Level.INFO, "State invalid " + state);
       return false;
     }
 

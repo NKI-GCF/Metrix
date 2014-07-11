@@ -55,13 +55,14 @@ public final class CommandProcessor {
     this.recCom = command;
     this.oos = oos;
     this.ds = ds;
-
+    LoggerWrapper.log.log(Level.INFO, "API CHECKS");
     if (!checkAPI()) {
+        LoggerWrapper.log.log(Level.INFO, "API NOT OKE");
       InvalidCredentialsException ICE = new InvalidCredentialsException("The supplied API key is incorrect for this user. Please check.");
       oos.writeObject(ICE);    // Write to client
       throw ICE;          // Throw to server
     }
-
+    
     // Perform validity checks
     if (recCom.checkParams()) {
       // Set validity
@@ -122,7 +123,7 @@ public final class CommandProcessor {
     }
 
     if (recCom.getCommand().equals(Constants.COM_FUNCTION_FETCH)) {
-
+        LoggerWrapper.log.log(Level.INFO, "Command exec for FFETCH ");
 	/*
          *    Process a simple / detailed run info request.
          */
