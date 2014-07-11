@@ -100,7 +100,7 @@ public class MetrixLive {
 
           Object serverAnswer = new Object();
 
-          while (ois != null) {
+          while (ois.available() > 0) {
             serverAnswer = ois.readObject();
             if (serverAnswer instanceof Command) {  // Answer is a Command with info message.
               nki.objects.Command commandIn = (nki.objects.Command) serverAnswer;
@@ -170,7 +170,7 @@ public class MetrixLive {
         }
         catch (IOException Ex) {
           //	System.out.println("Error" + Ex);
-          LoggerWrapper.log.log(Level.WARNING, "EXCEPTION! " + Ex.toString());
+          LoggerWrapper.log.log(Level.WARNING, "EXCEPTION! " + Ex);
         }
       }
     }
