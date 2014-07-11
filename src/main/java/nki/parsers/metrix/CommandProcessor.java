@@ -150,7 +150,9 @@ public final class CommandProcessor {
           metrixLogger.log.log(Level.FINER, "outcome: "+ sc.getCollectionCount());
         }
         else {
+          metrixLogger.log.log(Level.FINER, "Getting Summaries by state. " + recCom.getState());
           sc = DataStore.getSummaryCollectionByState(recCom.getState());
+          metrixLogger.log.log(Level.FINER, "outcome: "+ sc.getCollectionCount());
         }
 
         // If no active runs present return command with details.

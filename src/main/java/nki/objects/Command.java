@@ -177,7 +177,7 @@ public class Command implements Serializable {
       this.format = Constants.COM_FORMAT_TAB;
     }
     else if (form.equals(Constants.COM_FORMAT_JSON)){
-        this.format = Constants.COM_FORMAT_TAB;
+        this.format = Constants.COM_FORMAT_JSON;
     }else{
       this.format = Constants.COM_FORMAT_XML;
     }
