@@ -76,7 +76,10 @@ public class Summary implements Serializable {
   private IntensityScores iScores;
   private IntensityDist iDistAvg;
   private IntensityDist iDistCCAvg;
+  private IntensityDist iDistRaw;
 
+  private ErrorDist eDist;
+  
   private Indices sampleInfo;
   private int firstCycleIntensity;
 
@@ -382,6 +385,14 @@ public class Summary implements Serializable {
     return qScores;
   }
 
+  public void setErrorDist(ErrorDist eDist){
+      this.eDist = eDist;
+  }
+  
+  public ErrorDist getErrorDist(){
+      return this.eDist;
+  }
+  
   public void setIScores(IntensityScores iScores) {
     this.iScores = iScores;
   }
@@ -406,6 +417,14 @@ public class Summary implements Serializable {
     return iDistCCAvg;
   }
 
+  public void setIntensityDistRaw(IntensityDist iDistRaw) {
+    this.iDistRaw = iDistRaw;
+  }
+
+  public IntensityDist getIntensityDistRaw() {
+    return iDistRaw;
+  }
+  
   public void setSampleInfo(Indices sampleInfo) {
     this.sampleInfo = sampleInfo;
   }
@@ -458,10 +477,18 @@ public class Summary implements Serializable {
     return iDistCCAvg != null;
   }
 
+  public boolean hasIntensityDistRaw() {
+    return iDistRaw != null;
+  }
+  
   public boolean hasSampleInfo() {
     return sampleInfo != null;
   }
 
+  public boolean hasErrorDist(){
+      return eDist != null;
+  }
+  
   public void setParseError(int parseError) {
     this.parseError = parseError;
   }

@@ -23,6 +23,7 @@ import nki.util.LoggerWrapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
+import java.util.logging.Level;
 
 public class DataStore {
   static final String WRITE_OBJECT_SQL = "INSERT INTO metrix_objects(run_id, object_value, state) VALUES (?, ?, ?)";
@@ -47,7 +48,9 @@ public class DataStore {
 
     fin.close();
     try {
+      LoggerWrapper.log.log(Level.WARNING, "Opening connection");
       conn = getConnection();
+      LoggerWrapper.log.log(Level.WARNING, "Opened connection");
     }
     catch (Exception ex) {
       metrixLogger.log.severe("Error setting up database connection. " + ex.toString());

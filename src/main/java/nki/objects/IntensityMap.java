@@ -98,6 +98,37 @@ public class IntensityMap implements Serializable {
     return avgOverTiles;
   }
 
+    // Calculate the average raw intensity for this cycle for each metric constant [A, C, G, T]
+  public Map<String, MutableInt> getCycleAverageRawInt() {
+    Map<String, MutableInt> avgOverTiles = new HashMap<>();
+
+    avgOverTiles.put(Constants.METRIC_EX_RAWINT_A, new MutableInt());
+    avgOverTiles.put(Constants.METRIC_EX_RAWINT_C, new MutableInt());
+    avgOverTiles.put(Constants.METRIC_EX_RAWINT_G, new MutableInt());
+    avgOverTiles.put(Constants.METRIC_EX_RAWINT_T, new MutableInt());
+
+    for (int tile : sMap.keySet()) {
+      Map<String, Double> tileMapping = sMap.get(tile);
+
+      Integer iA = tileMapping.get(Constants.METRIC_EX_RAWINT_A).intValue();
+      Integer iC = tileMapping.get(Constants.METRIC_EX_RAWINT_C).intValue();
+      Integer iG = tileMapping.get(Constants.METRIC_EX_RAWINT_G).intValue();
+      Integer iT = tileMapping.get(Constants.METRIC_EX_RAWINT_T).intValue();
+
+      avgOverTiles.get(Constants.METRIC_EX_RAWINT_A).add(iA);
+      avgOverTiles.get(Constants.METRIC_EX_RAWINT_C).add(iC);
+      avgOverTiles.get(Constants.METRIC_EX_RAWINT_G).add(iG);
+      avgOverTiles.get(Constants.METRIC_EX_RAWINT_T).add(iT);
+    }
+
+    avgOverTiles.get(Constants.METRIC_EX_RAWINT_A).avg();
+    avgOverTiles.get(Constants.METRIC_EX_RAWINT_C).avg();
+    avgOverTiles.get(Constants.METRIC_EX_RAWINT_G).avg();
+    avgOverTiles.get(Constants.METRIC_EX_RAWINT_T).avg();
+
+    return avgOverTiles;
+  }
+  
   // Return the number of called bases foreach channel [NC, A, C, G, T]
   public void getNumberCalledBases() {
     //public HashMap<String, float> getNumberCalledBases(){

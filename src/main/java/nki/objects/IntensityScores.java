@@ -112,4 +112,21 @@ public class IntensityScores implements Serializable {
 
     return iDistAvgCC;
   }
+  
+  public IntensityDist getRawIntensityDist(){
+    IntensityDist iDistRaw = new IntensityDist();
+
+    // Lane -> CycleMap
+    for (int lane : iScores.keySet()) {
+      Map<Integer, IntensityMap> laneScores = iScores.get(lane);
+      // Cycle -> IntensityMap
+      for (int cycle : laneScores.keySet()) {
+        IntensityMap qmap = laneScores.get(cycle);
+        Map<String, MutableInt> iMapMAvg = qmap.getCycleAverageRawInt();
+        iDistRaw.setIntensity(lane, cycle, iMapMAvg);
+      }
+    }
+
+    return iDistRaw;
+  }
 }

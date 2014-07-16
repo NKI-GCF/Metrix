@@ -1,11 +1,12 @@
 package nki.decorators;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import nki.objects.*;
 import nki.parsers.illumina.TileMetrics;
-
-import java.text.DecimalFormat;
 
 /**
  * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
@@ -18,20 +19,38 @@ public class MetrixTileMetricsDecorator {
   private TileMetrics tileMetrics;
   private Reads reads;
 
-  private DecimalFormat df = new DecimalFormat("##");
-  private DecimalFormat dfTwo = new DecimalFormat("##.##");
-  private DecimalFormat phasingDf = new DecimalFormat("#.###");
-
+  private DecimalFormat df = new DecimalFormat("##", new DecimalFormatSymbols(Locale.US));
+  private DecimalFormat dfTwo = new DecimalFormat("##.##", new DecimalFormatSymbols(Locale.US));
+  private DecimalFormat phasingDf = new DecimalFormat("#.###", new DecimalFormatSymbols(Locale.US));
+  private ClusterDensity clusterDensity;
+  private ClusterDensity clusterDensityPassingFilter;
+  private PhasingCollection phasingMap;
+  private PhasingCollection prephasingMap;
+  
   public MetrixTileMetricsDecorator(TileMetrics tileMetrics, Reads reads) {
     this.tileMetrics = tileMetrics;
     this.reads = reads;
   }
 
+  public MetrixTileMetricsDecorator(ClusterDensity clusterDensity, 
+                                    ClusterDensity clusterDensityPassingFilter, 
+                                    PhasingCollection phasingMap,
+                                    PhasingCollection prephasingMap,
+                                    Reads reads){
+      this.clusterDensity = clusterDensity;
+      this.clusterDensityPassingFilter = clusterDensityPassingFilter;
+      this.phasingMap = phasingMap;
+      this.prephasingMap = prephasingMap;
+      this.reads = reads;
+  }
+  
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
 
-    ClusterDensity clusterDensity = tileMetrics.getCDmap();
-    ClusterDensity clusterDensityPassingFilter = tileMetrics.getCDpfMap();
+    if(clusterDensity == null || clusterDensityPassingFilter == null){
+        clusterDensity = tileMetrics.getCDmap();
+        clusterDensityPassingFilter = tileMetrics.getCDpfMap();
+    }
 
     JSONArray clusterDensities = new JSONArray();
     for (int lane : clusterDensity.toObj().keySet()) {
@@ -59,9 +78,11 @@ public class MetrixTileMetricsDecorator {
     }
     json.put("clusterDensities", clusterDensities);
 
-    PhasingCollection phasingMap = tileMetrics.getPhasingMap();
-    PhasingCollection prephasingMap = tileMetrics.getPrephasingMap();
-
+    if(phasingMap == null || prephasingMap == null){
+        phasingMap = tileMetrics.getPhasingMap();
+        prephasingMap = tileMetrics.getPrephasingMap();
+    }
+        
     JSONArray phasingMetrics = new JSONArray();
     for (int lane : phasingMap.toObj().keySet()) {
       JSONObject pLane = new JSONObject();

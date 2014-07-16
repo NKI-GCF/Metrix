@@ -27,6 +27,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ListIterator;
 import java.util.logging.Level;
+import nki.decorators.MetrixSummaryCollectionDecorator;
 
 public final class CommandProcessor {
 
@@ -86,7 +87,7 @@ public final class CommandProcessor {
       }
       catch (Exception Ex) {
         oos.writeObject(Ex);
-        LoggerWrapper.log.log(Level.SEVERE, "Uncaught exception in CommandProcessor: {0}", Ex.toString());
+        LoggerWrapper.log.log(Level.SEVERE, "Uncaught exception in CommandProcessor: {0}", Ex);
       }
 
     }
@@ -115,240 +116,60 @@ public final class CommandProcessor {
                         MissingCommandDetailException,
                         EmptyResultSetCollection,
                         Exception {
-    // If true validity, start.
-    if (recCom.getCommand().equals(Constants.COM_FUNCTION_SET)) {
-      throw new UnimplementedCommandException("This command (" + recCom.getCommand() + ") has not been implemented. ");
+    /*
+    *  Retrieve Summary Collection 
+    */
+    SummaryCollection sc = new SummaryCollection();
+    
+    // Check is state is set and required.
+    if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE) && !recCom.checkState(recCom.getState())) {
+      throw new MissingCommandDetailException("Summary State of received command is missing.");
     }
+    
+    if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)) {
+      Summary sum = DataStore.getSummaryByRunName(recCom.getRunId());
+      sc.appendSummary(sum);
+    }
+    else if (recCom.getState() == Constants.STATE_ALL_PSEUDO) {
+      sc = DataStore.getSummaryCollections();
+    }
+    else {
+      sc = DataStore.getSummaryCollectionByState(recCom.getState());
+    }
+    
+    // If no runs present in collection, throw message.
+    if (sc.getCollectionCount() == 0) {
+      throw new EmptyResultSetCollection("The results for your search query.");
+    }
+    
+    /*
+    * Format Summary Collection according to command specifications.
+    */
 
-    if (recCom.getCommand().equals(Constants.COM_FUNCTION_FETCH)) {
-
-			/*	
-       *	Process a simple / detailed run info request.
-			*/
-
-      if (recCom.getType().equals(Constants.COM_TYPE_SIMPLE) || recCom.getType().equals(Constants.COM_TYPE_DETAIL)) {
-
-        // Check is state is set and required.
-        int state = -1;
-        if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE) && !recCom.checkState(recCom.getState())) {
-          throw new MissingCommandDetailException("Summary State of received command is missing.");
-        }
-        else {
-          state = recCom.getState();
-        }
-
-        // Setup new SummaryCollection and fill using command parameters (RunID or State)
-        SummaryCollection sc = new SummaryCollection();
-
-        if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)) {
-          Summary sum = DataStore.getSummaryByRunName(recCom.getRunId());
-          sc.appendSummary(sum);
-        }
-        else if (recCom.getState() == Constants.STATE_ALL_PSEUDO) {
-          sc = DataStore.getSummaryCollections();
-        }
-        else {
-          sc = DataStore.getSummaryCollectionByState(recCom.getState());
-        }
-
-        // If no active runs present return command with details.
-        if (sc.getCollectionCount() == 0) {
-          throw new EmptyResultSetCollection("The command parameters did not produce results.");
-          // If request format is in XML
-        }
-        else if (recCom.getFormat().equals(Constants.COM_FORMAT_XML)) {
-          String collectionString = sc.getSummaryCollectionXMLAsString(recCom);
-          if (collectionString.equals("")) {
-            oos.writeObject("");
-          }
-          else {
-            oos.writeObject(collectionString);
-          }
-        }
-        else { // Else return the SummaryCollection
-          oos.writeObject(sc);
-        }
-        sc = null;
-      }
-
-			/*	
-			 *	Process a metrics request.
-			*/
-
-      if (recCom.getType().equals(Constants.COM_TYPE_METRIC)) {
-        // Retrieve summary from database and check metric availability.
-        if (recCom.getRunId() == null && "".equals(Integer.toString(recCom.getState()))) {
-          throw new MissingCommandDetailException("Please supply parameters (Run State or Run Id) for the requested metrics.");
-        }
-
-        SummaryCollection sc = new SummaryCollection();
-
-        if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYRUN)) {
-          Summary sum = DataStore.getSummaryByRunName(recCom.getRunId());
-          sc.appendSummary(sum);
-        }
-        else {
-          if (recCom.getState() == Constants.STATE_ALL_PSEUDO) {
-            sc = DataStore.getSummaryCollections();
-          }
-          else {
-            sc = DataStore.getSummaryCollectionByState(recCom.getState());
-          }
-        }
-
-        if (sc.getCollectionCount() == 0) {
-          throw new EmptyResultSetCollection("No Results for your search query.");
-        }
-
-        int curCount = 1;
-        for (Summary sum : sc.getSummaryCollection()) {
-          LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
-          if (sum != null) {
-            Boolean update = false;
-            String runDir = sum.getRunDirectory();
-            if (runDir.equals("")) {
-              continue;
-            }
-            String extractionMetrics = runDir + "/InterOp/" + Constants.EXTRACTION_METRICS;
-            String tileMetrics = runDir + "/InterOp/" + Constants.TILE_METRICS;
-            String qualityMetrics = runDir + "/InterOp/" + Constants.QMETRICS_METRICS;
-            String intensityMetrics = runDir + "/InterOp/" + Constants.CORRECTED_INT_METRICS;
-            String indexMetrics = runDir + "/InterOp/" + Constants.INDEX_METRICS;
-            long currEpoch = System.currentTimeMillis();
-            boolean timeCheck = (currEpoch - sum.getLastUpdatedEpoch()) > Constants.METRIC_UPDATE_TIME;
-
-            // Process Extraction Metrics
-            Reads rds = sum.getReads();
-
-            // Process Cluster Density and phasing / prephasing
-            if (!sum.hasClusterDensity() ||
-                !sum.hasClusterDensityPF() ||
-                !sum.hasPhasing() ||
-                !sum.hasPrephasing() ||
-                timeCheck
-                ) {
-              TileMetrics tm = new TileMetrics(tileMetrics, 0);
-
-              if (!tm.getFileMissing()) {                // If TileMetrics File is present - process.
-                //tm.digestData(rds);
-                tm.digestData();
-                sum.setClusterDensity(tm.getCDmap());
-                sum.setClusterDensityPF(tm.getCDpfMap());
-                sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
-                sum.setPrephasingMap(tm.getPrephasingMap());
-
-                // Distribution present in ClusterDensity Object.
-                update = true;
-              }
-              tm.closeSourceStream();
-            }
-
-            // Process QScore Dist
-            if (!sum.hasQScores() || timeCheck) {
-              QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
-              if (!qm.getFileMissing()) {
-                //QualityScores qsOut = qm.digestData(rds);
-                QualityScores qsOut = qm.digestData();
-                //	sum.setQScores(qsOut);
-                // Calculate distribution
-                QScoreDist qScoreDist = qsOut.getQScoreDistribution();
-                sum.setQScoreDist(qScoreDist);
-                update = true;
-              }
-              qm.closeSourceStream();
-            }
-
-            // Process Corrected Intensities (+ Avg Cor Int Called Clusters)
-            if (!sum.hasIScores() || timeCheck) {
-              CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
-              if (!cim.getFileMissing()) {
-                IntensityScores isOut = cim.digestData();
-
-								/* If you would like to store the intensity object, increase the max_allowed_packet with:
-								* SET GLOBAL max_allowed_packet = 1024 * 1024 * 50 to prevent a PacketTooBigException for the SQL Update.
-								*/
-
-                //sum.setIScores(isOut);
-
-                // Calculate distribution
-                sum.setIntensityDistAvg(isOut.getAverageCorrectedIntensityDist());
-                sum.setIntensityDistCCAvg(isOut.getCalledClustersAverageCorrectedIntensityDist());
-                update = true;
-              }
-              cim.closeSourceStream();
-            }
-
-            // Process Index metrics
-            // sum.hasIndexMetrics()
-            IndexMetrics im = new IndexMetrics(indexMetrics, 0);
-            Indices indices = im.digestData();
-            sum.setSampleInfo(indices);
-
-            im.closeSourceStream();
-
-            if (update == true) {
-              try {
-                DataStore _ds = new DataStore();
-                sum.setLastUpdated();
-                DataStore.updateSummaryByRunName(sum, runDir);
-                DataStore.closeAll();
-
-                if (_ds != null) {
-                  _ds = null;
-                }
-              }
-              catch (Exception SEx) {
-                LoggerWrapper.log.log(Level.SEVERE, "Exception in update statement {0}", SEx.toString());
-              }
-            }
-          }
-          else {
-            // Throw error
-            LoggerWrapper.log.severe("[WARNING] Obtained an empty summary.");
-          }
-
-          // Generate and send update object.
-          Update update = new Update();
-          update.setMsg(sum.getRunId());
-          update.setCurrentProcessing(curCount);
-          update.setTotalProcessing(sc.getCollectionCount());
-          update.setChecksum(sum);
-          // Reset the stream to ensure proper update objects being sent - Prevent caching.
-          oos.reset();
-          oos.writeObject(update);
-          curCount++;
-        }// End SC While iterator
-                /*
-                 *  Check output formatting method and return.
-                 */
-        switch (recCom.getFormat()) {
-          case Constants.COM_FORMAT_XML:
-            // Generate XML.
-            oos.writeObject(sc.getSummaryCollectionXMLAsString(recCom));
-            break;
-          case Constants.COM_FORMAT_TAB:
-            // Generate TAB separated string
-            oos.writeObject(sc.toTab(recCom));
-            break;
-          case Constants.COM_FORMAT_OBJ:
-            // Send back the SummaryCollection POJO
+    MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
+    mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
+    
+        if (recCom.getFormat().equals(Constants.COM_FORMAT_XML)) {
+            // Set formatting of summary collection. 
+            // Default is SIMPLE
+            //String formattedSummaryCollection = sc.toXML();
+            //oos.writeObject(formattedSummaryCollection);
+        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_JSON)){
+            //String formattedSummaryCollection = sc.toJSON();
+            oos.writeObject(mscd.toJSON().toString());
+        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_TAB)){
+            //String formattedSummaryCollection = mscd.toXML().toString();
+        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_CSV)){
+            String formattedSummaryCollection = mscd.toCSV();
+        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
             oos.writeObject(sc);
-            break;
-          default:
-            // Exception
-            throw new MissingCommandDetailException("Requested output format not understood (" + recCom.getFormat() + ")");
+        }else{
+            // Return plain text
+            oos.writeObject("I dont understand.");
         }
+
+        sc = null;
         oos.flush();
         DataStore.closeAll();
-
-      }
-    }
-
-    if (valCom) {
-      // check mode
-    }
-    // return retCom with return value and potential error message
   }
-
 }
-

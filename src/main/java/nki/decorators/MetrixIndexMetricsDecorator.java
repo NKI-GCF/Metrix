@@ -1,10 +1,15 @@
 package nki.decorators;
 
+import java.io.IOException;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import nki.objects.Indices;
 import nki.objects.SampleInfo;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
@@ -45,4 +50,20 @@ public class MetrixIndexMetricsDecorator {
 
     return json;
   }
+  
+   public Element toXML() {
+    Document xmlDoc = null;
+    Element root = null;
+    try {
+      // Build the XML document
+      DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+      xmlDoc = docBuilder.newDocument();
+      
+    }catch(Exception Ex){
+        
+    }
+    
+    return root;
+   }
 }

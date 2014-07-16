@@ -44,7 +44,7 @@ public class SummaryCollection implements Serializable {
     }
   }
 
-  public Document getSummaryCollectionAsXML(Command com) {
+  public Document toXML(Command com) {
     Document xmlDoc = null;
     try {
       // Build the XML document
@@ -55,7 +55,7 @@ public class SummaryCollection implements Serializable {
       Element root = xmlDoc.createElement("SummaryCollection");
       xmlDoc.appendChild(root);
 
-      // Set run counts as root attributes
+      // Set run counts as orot attributes
       root.setAttribute("active", convertStateInt(Constants.STATE_RUNNING));
       root.setAttribute("finished", convertStateInt(Constants.STATE_FINISHED));
       root.setAttribute("error", convertStateInt(Constants.STATE_HANG));
@@ -150,7 +150,7 @@ public class SummaryCollection implements Serializable {
 
       // Intensities
       if (sumObj.hasIntensityDistCCAvg()) {
-        sumXml = sumObj.getIntensityDistCCAvg().toXML(sumXml, xmlDoc);
+    //    sumXml = sumObj.getIntensityDistCCAvg().toXML(sumXml, xmlDoc);
       }
 
       // Prephasing
@@ -174,7 +174,7 @@ public class SummaryCollection implements Serializable {
 	/*
 	 *  Helpers
 	 */
-  private String convertStateInt(int mapping) {
+  public String convertStateInt(int mapping) {
     if (summaryStateMapping.containsKey(mapping)) {
       return Integer.toString(summaryStateMapping.get(mapping).get());
     }
@@ -191,19 +191,13 @@ public class SummaryCollection implements Serializable {
     return e;
   }
 
-	/*
-	 *	Converters 
-	 */
-  public String toTab(Command com) {
-    for (Summary sumObj : summaryCollection) {
-
-    }
-    return "";
-  }
+/*
+ *	Converters 
+ */
 
   public String getSummaryCollectionXMLAsString(Command com) {
     // Call getSummaryCollectionAsXML
-    Document xmlDoc = this.getSummaryCollectionAsXML(com);
+    Document xmlDoc = this.toXML(com);
     StringWriter writer = new StringWriter();
 
     try {

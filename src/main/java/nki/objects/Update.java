@@ -7,15 +7,8 @@
 
 package nki.objects;
 
-import java.net.*;
 import java.io.*;
-import java.lang.*;
-import java.util.Date;
-import java.util.Arrays;
 import java.security.MessageDigest;
-
-import nki.constants.Constants;
-import nki.objects.Summary;
 
 public class Update implements Serializable {
 

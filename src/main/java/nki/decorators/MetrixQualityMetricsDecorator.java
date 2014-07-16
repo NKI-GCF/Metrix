@@ -1,16 +1,16 @@
 package nki.decorators;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import java.util.Map;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import nki.objects.Metric;
 import nki.objects.MutableLong;
 import nki.objects.QScoreDist;
 import nki.objects.QualityScores;
-
-import java.text.DecimalFormat;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import nki.objects.Summary;
 
 /**
  * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
@@ -21,18 +21,38 @@ import java.util.TreeMap;
  */
 public class MetrixQualityMetricsDecorator {
   private QualityScores qualityScores;
-
-  private DecimalFormat df = new DecimalFormat("##.##");
+  private QScoreDist qScoreDist;
+  private Map<Integer, QScoreDist> qScoreDistByLane;
+  private Map<Integer, Metric> qScoreDistByCycle;
+  private DecimalFormat df = new DecimalFormat("##.##", new DecimalFormatSymbols(Locale.US));
 
   public MetrixQualityMetricsDecorator(QualityScores qualityScores) {
     this.qualityScores = qualityScores;
+    this.qScoreDistByLane = qualityScores.getQScoreDistributionByLane();
+    this.qScoreDistByCycle = qualityScores.getQScoreDistributionByCycle();
   }
 
+  public MetrixQualityMetricsDecorator( QScoreDist qScoreDist, 
+                                        Map<Integer, QScoreDist> qScoreDistByLane, 
+                                        Map<Integer, Metric> qScoreDistByCycle
+  ){
+      this.qScoreDist = qScoreDist;
+      this.qScoreDistByLane = qScoreDistByLane;
+      this.qScoreDistByCycle = qScoreDistByCycle;
+  }
+  
+    public MetrixQualityMetricsDecorator( Summary sum ){
+      this.qScoreDist = sum.getQScoreDist();
+      this.qScoreDistByLane = sum.getQScores().getQScoreDistributionByLane();
+      this.qScoreDistByCycle = sum.getQScores().getQScoreDistributionByCycle();
+  }
+  
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
-
     JSONObject combQs = new JSONObject();
-    QScoreDist qScoreDist = qualityScores.getQScoreDistribution();
+    if(this.qualityScores != null && this.qScoreDist == null){
+        qScoreDist = qualityScores.getQScoreDistribution();
+    }
 
     if (qScoreDist.aboveQ(20) != -1d) {
       combQs.put(">Q20", qScoreDist.aboveQ(20));
@@ -51,10 +71,10 @@ public class MetrixQualityMetricsDecorator {
     json.put("combinedReadQualityScores", combQs);
 
     JSONArray laneQualities = new JSONArray();
-    Map<Integer, QScoreDist> qScoreLaneDist = qualityScores.getQScoreDistributionByLane();
-    for (Integer lane : qScoreLaneDist.keySet()) {
+    //Map<Integer, QScoreDist> qScoreLaneDist = qualityScores.getQScoreDistributionByLane();
+    for (Integer lane : qScoreDistByLane.keySet()) {
       JSONObject lqLane = new JSONObject();
-      QScoreDist dist = qScoreLaneDist.get(lane);
+      QScoreDist dist = qScoreDistByLane.get(lane);
       lqLane.put("lane", lane);
       JSONArray a = new JSONArray();
       Map<Integer, MutableLong> sDist = dist.getQualityScoreDist();
@@ -70,12 +90,12 @@ public class MetrixQualityMetricsDecorator {
     json.put("perLaneQualityScores", laneQualities);
 
     JSONArray cycleQualities = new JSONArray();
-    Map<Integer, Metric> qScoreCycleDist = qualityScores.getQScoreDistributionByCycle();
+    //Map<Integer, Metric> qScoreCycleDist = qualityScores.getQScoreDistributionByCycle();
 
-    for (Integer cycle : qScoreCycleDist.keySet()) {
+    for (Integer cycle : qScoreDistByCycle.keySet()) {
       JSONObject qCycle = new JSONObject();
 
-      Metric locMetric = qScoreCycleDist.get(cycle);
+      Metric locMetric = qScoreDistByCycle.get(cycle);
 
       if (locMetric != null && !locMetric.getTileScores().isEmpty()) {
         qCycle.put("qMedian", Double.valueOf(df.format(locMetric.calcMedian())));

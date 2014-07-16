@@ -11,17 +11,11 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import nki.objects.Metric;
-
 import java.text.*;
 import java.util.Map;
 
 import org.w3c.dom.*;
 
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
 
 public class ClusterDensity implements Serializable {
 

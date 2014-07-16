@@ -47,6 +47,11 @@ public final class Constants {
   public static final String METRIC_VAR_ACI_G = "AvgCorIntG";
   public static final String METRIC_VAR_ACI_T = "AvgCorIntT";
 
+  public static final String METRIC_EX_RAWINT_A = "RawIntA";
+  public static final String METRIC_EX_RAWINT_C = "RawIntC";
+  public static final String METRIC_EX_RAWINT_G = "RawIntG";
+  public static final String METRIC_EX_RAWINT_T = "RawIntT";
+  
   public static final String METRIC_VAR_ACICC_A = "AvgCorIntClusA";
   public static final String METRIC_VAR_ACICC_C = "AvgCorIntClusC";
   public static final String METRIC_VAR_ACICC_G = "AvgCorIntClusG";
@@ -94,14 +99,15 @@ public final class Constants {
   public static final String COM_FORMAT_XML = "XML";    // Return data in XML format
   public static final String COM_FORMAT_OBJ = "POJO";    // Return data as java object
   public static final String COM_FORMAT_TAB = "TAB";    // Return data in tab separated format
+  public static final String COM_FORMAT_CSV = "CSV";    // Return data in comma separated format
   public static final String COM_FORMAT_JSON = "JSON";    // Return data in JSON format
   
-  // Command data request detail level
+  // Command data request detail
   public static final String COM_TYPE_SIMPLE = "SIMPLE";    // Level of requested detail of return output.
   public static final String COM_TYPE_METRIC = "METRIC";
   public static final String COM_TYPE_DETAIL = "DETAIL";
   public static final String COM_TYPE_FULL = "FULL";
-
+ 
   // Command data request modes
   public static final String COM_MODE_CALL = "CALL";    // Make single request for data.
   public static final String COM_MODE_TIMED = "TIMED";    // Return the requested data every xyz milliseconds.

@@ -35,26 +35,26 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
     return iScores;
   }
 
-	/*
-   * Binary structure:
-	 * 	byte 0: file version number (2)
-	 *	byte 1: length of each record
-	 *	bytes (N * 48 + 2) - (N *48 + 49): record:
-	 *	2 bytes: lane number (uint16)
-	 *	2 bytes: tile number (uint16)
-	 *	2 bytes: cycle number (uint16)
-	 *	2 bytes: average intensity (uint16)
-	 *	2 bytes: average corrected int for channel A (uint16)
-	 *	2 bytes: average corrected int for channel C (uint16)
-	 *	2 bytes: average corrected int for channel G (uint16)
-	 *	2 bytes: average corrected int for channel T (uint16)
-	 *	2 bytes: average corrected int for called clusters for base A (uint16)
-	 *	2 bytes: average corrected int for called clusters for base C (uint16)
-	 *	2 bytes: average corrected int for called clusters for base G (uint16)
-	 *	2 bytes: average corrected int for called clusters for base T (uint16)
-	 *	20 bytes: number of base calls (float) for No Call and channel [A, C, G, T] respectively
-	 *	4 bytes: signal to noise ratio (float)
-	 */
+    /*
+     * Binary structure:
+     * 	byte 0: file version number (2)
+     *	byte 1: length of each record
+     *	bytes (N * 48 + 2) - (N *48 + 49): record:
+     *	2 bytes: lane number (uint16)
+     *	2 bytes: tile number (uint16)
+     *	2 bytes: cycle number (uint16)
+     *	2 bytes: average intensity (uint16)
+     *	2 bytes: average corrected int for channel A (uint16)
+     *	2 bytes: average corrected int for channel C (uint16)
+     *	2 bytes: average corrected int for channel G (uint16)
+     *	2 bytes: average corrected int for channel T (uint16)
+     *	2 bytes: average corrected int for called clusters for base A (uint16)
+     *	2 bytes: average corrected int for called clusters for base C (uint16)
+     *	2 bytes: average corrected int for called clusters for base G (uint16)
+     *	2 bytes: average corrected int for called clusters for base T (uint16)
+     *	20 bytes: number of base calls (float) for No Call and channel [A, C, G, T] respectively
+     *	4 bytes: signal to noise ratio (float)
+     */
 
   public IntensityScores digestData() {
     iScores = new IntensityScores();

@@ -43,7 +43,7 @@ public class Command implements Serializable {
   private String mode = Constants.COM_MODE_CALL;
   private String type = Constants.COM_TYPE_SIMPLE;
   private String format = Constants.COM_FORMAT_XML;
-  private String command = Constants.COM_FUNCTION_FETCH;
+  //private String command = Constants.COM_FUNCTION_FETCH;
   private int state = Constants.STATE_ALL_PSEUDO;
   private Object payload;
   private MetricFilter filter;
@@ -75,9 +75,10 @@ public class Command implements Serializable {
   }
 
   // Instantiate with variables
-  public Command(String format, int state, String command, String mode, String type, String runId) {
+  //public Command(String format, int state, String command, String mode, String type, String runId) {
+  public Command(String format, int state, String mode, String type, String runId) {
     this.setFormat(format);
-    this.setCommand(command);
+    //this.setCommand(command);
     this.setMode(mode);
     this.setType(type);
     this.setRunId(runId);
@@ -88,14 +89,14 @@ public class Command implements Serializable {
     this.dateTime = new Date();
   }
 
-  public void setCommand(String command) {
+  /*public void setCommand(String command) {
     this.command = command;
   }
 
   public String getCommand() {
     return command;
   }
-
+    */
   public Date getDateTime() {
     return dateTime;
   }

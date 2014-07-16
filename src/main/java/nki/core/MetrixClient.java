@@ -72,11 +72,10 @@ public class MetrixClient {
           nki.objects.Command sendCommand = new nki.objects.Command();
 
           // Set a value for command
-          sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
-          sendCommand.setState(12); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
-          sendCommand.setCommand("FETCH");
+          sendCommand.setFormat(Constants.COM_FORMAT_JSON);
+          sendCommand.setState(Constants.STATE_FINISHED); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
           sendCommand.setMode("CALL");
-          sendCommand.setType("DETAIL"); // You can also make use of the available Constants here.
+          sendCommand.setType(Constants.COM_TYPE_DETAIL); // You can also make use of the available Constants here.
 //					sendCommand.setRunId(""); // Use run directory path as string (no trailing slash) or if a State is desired, use setState and comment out setRunId() method.
           oos.writeObject(sendCommand);
           oos.flush();
@@ -89,14 +88,14 @@ public class MetrixClient {
             serverAnswer = ois.readObject();
             if (serverAnswer instanceof Command) {  // Answer is a Command with info message.
               nki.objects.Command commandIn = (nki.objects.Command) serverAnswer;
-              if (commandIn.getCommand() != null) {
-                System.out.println("[SERVER] " + commandIn.getCommand());
+              if (commandIn.getMessage()!= null) {
+                System.out.println("[SERVER] " + commandIn.getMessage());
               }
             }
 
-						/*
-						 * Requested Data collection
-						 */
+            /*
+             * Requested Data collection
+             */
 
             if (serverAnswer instanceof SummaryCollection) {
               SummaryCollection sc = (SummaryCollection) serverAnswer;
@@ -147,12 +146,13 @@ public class MetrixClient {
 
                 System.out.println("IntensityScore Avg");
                 if (sum.hasIntensityDistAvg()) {
-                  System.out.println(sum.getIntensityDistAvg().toTab());
+                  
+//                  System.out.println(sum.getIntensityDistAvg().toTab());
                 }
 
                 System.out.println("IntensityScore CC Avg");
                 if (sum.hasIntensityDistCCAvg()) {
-                  System.out.println(sum.getIntensityDistCCAvg().toTab());
+//                  System.out.println(sum.getIntensityDistCCAvg().toTab());
                 }
 
                 System.out.println("Project/Sample overview");
@@ -207,7 +207,7 @@ public class MetrixClient {
         }
         catch (IOException Ex) {
           //	System.out.println("Error" + Ex);
-          LoggerWrapper.log.log(Level.WARNING, "");
+          LoggerWrapper.log.log(Level.WARNING, "Ex "+Ex);
         }
       }
     }
