@@ -75,7 +75,7 @@ public class MetrixContainer {
       this.sum = summary;
 
       if (sum != null) {
-        String runDir = sum.getRunDirectory();
+        runDir = sum.getRunDirectory();
 
         long currEpoch = System.currentTimeMillis();
         timeCheck = (currEpoch - sum.getLastUpdatedEpoch()) > Constants.METRIC_UPDATE_TIME &!
@@ -252,6 +252,7 @@ public class MetrixContainer {
             update = true;
           }
           tm.closeSourceStream();
+          tm = null;
         }
       
         // Load QualityMetrics
@@ -270,6 +271,7 @@ public class MetrixContainer {
              update = true;
            }
            qm.closeSourceStream();
+           qm = null; // Manual GC
          }        
         
         // Load CorrectedIntensityMetrics
@@ -289,6 +291,7 @@ public class MetrixContainer {
               update = true;
             }
             cim.closeSourceStream();
+            cim = null; // Manual GC
         }
 
         // Load ExtractionMetrics
@@ -303,6 +306,7 @@ public class MetrixContainer {
               update = true;
             }
             eim.closeSourceStream();
+            eim = null; // Manual GC
         }        
         
         // Load IndexMetrics
@@ -313,6 +317,7 @@ public class MetrixContainer {
             sum.setSampleInfo(indices);
             update = true;
             im.closeSourceStream();
+            im = null; // Manual GC
         }
         
       // Load ErrorMetrics
@@ -339,7 +344,7 @@ public class MetrixContainer {
           try {
             DataStore ds = new DataStore();
             sum.setLastUpdated();
-            log.debug("Updating " + sum.getRunId() + " in database.");
+            log.debug("Updating " + sum.getRunId() + " in database. ("+runDir+")");
             ds.updateSummaryByRunName(sum, runDir);
             ds.closeAll();
             log.debug("Done.");
@@ -349,6 +354,7 @@ public class MetrixContainer {
           }
           catch (Exception SEx) {
             LoggerWrapper.log.log(Level.SEVERE, "Exception in update statement {0}", SEx.toString());
+            SEx.printStackTrace();
           }
 
       }

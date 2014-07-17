@@ -8,22 +8,10 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import nki.objects.ClusterDensity;
-import nki.objects.PhasingCollection;
-//import nki.objects.ErrorRate;
-import nki.objects.Phasing;
-import nki.objects.Reads;
-import nki.objects.QualityScores;
-import nki.objects.QScoreDist;
-import nki.objects.IntensityScores;
-import nki.objects.IntensityDist;
-import nki.objects.Indices;
 import nki.constants.Constants;
 
 public class Summary implements Serializable {

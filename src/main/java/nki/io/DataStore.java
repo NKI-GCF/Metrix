@@ -259,7 +259,7 @@ public class DataStore {
     sum.setLastUpdated();
     pstmt.setObject(1, sum);
     pstmt.setInt(2, sum.getState());
-    pstmt.setString(3, runName);
+    pstmt.setString(3, sum.getRunDirectory());
 
     pstmt.executeUpdate();
 
@@ -271,7 +271,6 @@ public class DataStore {
     catch (Exception E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
-
   }
 
   public static void updateSummaryById(Summary sum, int id) throws Exception {

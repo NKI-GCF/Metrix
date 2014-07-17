@@ -139,7 +139,7 @@ public final class CommandProcessor {
     
     // If no runs present in collection, throw message.
     if (sc.getCollectionCount() == 0) {
-      throw new EmptyResultSetCollection("The results for your search query.");
+      throw new EmptyResultSetCollection("No results for your search query.");
     }
     
     /*
@@ -151,17 +151,16 @@ public final class CommandProcessor {
     
         if (recCom.getFormat().equals(Constants.COM_FORMAT_XML)) {
             // Set formatting of summary collection. 
-            // Default is SIMPLE
-            //String formattedSummaryCollection = sc.toXML();
-            //oos.writeObject(formattedSummaryCollection);
+             oos.writeObject(mscd.toXML().toString());
         }else if(recCom.getFormat().equals(Constants.COM_FORMAT_JSON)){
-            //String formattedSummaryCollection = sc.toJSON();
+            // JSON format has to be converted to String.
             oos.writeObject(mscd.toJSON().toString());
         }else if(recCom.getFormat().equals(Constants.COM_FORMAT_TAB)){
-            //String formattedSummaryCollection = mscd.toXML().toString();
+            oos.writeObject(mscd.toTab());
         }else if(recCom.getFormat().equals(Constants.COM_FORMAT_CSV)){
-            String formattedSummaryCollection = mscd.toCSV();
+            oos.writeObject(mscd.toCSV());
         }else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
+            // Plain SummaryCollection format can be sent through the outputstream.
             oos.writeObject(sc);
         }else{
             // Return plain text

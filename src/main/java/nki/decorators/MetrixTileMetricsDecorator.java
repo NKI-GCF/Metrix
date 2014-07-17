@@ -44,6 +44,14 @@ public class MetrixTileMetricsDecorator {
       this.reads = reads;
   }
   
+    public MetrixTileMetricsDecorator(Summary sum){
+      this.clusterDensity = sum.getClusterDensity();
+      this.clusterDensityPassingFilter = sum.getClusterDensityPF();
+      this.phasingMap = sum.getPhasingMap();
+      this.prephasingMap = sum.getPrephasingMap();
+      this.reads = sum.getReads();
+  }
+  
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
 
@@ -107,4 +115,7 @@ public class MetrixTileMetricsDecorator {
 
     return json;
   }
+  
+  
+  
 }

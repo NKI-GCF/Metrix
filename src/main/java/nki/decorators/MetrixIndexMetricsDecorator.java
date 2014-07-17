@@ -59,7 +59,27 @@ public class MetrixIndexMetricsDecorator {
       DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
       DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
       xmlDoc = docBuilder.newDocument();
+      Element idxStats = xmlDoc.createElement("Indices");
       
+      for (String projectName : indices.getIndices().keySet()) {
+        Element projEle = xmlDoc.createElement("Project");
+        projEle.setAttribute("name", projectName);
+
+        Map<String, SampleInfo> samples = indices.getIndices().get(projectName);
+        for (String sampleName : samples.keySet()) {
+          Element sampleEle = xmlDoc.createElement("Sample");
+          sampleEle.setAttribute("name", sampleName);
+
+          SampleInfo si = samples.get(sampleName);
+          sampleEle.setAttribute("lane", String.valueOf(si.getLaneNum()));
+          sampleEle.setAttribute("read", String.valueOf(si.getReadNum()));
+          sampleEle.setAttribute("clusters", String.valueOf(si.getNumClusters()));
+          sampleEle.setAttribute("index", si.getIndexBarcode());
+          projEle.appendChild(sampleEle);
+        }
+        idxStats.appendChild(projEle);
+       }
+       return idxStats;
     }catch(Exception Ex){
         
     }

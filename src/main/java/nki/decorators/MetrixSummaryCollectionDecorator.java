@@ -75,8 +75,10 @@ public class MetrixSummaryCollectionDecorator {
             metrixJson.put("extractionMetrics", extractionMetrics);
             metrixJson.put("intensityMetrics", intensityMetrics);
             
+            LoggerWrapper.log.log(Level.FINEST, "Emptying MetrixContainer");
+            mc = null;
             iter.remove();
-            LoggerWrapper.log.log(Level.INFO, "Removed from list.");
+            LoggerWrapper.log.log(Level.INFO, "Removed summary from list.");
           }else{
               metrixJson.put("Unknown request type. ", new JSONObject());
           }
@@ -107,18 +109,20 @@ public class MetrixSummaryCollectionDecorator {
       return "";
   }
   
-  public void toXML(){
+  public Element toXML(){
     Document xmlDoc = null;
+    Element root = null;
     try {
       // Build the XML document
       DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
       DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
       xmlDoc = docBuilder.newDocument();
 
-      Element root = xmlDoc.createElement("SummaryCollection");
+      root = xmlDoc.createElement("SummaryCollection");
       xmlDoc.appendChild(root);
       
-      for(Summary sum : sc.getSummaryCollection()){
+        for(ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();){
+          Summary sum = iter.next();
           LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
           MetrixContainer mc = new MetrixContainer(sum);          
           
@@ -134,7 +138,7 @@ public class MetrixSummaryCollectionDecorator {
             sumXml.appendChild(runinfo);
             
             Element tile = xmlDoc.createElement("tileMetrics");
-            //tile = new MetrixTileMetricsDecorator(mc.getSummary().getClusterDensity(), mc.getSummary().getClusterDensityPF(), mc.getSummary().getPhasingMap(), mc.getSummary().getPrephasingMap()).toXML();
+            //tile = new MetrixTileMetricsDecorator(mc.getSummary()).toXML(sumXml, xmlDoc);
             sumXml.appendChild(tile);
             
             Element quality = xmlDoc.createElement("qualityMetrics");
@@ -164,11 +168,14 @@ public class MetrixSummaryCollectionDecorator {
             sumXml = new MetrixSummaryDecorator(mc.getSummary()).toXML(sumXml, xmlDoc);
             root.appendChild(sumXml);
           }
+          iter.remove();
+          LoggerWrapper.log.log(Level.INFO, "Removed from list.");
       }
+        return root; 
     }
     catch (Exception ex) {
       ex.printStackTrace();
     }
-      
+    return root;
   }
 }

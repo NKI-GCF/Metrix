@@ -1,5 +1,7 @@
 package nki.objects;
 
+import java.io.Serializable;
+
 /**
  * nki.objects
  * <p/>
@@ -10,7 +12,7 @@ package nki.objects;
  * @date 07/04/14
  * @since version
  */
-public class SampleInfo {
+public class SampleInfo implements Serializable {
   private int readNum;
   private int laneNum;
   private long numClusters;

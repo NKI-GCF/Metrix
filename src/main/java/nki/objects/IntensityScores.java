@@ -8,14 +8,8 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
-
-import nki.objects.MutableLong;
-import nki.objects.IntensityMap;
-import nki.objects.IntensityDist;
-import nki.constants.Constants;
 
 public class IntensityScores implements Serializable {
 
