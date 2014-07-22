@@ -47,25 +47,42 @@ public class MetrixSummaryCollectionDecorator {
           Summary sum = iter.next();
           LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
           JSONObject metrixJson = new JSONObject();
-          MetrixContainer mc = new MetrixContainer(sum);
           
           if(this.expectedType.equals(Constants.COM_TYPE_SIMPLE)){
-            JSONObject summary = new MetrixSummaryDecorator(mc.getSummary()).toJSON();
+            JSONObject summary;
+            if(sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG){
+                summary = new MetrixSummaryDecorator(sum).toJSON();
+            }else{
+                MetrixContainer mc = new MetrixContainer(sum);
+                summary = new MetrixSummaryDecorator(mc.getSummary()).toJSON();
+            }
             metrixJson.put("summary", summary);
           }else if(this.expectedType.equals(Constants.COM_TYPE_DETAIL)){
-            JSONObject summary = new MetrixSummaryDecorator(mc.getSummary()).toJSON();
-            JSONObject tileMetrics = new MetrixTileMetricsDecorator(mc.getSummary().getClusterDensity(),
-                                                                    mc.getSummary().getClusterDensityPF(),
-                                                                    mc.getSummary().getPhasingMap(),
-                                                                    mc.getSummary().getPrephasingMap(),
-                                                                    mc.getSummary().getReads()
+            Summary procSum = sum;
+            
+            if((sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG) && sum.hasIntensityDistRaw()){
+                procSum = sum;
+            }else{
+                MetrixContainer mc = new MetrixContainer(sum);
+                procSum = mc.getSummary();
+                mc = null;
+            }
+
+            JSONObject summary = new MetrixSummaryDecorator(procSum).toJSON();
+            JSONObject tileMetrics = new MetrixTileMetricsDecorator(procSum.getClusterDensity(),
+                                                                    procSum.getClusterDensityPF(),
+                                                                    procSum.getPhasingMap(),
+                                                                    procSum.getPrephasingMap(),
+                                                                    procSum.getReads()
                                      ).toJSON();
             
-            JSONObject qualityMetrics = new MetrixQualityMetricsDecorator(mc.getSummary()).toJSON();
-            JSONObject errorMetrics = new MetrixErrorMetricsDecorator(mc.getSummary().getErrorDist()).toJSON();
-            JSONObject indexMetrics = new MetrixIndexMetricsDecorator(mc.getSummary().getSampleInfo()).toJSON();
-            JSONObject extractionMetrics = new MetrixExtractionMetricsDecorator(mc.getSummary().getIntensityDistRaw()).toJSON();
-            JSONObject intensityMetrics = new MetrixIntensityMetricsDecorator(mc.getSummary().getIntensityDistAvg(), mc.getSummary().getIntensityDistCCAvg()).toJSON();
+            JSONObject qualityMetrics = new MetrixQualityMetricsDecorator(procSum).toJSON();
+            JSONObject errorMetrics = new MetrixErrorMetricsDecorator(procSum.getErrorDist()).toJSON();
+            JSONObject indexMetrics = new MetrixIndexMetricsDecorator(procSum.getSampleInfo()).toJSON();
+            JSONObject extractionMetrics = new MetrixExtractionMetricsDecorator(procSum.getIntensityDistRaw()).toJSON();
+            JSONObject intensityMetrics = new MetrixIntensityMetricsDecorator(procSum.getIntensityDistAvg(),
+                                                                              procSum.getIntensityDistCCAvg()
+                                          ).toJSON();
           
             metrixJson.put("summary", summary);
             metrixJson.put("tileMetrics", tileMetrics);
@@ -76,7 +93,7 @@ public class MetrixSummaryCollectionDecorator {
             metrixJson.put("intensityMetrics", intensityMetrics);
             
             LoggerWrapper.log.log(Level.FINEST, "Emptying MetrixContainer");
-            mc = null;
+            procSum = null;
             iter.remove();
             LoggerWrapper.log.log(Level.INFO, "Removed summary from list.");
           }else{
@@ -88,6 +105,7 @@ public class MetrixSummaryCollectionDecorator {
       }
       // Add statistics to json object.
       json.accumulate("summaries", jsonCollection);
+      sc = null; // Destroy the summarycollection.
       return json;
   }
   

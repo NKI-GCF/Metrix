@@ -149,26 +149,26 @@ public final class CommandProcessor {
     MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
     mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
     
-        if (recCom.getFormat().equals(Constants.COM_FORMAT_XML)) {
-            // Set formatting of summary collection. 
-             oos.writeObject(mscd.toXML().toString());
-        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_JSON)){
-            // JSON format has to be converted to String.
-            oos.writeObject(mscd.toJSON().toString());
-        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_TAB)){
-            oos.writeObject(mscd.toTab());
-        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_CSV)){
-            oos.writeObject(mscd.toCSV());
-        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
-            // Plain SummaryCollection format can be sent through the outputstream.
-            oos.writeObject(sc);
-        }else{
-            // Return plain text
-            oos.writeObject("I dont understand.");
-        }
+    if (recCom.getFormat().equals(Constants.COM_FORMAT_XML)) {
+        // Set formatting of summary collection. 
+         oos.writeObject(mscd.toXML().toString());
+    }else if(recCom.getFormat().equals(Constants.COM_FORMAT_JSON)){
+        // JSON format has to be converted to String.
+        oos.writeObject(mscd.toJSON().toString());
+    }else if(recCom.getFormat().equals(Constants.COM_FORMAT_TAB)){
+        oos.writeObject(mscd.toTab());
+    }else if(recCom.getFormat().equals(Constants.COM_FORMAT_CSV)){
+        oos.writeObject(mscd.toCSV());
+    }else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
+        // Plain SummaryCollection format can be sent through the outputstream.
+        oos.writeObject(sc);
+    }else{
+        // Return plain text
+        oos.writeObject("I dont understand.");
+    }
 
-        sc = null;
-        oos.flush();
-        DataStore.closeAll();
+    sc = null;
+    oos.flush();
+    DataStore.closeAll();
   }
 }

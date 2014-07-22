@@ -376,7 +376,6 @@ public class MetrixLogic {
     catch (IOException Ex) {
       LoggerWrapper.log.log(Level.SEVERE, "IOException when loading config: {0}", Ex.toString());
     }
-
   }
 
   public boolean runPostProcessing(Summary sum) {

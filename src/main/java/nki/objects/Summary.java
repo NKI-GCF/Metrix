@@ -59,13 +59,19 @@ public class Summary implements Serializable {
   private PhasingCollection prephasingMap;    // Prephasing values per lane
 
   private QualityScores qScores;            // QualityScores per lane, per cycle, per tile
-  private QScoreDist qScoreDist;      // The stored distribution of num clusters / QScore
 
   private IntensityScores iScores;
   private IntensityDist iDistAvg;
   private IntensityDist iDistCCAvg;
   private IntensityDist iDistRaw;
 
+  /*
+   Quality Metrics distributions.
+  */
+  private QScoreDist qScoreDist;      // The stored distribution of num clusters / QScore
+  private Map<Integer, QScoreDist> qScoreDistByLane;
+  private Map<Integer, Metric> qScoreDistByCycle;  
+  
   private ErrorDist eDist;
   
   private Indices sampleInfo;
@@ -353,8 +359,7 @@ public class Summary implements Serializable {
     DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     TimeZone tz = Calendar.getInstance().getTimeZone();
     format.setTimeZone(tz.getTimeZone(tz.getID()));
-    String formatted = format.format(date);
-    return formatted;
+    return format.format(date);
   }
 
   public void setQScoreDist(QScoreDist qScoreDist) {
@@ -365,6 +370,22 @@ public class Summary implements Serializable {
     return qScoreDist;
   }
 
+  public void setQScoreDistByLane(Map<Integer, QScoreDist> qScoreDistByLane) {
+    this.qScoreDistByLane = qScoreDistByLane;
+  }
+
+  public Map<Integer, QScoreDist> getQScoreDistByLane() {
+    return qScoreDistByLane;
+  }
+ 
+  public void setQScoreDistByCycle(Map<Integer, Metric> qScoreDistByCycle) {
+    this.qScoreDistByCycle = qScoreDistByCycle;
+  }
+
+  public Map<Integer, Metric> getQScoreDistByCycle() {
+    return qScoreDistByCycle;
+  }
+  
   public void setQScores(QualityScores qScores) {
     this.qScores = qScores;
   }

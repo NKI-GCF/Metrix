@@ -43,8 +43,10 @@ public class MetrixQualityMetricsDecorator {
   
     public MetrixQualityMetricsDecorator( Summary sum ){
       this.qScoreDist = sum.getQScoreDist();
-      this.qScoreDistByLane = sum.getQScores().getQScoreDistributionByLane();
-      this.qScoreDistByCycle = sum.getQScores().getQScoreDistributionByCycle();
+      //this.qScoreDistByLane = sum.getQScores().getQScoreDistributionByLane();
+      //this.qScoreDistByCycle = sum.getQScores().getQScoreDistributionByCycle();
+      this.qScoreDistByLane = sum.getQScoreDistByLane();
+      this.qScoreDistByCycle = sum.getQScoreDistByCycle();
   }
   
   public JSONObject toJSON() {

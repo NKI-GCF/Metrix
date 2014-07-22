@@ -229,6 +229,30 @@ public class MetrixContainer {
   }
   
   private void initSummary(){
+        log.debug("Processing RunInfo details");
+        try {
+          if (!sum.getXmlInfo()) {
+            XmlDriver xmd = new XmlDriver(runDir, sum);
+            if (xmd.parseRunInfo()) {
+              sum = xmd.getSummary();
+            }
+            else {
+              sum.setXmlInfo(false);
+            }
+          }
+        }
+        catch (SAXException se) {
+          se.printStackTrace();
+          log.error("Error parsing RunInfo.xml info: " + se.getMessage());
+        }
+        catch (IOException ioe) {
+          ioe.printStackTrace();
+          log.error("Input/output error in parsing RunInfo.xml info: " + ioe.getMessage());
+        }
+        catch (ParserConfigurationException pce) {
+          pce.printStackTrace();
+          log.error("Error in XML parser configuration: " + pce.getMessage());
+        }
       // Load TileMetrics
         // Process Cluster Density and phasing / prephasing
         if (!sum.hasClusterDensity() ||
@@ -237,9 +261,10 @@ public class MetrixContainer {
             !sum.hasPrephasing() ||
             timeCheck
             ) {
-          TileMetrics tm = new TileMetrics(tileMetrics, 0);
-
-          if (!tm.getFileMissing()) {                // If TileMetrics File is present - process.
+          
+          //if (!tm.getFileMissing()) {                // If TileMetrics File is present - process.
+          if(!sum.hasClusterDensity() || !sum.hasClusterDensityPF() || !sum.hasPhasing() || !sum.hasPrephasing()){
+            TileMetrics tm = new TileMetrics(tileMetrics, 0);
             log.debug("Processing Tile Metrics");
             //tm.digestData(rds);
             tm.digestData();
@@ -250,9 +275,10 @@ public class MetrixContainer {
 
             // Distribution present in ClusterDensity Object.
             update = true;
+            tm.closeSourceStream();
+            tm = null;
           }
-          tm.closeSourceStream();
-          tm = null;
+
         }
       
         // Load QualityMetrics
@@ -261,64 +287,67 @@ public class MetrixContainer {
         if (!sum.hasQScores() || timeCheck) {
            log.debug("Processing Quality Metrics");
            QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
-           if (!qm.getFileMissing()) {
-             //QualityScores qsOut = qm.digestData(rds);
+           //if (!qm.getFileMissing()) {
+           if(!sum.hasQScoreDist() && !qm.getFileMissing()){
              QualityScores qsOut = qm.digestData();
-             sum.setQScores(qsOut);
-             // Calculate distribution
-             QScoreDist qScoreDist = qsOut.getQScoreDistribution();
-             sum.setQScoreDist(qScoreDist);
+             //sum.setQScores(qsOut);
+             // Calculate and set distributions
+             sum.setQScoreDist(qsOut.getQScoreDistribution());
+             sum.setQScoreDistByLane(qsOut.getQScoreDistributionByLane());
+             sum.setQScoreDistByCycle(qsOut.getQScoreDistributionByCycle());
+             
              update = true;
            }
            qm.closeSourceStream();
-           qm = null; // Manual GC
+           qm = null; // Manual GC           
          }        
         
         // Load CorrectedIntensityMetrics
         // Process Corrected Intensities (+ Avg Cor Int Called Clusters)
         log.debug("Checking Corrected Intensity Metrics");
-        if (!sum.hasIScores() || timeCheck) {
+        CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
+        if (((!sum.hasIntensityDistAvg() || !sum.hasIntensityDistCCAvg() || !sum.hasIntensityDistRaw()) && !cim.getFileMissing())  || timeCheck) {
             log.debug("Processing Corrected Intensity Metrics");
-            CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
             if (!cim.getFileMissing()) {
               IntensityScores isOut = cim.digestData();
-
-              sum.setIScores(isOut);
+              //sum.setIScores(isOut);
 
               // Calculate distribution
               sum.setIntensityDistAvg(isOut.getAverageCorrectedIntensityDist());
               sum.setIntensityDistCCAvg(isOut.getCalledClustersAverageCorrectedIntensityDist());
               update = true;
-            }
+           }
             cim.closeSourceStream();
-            cim = null; // Manual GC
+            cim = null; // Manual GC     
         }
 
         // Load ExtractionMetrics
         // Process Raw Intensities
-        if (!sum.hasIntensityDistRaw() || timeCheck) {
-            ExtractionMetrics eim = new ExtractionMetrics(extractionMetrics, 0);
+        ExtractionMetrics eim = new ExtractionMetrics(extractionMetrics, 0);
+        if(!sum.hasIntensityDistRaw() || timeCheck) {
             if (!eim.getFileMissing()) {
               IntensityScores risOut = eim.digestData();
 
               // Calculate distribution
               sum.setIntensityDistRaw(risOut.getRawIntensityDist());
               update = true;
+
             }
-            eim.closeSourceStream();
-            eim = null; // Manual GC
+        eim.closeSourceStream();
+        eim = null; // Manual GC
         }        
         
         // Load IndexMetrics
+        IndexMetrics im = new IndexMetrics(indexMetrics, 0);
         if(!sum.hasSampleInfo()){
             log.debug("Processing Index Metrics");
-            IndexMetrics im = new IndexMetrics(indexMetrics, 0);
             Indices indices = im.digestData();
             sum.setSampleInfo(indices);
             update = true;
-            im.closeSourceStream();
-            im = null; // Manual GC
         }
+        im.closeSourceStream();
+        im = null; // Manual GC
+        
         
       // Load ErrorMetrics
       if(!sum.hasErrorDist()){

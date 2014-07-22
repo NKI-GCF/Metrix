@@ -30,7 +30,7 @@ public class DataStore {
   static final String UPDATE_OBJECT_SQL_ID = "UPDATE metrix_objects SET object_value = ?, state = ? WHERE id = ?";
   static final String UPDATE_OBJECT_SQL_RUNNAME = "UPDATE metrix_objects SET object_value = ?, state = ? WHERE run_id = ?";
   static final String READ_OBJECT_SQL_ID = "SELECT object_value FROM metrix_objects WHERE id = ?";
-  static final String READ_OBJECT_SQL_RUNNAME = "SELECT object_value FROM metrix_objects WHERE run_id = ?";
+  static final String READ_OBJECT_SQL_RUNNAME = "SELECT run_id FROM metrix_objects WHERE run_id = ?";
   static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_objects WHERE state = ?";
   static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_objects;";
 
@@ -48,9 +48,9 @@ public class DataStore {
 
     fin.close();
     try {
-      LoggerWrapper.log.log(Level.WARNING, "Opening connection");
+      LoggerWrapper.log.log(Level.FINER, "Opening connection");
       conn = getConnection();
-      LoggerWrapper.log.log(Level.WARNING, "Opened connection");
+      LoggerWrapper.log.log(Level.FINER, "Opened connection");
     }
     catch (Exception ex) {
       metrixLogger.log.severe("Error setting up database connection. " + ex.toString());
@@ -136,6 +136,7 @@ public class DataStore {
 
   public static Summary getSummaryById(long id) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_ID);
+    metrixLogger.log.fine("Fetching summary by ID --.");
     pstmt.setLong(1, id);
     ResultSet rs = pstmt.executeQuery();
     rs.next();
@@ -158,7 +159,9 @@ public class DataStore {
   }
 
   public static Summary getSummaryByRunName(String runName) throws Exception {
-    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME);
+    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    metrixLogger.log.fine("Fetching summary by run name . " + runName);
+    pstmt.setFetchSize(Integer.MIN_VALUE);
     pstmt.setString(1, runName);
 
     ResultSet rs = pstmt.executeQuery();
@@ -191,8 +194,10 @@ public class DataStore {
 
   public static SummaryCollection getSummaryCollectionByState(int state) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_STATE);
+    metrixLogger.log.fine("Fetching by state.");
+    
     pstmt.setInt(1, state);
-
+   
     ResultSet rs = pstmt.executeQuery();
     SummaryCollection sc = new SummaryCollection();
 
@@ -224,6 +229,7 @@ public class DataStore {
 
   public static SummaryCollection getSummaryCollections() throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_ALL);
+    metrixLogger.log.fine("Fetching all summaries.");
 
     ResultSet rs = pstmt.executeQuery();
     SummaryCollection sc = new SummaryCollection();
@@ -260,7 +266,7 @@ public class DataStore {
     pstmt.setObject(1, sum);
     pstmt.setInt(2, sum.getState());
     pstmt.setString(3, sum.getRunDirectory());
-
+    LoggerWrapper.log.log(Level.FINE, "Updating summary object " + runName);
     pstmt.executeUpdate();
 
     try {
@@ -317,7 +323,9 @@ public class DataStore {
   }
 
   public static boolean checkSummaryByRunId(String run) throws Exception {
-    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME);
+    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    metrixLogger.log.fine("Fetching run by ID. " + run);
+    pstmt.setFetchSize(Integer.MIN_VALUE);
     pstmt.setString(1, run);
 
     boolean ret = false;

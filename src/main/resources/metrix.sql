@@ -18,5 +18,5 @@ CREATE TABLE `metrix`.`metrix_objects` (
   `object_value` longblob,
   `state` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=UTF8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 

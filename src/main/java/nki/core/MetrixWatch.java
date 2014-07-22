@@ -368,26 +368,29 @@ public class MetrixWatch extends Thread {
       try {
         DataStore _ds = new DataStore();
         sum = (Summary) _ds.getSummaryByRunName(nonInterOp);
-        metrixLogger.log.info("Backlog parsing " + sum.getRunId());
+        if(sum.getRunId() != null){
+            metrixLogger.log.info("Backlog parsing " + sum.getRunId());
+        }
         _ds.closeAll();
       }
       catch (Exception Ex) {
         metrixLogger.log.severe("Error in retrieving summary for forced check. " + Ex.toString());
       }
-
-      if (sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG) {
-        waitMap.remove(watchPairs.getKey());      // if watchkey is present, remove it from waitMap
-        keys.remove(watchPairs.getKey());      // Remove watchkeys from Watcher Service
-      }
-
-      if ((currentTime - mapTime) > forceTime) {
-        if (ml.processMetrics(Paths.get(nonInterOp), sum.getState(), dataStore)) {
-          waitMap.put((WatchKey) watchPairs.getKey(), System.currentTimeMillis());
-          metrixLogger.log.info("Forcefully parsed " + nonInterOp);
+      if(sum.getRunId() != null){
+        if (sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG) {
+          waitMap.remove(watchPairs.getKey());      // if watchkey is present, remove it from waitMap
+          keys.remove(watchPairs.getKey());      // Remove watchkeys from Watcher Service
         }
-      }
-      else {
-        metrixLogger.log.info("No update needed yet for " + nonInterOp);
+
+        if ((currentTime - mapTime) > forceTime) {
+          if (ml.processMetrics(Paths.get(nonInterOp), sum.getState(), dataStore)) {
+            waitMap.put((WatchKey) watchPairs.getKey(), System.currentTimeMillis());
+            metrixLogger.log.info("Forcefully parsed " + nonInterOp);
+          }
+        }
+        else {
+          metrixLogger.log.info("No update needed yet for " + nonInterOp);
+        }
       }
     }
   }

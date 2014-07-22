@@ -8,14 +8,9 @@
 package nki.objects;
 
 import java.io.*;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
-
-import nki.objects.QualityMap;
-import nki.objects.MutableLong;
-import nki.objects.QScoreDist;
 
 public class QualityScores implements Serializable {
 

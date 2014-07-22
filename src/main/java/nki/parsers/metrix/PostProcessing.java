@@ -72,19 +72,19 @@ public class PostProcessing {
     initXml();
     validateXmlStructure();
 		
-		/*
-		 *  Load post processing configuration
-		 */
+    /*
+     *  Load post processing configuration
+     */
     loadTemplate();
 
-		/*
-		 *  Interpret processing
-		 */
+    /*
+     *  Interpret processing
+     */
     parseXmlStructure();
 
-		/*
-		 *  Execute post processing
-		 */
+    /*
+     *  Execute post processing
+     */
     if (isValid) {
       executeProcessing();
     }
