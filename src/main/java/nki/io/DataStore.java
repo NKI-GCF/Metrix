@@ -358,7 +358,7 @@ public class DataStore {
     return ret;
   }
 
-  public static boolean checkSummaryByRunId(Connection dsConn, String run) throws Exception {
+  public boolean checkSummaryByRunId(Connection dsConn, String run) throws Exception {
     PreparedStatement pstmt = dsConn.prepareStatement(CHECK_RUN_ID_FOR_RUNNAME);
     metrixLogger.log.fine("Checking if run exists run by ID. " + run);
     

@@ -129,11 +129,11 @@ public class MetrixWatch extends Thread {
         DataStore ds = null;
         try{
           ds = new DataStore();
-          if(DataStore.checkSummaryByRunId(ds.conn, file) && (System.currentTimeMillis() - fileComplete.lastModified()) < 1814400000){
+          if(ds.checkSummaryByRunId(ds.conn, file) && (System.currentTimeMillis() - fileComplete.lastModified()) < 1814400000){
             // Run is finished, available in database. But has completed last then three weeks ago.
             ml.quickLoad = false;
             metrixLogger.log.info("Quick loading a finished run. Available in database.");
-          }else if(DataStore.checkSummaryByRunId(ds.conn, file)){
+          }else if(ds.checkSummaryByRunId(ds.conn, file)){
             // Run is finished, available in database.
             ml.quickLoad = true;
             metrixLogger.log.info("Quick loading a finished run. Available in database.");
@@ -143,6 +143,8 @@ public class MetrixWatch extends Thread {
             metrixLogger.log.severe("Run has finished. Not available in database. Parsing...");
           }
           ml.processMetrics(Paths.get(file), Constants.STATE_FINISHED, dataStore); // Parse available info with complete state
+          metrixLogger.log.finer("Closing connection.");
+          ds.conn.close();
         }catch(Exception Ex){
               metrixLogger.log.severe("Exception while checking finished run in database. "+ Ex);
         }finally{
@@ -178,29 +180,28 @@ public class MetrixWatch extends Thread {
           try{
             ds = new DataStore();
             // Run is older than three weeks and is available in database.
-            if(difference > 1814400000 && DataStore.checkSummaryByRunId(ds.conn, file)){
+            if(difference > 1814400000 && ds.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = true;
               metrixLogger.log.info("Quick loading a stopped run. Age is older than 3 weeks.");
-              ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
             // Run is less than three weeks old and is available in database.
-            }else if(difference < 1814400000 && DataStore.checkSummaryByRunId(ds.conn, file)){
+            }else if(difference < 1814400000 && ds.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = false;
               metrixLogger.log.info("Parsing a recent run which has stopped. Age is less than 3 weeks.");
-              ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
             // Run is older than three weeks but hasn't been found in database.
-            }else if(!DataStore.checkSummaryByRunId(ds.conn, file)){
+            }else if(!ds.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = false;
               metrixLogger.log.info("Parsing a run which has stopped but not found in database.");
-              ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
             }else{
               metrixLogger.log.severe("Parsing a run which has stopped. Alternative processing.");
-              ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);                
             }
+            ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
+            metrixLogger.log.finer("Closing connection.");
+            ds.conn.close();
           }catch(Exception Ex){
               metrixLogger.log.severe("Exception while checking stopped run in database. " + Ex);
           }finally{
-              ds = null;
-              metrixLogger.log.finest("Datastore for stopped run check dismantled.");
+            ds = null;
+            metrixLogger.log.finest("Datastore for stopped run check dismantled.");
           }
         }
         else {
