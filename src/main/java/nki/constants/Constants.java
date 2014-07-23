@@ -91,10 +91,6 @@ public final class Constants {
   public static final String SAMPLE_INDEX = "indexSeq";
   public static final String SAMPLE_NAME = "sampleName";
 
-  // Command function types
-  public static final String COM_FUNCTION_SET = "SET";    // *Unimplemented* Change run data details using injection
-  public static final String COM_FUNCTION_FETCH = "FETCH";    // Fetch run data (default)
-
   // Command data request formats
   public static final String COM_FORMAT_XML = "XML";    // Return data in XML format
   public static final String COM_FORMAT_OBJ = "POJO";    // Return data as java object
@@ -104,17 +100,12 @@ public final class Constants {
   
   // Command data request detail
   public static final String COM_TYPE_SIMPLE = "SIMPLE";    // Level of requested detail of return output.
-  public static final String COM_TYPE_METRIC = "METRIC";
   public static final String COM_TYPE_DETAIL = "DETAIL";
-  public static final String COM_TYPE_FULL = "FULL";
  
-  // Command data request modes
-  public static final String COM_MODE_CALL = "CALL";    // Make single request for data.
-  public static final String COM_MODE_TIMED = "TIMED";    // Return the requested data every xyz milliseconds.
-
   public static final String COM_RET_TYPE_BYSTATE = "BYSTATE";  // Retrieve runs by run state (use setState())
   public static final String COM_RET_TYPE_BYRUN = "BYRUN";    // Retrieve single run by run identifier (use setRunId())
-
+  public static final String COM_INITIALIZE = "INITIALIZE";    // Parsed all available runs and initialize
+  
   public static final long METRIC_UPDATE_TIME = 7200000;    // Update every 120 minutes
   public static final long ACTIVE_TIMEOUT = 86400000;    // Time out age of InterOp files while run is active. Default: 24 hours.
 

@@ -89,7 +89,6 @@ public final class CommandProcessor {
         oos.writeObject(Ex);
         LoggerWrapper.log.log(Level.SEVERE, "Uncaught exception in CommandProcessor: {0}", Ex);
       }
-
     }
     else {
       setIsValid(false);
@@ -120,8 +119,21 @@ public final class CommandProcessor {
     *  Retrieve Summary Collection 
     */
     SummaryCollection sc = new SummaryCollection();
+
+    /*
+    * Client requests to have the available runs prepared and analyzed for initialization.
+    */
+    if(recCom.getRetType().equals(Constants.COM_INITIALIZE)){
+        metrixLogger.log.log(Level.INFO, "Initialization command received. ");
+        sc = DataStore.getSummaryCollections();
+        MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
+        mscd.initializeMetrix();
+        oos.writeObject("Done with initialization.");
+        oos.flush();
+        DataStore.closeAll();
+    }    
     
-    // Check is state is set and required.
+    // Check actual command types.
     if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE) && !recCom.checkState(recCom.getState())) {
       throw new MissingCommandDetailException("Summary State of received command is missing.");
     }
@@ -145,7 +157,6 @@ public final class CommandProcessor {
     /*
     * Format Summary Collection according to command specifications.
     */
-
     MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
     mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
     

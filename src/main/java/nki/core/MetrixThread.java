@@ -54,30 +54,13 @@ public class MetrixThread extends Thread {
         Command commandClient;
         Object clientMsg;
         while ((clientMsg = ois.readObject()) != null) {
-          String mode = "";
           if (clientMsg instanceof Command) {
             commandClient = (Command) clientMsg;
-            mode = commandClient.getMode();
-
-            CommandProcessor cp;
 
             try {
-              // Mode Check
-              if (mode.equals(Constants.COM_MODE_TIMED)) {  // Keep alive repetitive command
-                timedBool = true;
-                while (timedBool) {
-                  cp = new CommandProcessor(commandClient, oos, ds);
-                  Thread.sleep(commandClient.getTimedInterval());
-                }
-              }
-
-              if (mode.equals(Constants.COM_MODE_CALL)) {  // Single call
                 LoggerWrapper.log.log(Level.INFO, "[SERVER] Received command [{0}]: Fetch run(s) with state: {1} ({2}) in format {3}", new Object[]{sChannel.socket().getInetAddress().getHostAddress(), commandClient.getState(), commandClient.getRetType(), commandClient.getFormat()});
-                cp = new CommandProcessor(commandClient, oos, ds);
+                CommandProcessor cp = new CommandProcessor(commandClient, oos, ds);
                 LoggerWrapper.log.log(Level.INFO, "[SERVER] Hopefully called Command processor.");
-              }
-
-              // Server Exceptions and important logging.
             }
             catch (CommandValidityException CVE) {
               metrixLogger.log.warning("Command Validity Exception! " + CVE);

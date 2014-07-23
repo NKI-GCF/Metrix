@@ -83,11 +83,6 @@ public class MetrixContainer {
 
         initPaths(runDir);
         initSummary();
-        
-        // Dont update anymore if run has finished.
-      /*  if(sum.getHasFinished()){
-            timeCheck = false;
-      }*/
       }
       else {
         // Throw error
@@ -261,24 +256,21 @@ public class MetrixContainer {
             !sum.hasPrephasing() ||
             timeCheck
             ) {
-          
-          //if (!tm.getFileMissing()) {                // If TileMetrics File is present - process.
-          if(!sum.hasClusterDensity() || !sum.hasClusterDensityPF() || !sum.hasPhasing() || !sum.hasPrephasing()){
-            TileMetrics tm = new TileMetrics(tileMetrics, 0);
-            log.debug("Processing Tile Metrics");
-            //tm.digestData(rds);
-            tm.digestData();
-            sum.setClusterDensity(tm.getCDmap());
-            sum.setClusterDensityPF(tm.getCDpfMap());
-            sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
-            sum.setPrephasingMap(tm.getPrephasingMap());
+       
+            //if (!tm.getFileMissing()) {                // If TileMetrics File is present - process.
+              TileMetrics tm = new TileMetrics(tileMetrics, 0);
+              log.debug("Processing Tile Metrics");
+              //tm.digestData(rds);
+              tm.digestData();
+              sum.setClusterDensity(tm.getCDmap());
+              sum.setClusterDensityPF(tm.getCDpfMap());
+              sum.setPhasingMap(tm.getPhasingMap());              // Get all values for summary and populate
+              sum.setPrephasingMap(tm.getPrephasingMap());
 
-            // Distribution present in ClusterDensity Object.
-            update = true;
-            tm.closeSourceStream();
-            tm = null;
-          }
-
+              // Distribution present in ClusterDensity Object.
+              update = true;
+              tm.closeSourceStream();
+              tm = null;
         }
       
         // Load QualityMetrics
@@ -299,7 +291,7 @@ public class MetrixContainer {
              update = true;
            }
            qm.closeSourceStream();
-           qm = null; // Manual GC           
+           qm = null; // Manual GC
          }        
         
         // Load CorrectedIntensityMetrics
@@ -416,7 +408,7 @@ public class MetrixContainer {
   public ExtractionMetrics getExtractionMetrics() {
     return exm;
   }
-
+  
   public void outputSummaryLog() {
     Reads rds = sum.getReads();
 

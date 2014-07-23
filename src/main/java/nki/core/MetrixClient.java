@@ -72,11 +72,12 @@ public class MetrixClient {
           nki.objects.Command sendCommand = new nki.objects.Command();
 
           // Set a value for command
-          sendCommand.setFormat(Constants.COM_FORMAT_JSON);
-          sendCommand.setState(Constants.STATE_FINISHED); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
-          sendCommand.setMode("CALL");
-          sendCommand.setType(Constants.COM_TYPE_DETAIL); // You can also make use of the available Constants here.
-//					sendCommand.setRunId(""); // Use run directory path as string (no trailing slash) or if a State is desired, use setState and comment out setRunId() method.
+          sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
+          sendCommand.setState(Constants.STATE_RUNNING); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
+          //sendCommand.setRunId("Z:\\120210_SN867_0084_AD0HDPACXX-RUN137");
+          sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here.
+          //sendCommand.setRetType(Constants.COM_INITIALIZE);
+
           oos.writeObject(sendCommand);
           oos.flush();
 

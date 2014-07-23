@@ -38,7 +38,8 @@ public class MetrixLogic {
   private Summary summary = null;
   private int state;
   private static final Properties configFile = new Properties();
-
+  public boolean quickLoad = false;
+  
   public MetrixLogic() {
 
   }
@@ -59,7 +60,6 @@ public class MetrixLogic {
     String tileMetrics = "";
     String qualityMetrics = "";
     String path = runDir.toString();
-
 
     if (!path.matches("(.*)InterOp(.*)")) {
       extractionMetrics = path + "/InterOp/" + Constants.EXTRACTION_METRICS;
@@ -116,106 +116,110 @@ public class MetrixLogic {
       finally {
         xmd.closeAll();
       }
-
-      saveEntry(path);
+      
+      if(!this.quickLoad){
+        saveEntry(path);
+      }
       return false;
     }
+    
+    if(!this.quickLoad){
+        summary.setRunDirectory(path);
 
-    summary.setRunDirectory(path);
+        // Instantiate processing modules.
+        ExtractionMetrics em = new ExtractionMetrics(extractionMetrics, state);
+        TileMetrics tm = new TileMetrics(tileMetrics, state);
+        QualityMetrics qm = new QualityMetrics(qualityMetrics, state);
 
-    // Instantiate processing modules.
-    ExtractionMetrics em = new ExtractionMetrics(extractionMetrics, state);
-    TileMetrics tm = new TileMetrics(tileMetrics, state);
-    QualityMetrics qm = new QualityMetrics(qualityMetrics, state);
-
-    if (em.getFileMissing() || tm.getFileMissing() || qm.getFileMissing()) { // Extraction or TileMetrics file missing. Parse again later.
-      //	summary.incParseError();
-    }
-
-    // Fail conditions:
-    // 	- More than 20 parsing attempts have been made which resulted in errors.
-    // 	- The current cycle of run is over 20
-    // 	- All involved InterOp files (EM, TM, QM) have not been updated for over 24 hours (86400000ms)
-    // 	- Run is not awaiting turning.
-    if (summary.getParseError() >= 20 && summary.getCurrentCycle() > 20) {
-      if ((em.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT) &&
-          (tm.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT) &&
-          (qm.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT)
-          ) {
-        if (!summary.getPairedTurnCheck()) {    // Check if this is not a run waiting for turning.
-          summary.setState(Constants.STATE_HANG);
-          saveEntry(path);
-          metrixLogger.log.info("Run " + summary.getRunId() + " has failed to complete within the allotted time frame.");
-          return false;
+        // Fail conditions:
+        // 	- More than 20 parsing attempts have been made which resulted in errors.
+        // 	- The current cycle of run is over 20
+        // 	- All involved InterOp files (EM, TM, QM) have not been updated for over 24 hours (86400000ms)
+        // 	- Run is not awaiting turning.
+        if (summary.getParseError() >= 20 && summary.getCurrentCycle() > 20) {
+          if ((em.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT) &&
+              (tm.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT) &&
+              (qm.getLastModifiedSourceDiff() >= Constants.ACTIVE_TIMEOUT)
+              ) {
+            if (!summary.getPairedTurnCheck()) {    // Check if this is not a run waiting for turning.
+              summary.setState(Constants.STATE_HANG);
+              saveEntry(path);
+              metrixLogger.log.info("Run " + summary.getRunId() + " has failed to complete within the allotted time frame.");
+              return false;
+            }
+          }
         }
-      }
-    }
 
-    try {
-      if (summary.getState() != Constants.STATE_FINISHED) {
-        summary.setState(state);
-      }
+        try {
+          if (summary.getState() != Constants.STATE_FINISHED) {
+            summary.setState(state);
+          }
 
-      if (!summary.getXmlInfo()) {
-        XmlDriver xmd = new XmlDriver(runDir + "", summary);
-        if (xmd.parseRunInfo()) {
-          summary = xmd.getSummary();
+          if (!summary.getXmlInfo()) {
+            XmlDriver xmd = new XmlDriver(runDir + "", summary);
+            if (xmd.parseRunInfo()) {
+              summary = xmd.getSummary();
+            }
+            else {
+              summary.setXmlInfo(false);
+            }
+          }
+
+          int currentCycle = em.getLastCycle();
+
+          if (summary.getRunType().equals("Paired End") && currentCycle == summary.getTurnCycle()) {
+            summary.setState(Constants.STATE_TURN);
+            state = Constants.STATE_TURN;
+          }
+
+          // If run == paired end. Check for FC turn at (numReads read 1 + index 1). Set state accordingly.
+          if (summary.getPairedTurnCheck()) {
+            // State has not been set yet and user has not yet been notified for the turning of the flowcell.
+            if (!summary.getHasNotifyTurned()) {
+              summary.setState(Constants.STATE_TURN);
+              metrixLogger.log.info("Flowcell of run: " + path + " has to be turned. Current cycle: " + currentCycle);
+              summary.setHasNotifyTurned(true);
+            }
+          }
+
+          summary.setCurrentCycle(currentCycle);
+          summary.setLastUpdated();
+
+          // Catch event for when the flowcell has turned and the sequencer has continued sequencing the other side.
+          if ((summary.getRunType() == "Paired End") && (currentCycle > summary.getTurnCycle()) && (summary.getState() == Constants.STATE_TURN)) {
+            summary.setHasTurned(true);
+            summary.setState(Constants.STATE_RUNNING);
+          }
+          else {
+            summary.setState(state);
+          }
+
+          saveEntry(path);  // Store summary entry in SQL database
+
+          metrixLogger.log.info("Finished processing: " + runDir.getFileName());
+
+          success = true;
         }
-        else {
-          summary.setXmlInfo(false);
+        catch (NullPointerException NPE) {
+          NPE.printStackTrace();
         }
-      }
-
-      int currentCycle = em.getLastCycle();
-
-      if (summary.getRunType() == "Paired End" && currentCycle == summary.getTurnCycle()) {
-        summary.setState(Constants.STATE_TURN);
-        state = Constants.STATE_TURN;
-      }
-
-      // If run == paired end. Check for FC turn at (numReads read 1 + index 1). Set state accordingly.
-      if (summary.getPairedTurnCheck()) {
-        // State has not been set yet and user has not yet been notified for the turning of the flowcell.
-        if (!summary.getHasNotifyTurned()) {
-          summary.setState(Constants.STATE_TURN);
-          metrixLogger.log.info("Flowcell of run: " + path + " has to be turned. Current cycle: " + currentCycle);
-          summary.setHasNotifyTurned(true);
+        catch (SAXException SAX) {
+          metrixLogger.log.severe("Error parsing XML with SAX. " + SAX.toString());
         }
-      }
-
-      summary.setCurrentCycle(currentCycle);
-      summary.setLastUpdated();
-
-      // Catch event for when the flowcell has turned and the sequencer has continued sequencing the other side.
-      if ((summary.getRunType() == "Paired End") && (currentCycle > summary.getTurnCycle()) && (summary.getState() == Constants.STATE_TURN)) {
-        summary.setHasTurned(true);
-        summary.setState(Constants.STATE_RUNNING);
-      }
-      else {
-        summary.setState(state);
-      }
-
-      saveEntry(path);  // Store summary entry in SQL database
-
-      metrixLogger.log.info("Finished processing: " + runDir.getFileName());
-      success = true;
-    }
-    catch (NullPointerException NPE) {
-      NPE.printStackTrace();
-    }
-    catch (SAXException SAX) {
-      metrixLogger.log.severe("Error parsing XML with SAX. " + SAX.toString());
-    }
-    catch (IOException Ex) {
-      metrixLogger.log.severe("IOException Error. " + Ex.toString());
-    }
-    catch (ParserConfigurationException PXE) {
-      metrixLogger.log.severe("Parser Configuration Exception. " + PXE.toString());
-    }
-    finally {
-      em.closeSourceStream();
-      qm.closeSourceStream();
-      tm.closeSourceStream();
+        catch (IOException Ex) {
+          metrixLogger.log.severe("IOException Error. " + Ex.toString());
+        }
+        catch (ParserConfigurationException PXE) {
+          metrixLogger.log.severe("Parser Configuration Exception. " + PXE.toString());
+        }
+        finally {
+          em.closeSourceStream();
+          qm.closeSourceStream();
+          tm.closeSourceStream();
+        }
+    
+    }else{
+        metrixLogger.log.info("Quick loading finished run : " + path);
     }
 
     return success;
@@ -232,7 +236,9 @@ public class MetrixLogic {
       try {
         DataStore _ds = new DataStore();
         if (_ds.checkSummaryByRunId(path)) {
-          summary = _ds.getSummaryByRunName(path);
+          if(!this.quickLoad){
+            summary = _ds.getSummaryByRunName(path);
+          }
         }
         else {
           // Summary isnt present in database
@@ -382,18 +388,21 @@ public class MetrixLogic {
     // Load properties file parameter for post processing
     loadConfig();
     String execPP = configFile.getProperty("EXEC_POSTPROCESSING", "FALSE");
+    if(sum != null){
+        if (execPP.equalsIgnoreCase("TRUE") ) {
+          metrixLogger.log.log(Level.INFO, "Calling post processing module for: {0}", sum.getRunId());
+          PostProcessing pp = new PostProcessing(sum);
+          pp.run();
 
-    if (execPP.equalsIgnoreCase("TRUE")) {
-      metrixLogger.log.log(Level.INFO, "Calling post processing module for: {0}", sum.getRunId());
-      PostProcessing pp = new PostProcessing(sum);
-      pp.run();
+          return true;
 
-      return true;
-
-    }
-    else {
-      metrixLogger.log.info("No postprocessing performed for: " + sum.getRunId());
-      return false;
+        }
+        else {
+          metrixLogger.log.info("No postprocessing performed for: " + sum.getRunId());
+          return false;
+        }
+    }else{
+        return false;
     }
   }
 }

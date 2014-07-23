@@ -45,22 +45,16 @@ public class MetrixLive {
     String externalFileName = System.getProperty("properties");
     String absFile = (new File(externalFileName)).getAbsolutePath();
 
-   // String jsonArg = args[0];
-    
-    //if(jsonArg == null || jsonArg.equals("")){
-    //    System.out.println("[ERROR] No input json argumented.");
-    //    System.exit(1);
-   // }
-    
-    // Convert jsonCommand to Metrix Command
+  
+   // Convert jsonCommand to Metrix Command
     Command sendCommand = new Command();
 
   //  final JSONObject json = (JSONObject) JSONSerializer.toJSON(jsonArg);
 
      // Set a value for command
-    sendCommand.setFormat(Constants.COM_FORMAT_XML); // Always return JSON
-    sendCommand.setState(Constants.STATE_FINISHED); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
-    sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here.    
+    sendCommand.setFormat(Constants.COM_FORMAT_XML);
+    sendCommand.setState(Constants.STATE_RUNNING); 
+    sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here
     
     try (InputStream fin = new FileInputStream(new File(absFile))) {
       configFile.load(fin);
@@ -104,9 +98,6 @@ public class MetrixLive {
             serverAnswer = ois.readObject();
             if (serverAnswer instanceof Command) {  // Answer is a Command with info message.
               nki.objects.Command commandIn = (nki.objects.Command) serverAnswer;
-              if (commandIn.getCommand() != null) {
-                System.out.println("[SERVER] " + commandIn.getCommand());
-              }
             }
 
             /*

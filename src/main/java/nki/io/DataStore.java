@@ -30,9 +30,10 @@ public class DataStore {
   static final String UPDATE_OBJECT_SQL_ID = "UPDATE metrix_objects SET object_value = ?, state = ? WHERE id = ?";
   static final String UPDATE_OBJECT_SQL_RUNNAME = "UPDATE metrix_objects SET object_value = ?, state = ? WHERE run_id = ?";
   static final String READ_OBJECT_SQL_ID = "SELECT object_value FROM metrix_objects WHERE id = ?";
-  static final String READ_OBJECT_SQL_RUNNAME = "SELECT run_id FROM metrix_objects WHERE run_id = ?";
+  static final String READ_OBJECT_SQL_RUNNAME = "SELECT object_value FROM metrix_objects WHERE run_id = ?";
   static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_objects WHERE state = ?";
   static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_objects;";
+  static final String CHECK_RUN_ID_FOR_RUNNAME = "SELECT run_id FROM metrix_objects WHERE run_id = ?";
 
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
@@ -159,9 +160,9 @@ public class DataStore {
   }
 
   public static Summary getSummaryByRunName(String runName) throws Exception {
-    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME);
     metrixLogger.log.fine("Fetching summary by run name . " + runName);
-    pstmt.setFetchSize(Integer.MIN_VALUE);
+    
     pstmt.setString(1, runName);
 
     ResultSet rs = pstmt.executeQuery();
@@ -322,10 +323,14 @@ public class DataStore {
     return maxID;
   }
 
-  public static boolean checkSummaryByRunId(String run) throws Exception {
-    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    metrixLogger.log.fine("Fetching run by ID. " + run);
-    pstmt.setFetchSize(Integer.MIN_VALUE);
+  public boolean checkSummaryByRunId(String run) throws Exception {
+    if(conn == null){
+        LoggerWrapper.log.fine("No connection. Connecting. ");
+        conn = getConnection();
+    }
+    PreparedStatement pstmt = conn.prepareStatement(CHECK_RUN_ID_FOR_RUNNAME);
+    metrixLogger.log.fine("Checking if run exists run by ID. " + run);
+    
     pstmt.setString(1, run);
 
     boolean ret = false;

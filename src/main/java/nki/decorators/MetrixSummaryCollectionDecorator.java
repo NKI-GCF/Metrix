@@ -37,6 +37,17 @@ public class MetrixSummaryCollectionDecorator {
       }
   }
   
+  public void initializeMetrix(){
+      LoggerWrapper.log.log(Level.INFO, "Starting full initialization of Metrix. ");
+      for(ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();){
+          Summary sum = iter.next();
+          LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
+          MetrixContainer mc = new MetrixContainer(sum);
+          mc = null; // Cleanup MC.
+          LoggerWrapper.log.log(Level.INFO, "Done processing ...");
+      }
+      LoggerWrapper.log.log(Level.INFO, "Finished full initialization.");
+  }
   
   public JSONObject toJSON(){
       JSONObject json = new JSONObject();
@@ -113,7 +124,7 @@ public class MetrixSummaryCollectionDecorator {
       
       for(Summary sum : sc.getSummaryCollection()){
           JSONObject metrixJson = new JSONObject();
-          MetrixContainer metrixContainer = new MetrixContainer(sum);
+          MetrixContainer mc = new MetrixContainer(sum);
           
       }
       return "";
@@ -123,7 +134,7 @@ public class MetrixSummaryCollectionDecorator {
       
       for(Summary sum : sc.getSummaryCollection()){
           
-      }      
+      }
       return "";
   }
   

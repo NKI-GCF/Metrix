@@ -14,8 +14,6 @@ import org.w3c.dom.Element;
  */
 public class MetrixSummaryDecorator {
   private Summary summary;
-  private Element sumXml;
-  private Document xmlDoc;
 
   public MetrixSummaryDecorator(Summary summary) {
     this.summary = summary;
