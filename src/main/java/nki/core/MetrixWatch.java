@@ -142,9 +142,10 @@ public class MetrixWatch extends Thread {
             ml.quickLoad = false;
             metrixLogger.log.severe("Run has finished. Not available in database. Parsing...");
           }
-          ml.processMetrics(Paths.get(file), Constants.STATE_FINISHED, dataStore); // Parse available info with complete state
-          metrixLogger.log.finer("Closing connection.");
+          LoggerWrapper.log.finer("Closing connection.");
           ds.conn.close();
+          LoggerWrapper.log.finer("Started processing of finished run.");
+          ml.processMetrics(Paths.get(file), Constants.STATE_FINISHED, dataStore); // Parse available info with complete state
         }catch(Exception Ex){
               metrixLogger.log.severe("Exception while checking finished run in database. "+ Ex);
         }finally{
@@ -194,9 +195,10 @@ public class MetrixWatch extends Thread {
             }else{
               metrixLogger.log.severe("Parsing a run which has stopped. Alternative processing.");
             }
-            ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
             metrixLogger.log.finer("Closing connection.");
             ds.conn.close();
+            metrixLogger.log.finer("Started processing of stopped run.");
+            ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
           }catch(Exception Ex){
               metrixLogger.log.severe("Exception while checking stopped run in database. " + Ex);
           }finally{

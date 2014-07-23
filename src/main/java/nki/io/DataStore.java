@@ -344,12 +344,8 @@ public class DataStore {
     }
 
     try {
-      if (rs != null) {
-        rs.close();
-      }
-      if (pstmt != null) {
-        pstmt.close();
-      }
+      rs.close();
+      pstmt.close();
     }
     catch (Exception E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
