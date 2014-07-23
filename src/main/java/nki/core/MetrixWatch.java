@@ -129,11 +129,11 @@ public class MetrixWatch extends Thread {
         DataStore ds = null;
         try{
           ds = new DataStore();
-          if(ds.checkSummaryByRunId(file) && (System.currentTimeMillis() - fileComplete.lastModified()) < 1814400000){
+          if(DataStore.checkSummaryByRunId(ds.conn, file) && (System.currentTimeMillis() - fileComplete.lastModified()) < 1814400000){
             // Run is finished, available in database. But has completed last then three weeks ago.
             ml.quickLoad = false;
             metrixLogger.log.info("Quick loading a finished run. Available in database.");
-          }else if(ds.checkSummaryByRunId(file)){
+          }else if(DataStore.checkSummaryByRunId(ds.conn, file)){
             // Run is finished, available in database.
             ml.quickLoad = true;
             metrixLogger.log.info("Quick loading a finished run. Available in database.");
@@ -178,17 +178,17 @@ public class MetrixWatch extends Thread {
           try{
             ds = new DataStore();
             // Run is older than three weeks and is available in database.
-            if(difference > 1814400000 && ds.checkSummaryByRunId(file)){
+            if(difference > 1814400000 && DataStore.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = true;
               metrixLogger.log.info("Quick loading a stopped run. Age is older than 3 weeks.");
               ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
             // Run is less than three weeks old and is available in database.
-            }else if(difference < 1814400000 && ds.checkSummaryByRunId(file)){
+            }else if(difference < 1814400000 && DataStore.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = false;
               metrixLogger.log.info("Parsing a recent run which has stopped. Age is less than 3 weeks.");
               ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
             // Run is older than three weeks but hasn't been found in database.
-            }else if(!ds.checkSummaryByRunId(file)){
+            }else if(!DataStore.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = false;
               metrixLogger.log.info("Parsing a run which has stopped but not found in database.");
               ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);

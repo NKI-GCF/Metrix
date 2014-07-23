@@ -358,6 +358,33 @@ public class DataStore {
     return ret;
   }
 
+  public static boolean checkSummaryByRunId(Connection dsConn, String run) throws Exception {
+    PreparedStatement pstmt = dsConn.prepareStatement(CHECK_RUN_ID_FOR_RUNNAME);
+    metrixLogger.log.fine("Checking if run exists run by ID. " + run);
+    
+    pstmt.setString(1, run);
+
+    boolean ret = false;
+
+    ResultSet rs = pstmt.executeQuery();
+    if (rs.next()) {
+      ret = true;
+    }
+    else {
+      ret = false;
+    }
+
+    try {
+      rs.close();
+      pstmt.close();
+    }
+    catch (Exception E) {
+      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+    }
+    return ret;
+  }
+  
+  
   public static void closeAll() {
     try {
       conn.close();
