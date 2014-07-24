@@ -34,7 +34,7 @@ public class DataStore {
   static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_objects WHERE state = ?";
   static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_objects;";
   static final String CHECK_RUN_ID_FOR_RUNNAME = "SELECT run_id FROM metrix_objects WHERE run_id = ?";
-  static final String READ_OBJECTS_SEARCH_RUNID = "SELECT object_value FROM metrix_objects WHERE run_id LIKE '%?%'";
+  static final String READ_OBJECTS_SEARCH_RUNID = "SELECT object_value FROM metrix_objects WHERE run_id LIKE ?";
   
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
@@ -217,7 +217,7 @@ public class DataStore {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECTS_SEARCH_RUNID);
     metrixLogger.log.fine("Fetching by state.");
     
-    pstmt.setString(1, searchTerm);
+    pstmt.setString(1, '%' + searchTerm + '%'); // Do global search.
    
     ResultSet rs = pstmt.executeQuery();
     SummaryCollection sc = new SummaryCollection();
