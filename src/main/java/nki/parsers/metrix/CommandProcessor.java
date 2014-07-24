@@ -151,7 +151,7 @@ public final class CommandProcessor {
       Summary sum = DataStore.getSummaryByRunName(recCom.getRunId());
       sc.appendSummary(sum);
     }
-    else if (recCom.getState() == Constants.STATE_ALL_PSEUDO) {
+    else if (recCom.getState() == Constants.STATE_ALL_PSEUDO && recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE)) {
       sc = DataStore.getSummaryCollections();
     }
     else {
