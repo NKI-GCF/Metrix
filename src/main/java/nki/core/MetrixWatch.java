@@ -294,7 +294,7 @@ public class MetrixWatch extends Thread {
         WatchEvent<Path> ev = cast(event);
         Path name = ev.context();
 
-        if (name == null) {
+        if (name == null || dir == null) {
           continue;
         }
         Path child = dir.resolve(name);

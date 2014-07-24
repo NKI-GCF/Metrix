@@ -42,7 +42,8 @@ public final class Command implements Serializable {
   private String info;
   private String message;
   private String retType = Constants.COM_RET_TYPE_BYSTATE;  // Type of retrieval.
-
+  private String runIdSearch;
+  
   public static final int[] STATES = {
       Constants.STATE_RUNNING,
       Constants.STATE_FINISHED,
@@ -54,6 +55,7 @@ public final class Command implements Serializable {
 
   public static final String[] TYPES = {
       Constants.COM_INITIALIZE,
+      Constants.COM_SEARCH,
       Constants.COM_TYPE_SIMPLE,
       Constants.COM_TYPE_DETAIL
   };
@@ -87,6 +89,14 @@ public final class Command implements Serializable {
     return message;
   }
 
+    public void setRunIdSearch(String runIdSearch) {
+    this.runIdSearch = runIdSearch;
+  }
+
+  public String getRunIdSearch() {
+    return runIdSearch;
+  }
+  
   public void setInfo(String infomsg) {
     this.info = infomsg;
   }
@@ -203,9 +213,12 @@ public final class Command implements Serializable {
   public void setRetType(String retType) {
     if (retType.equals(Constants.COM_RET_TYPE_BYSTATE)) {
       this.retType = Constants.COM_RET_TYPE_BYSTATE;
+    }else if(retType.equals(Constants.COM_SEARCH)){
+        this.retType = Constants.COM_SEARCH;
     }else if(retType.equals(Constants.COM_INITIALIZE)){
         this.retType = Constants.COM_INITIALIZE;
     }else {
+      // Default to search by run.
       this.retType = Constants.COM_RET_TYPE_BYRUN;
     }
   }

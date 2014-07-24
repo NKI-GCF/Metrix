@@ -26,6 +26,7 @@ import nki.exceptions.UnimplementedCommandException;
 import nki.exceptions.InvalidCredentialsException;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -55,6 +56,28 @@ public class MetrixClient {
     int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
     String host = configFile.getProperty("HOST", "localhost");
 
+    String searchTerm = "";
+    ArrayList<String> searchResults = new ArrayList<>();
+    int arrIdx = 0;
+    
+    if (args.length == 0) {
+        System.err.println("Invalid number of arguments.");
+        System.exit(1);
+    }
+    else if (args.length == 1) {
+      searchTerm = args[0];
+
+      if (searchTerm.length() <= 2) {
+        System.err.println("Need a bigger search string.");
+        System.exit(1);
+      }
+    }
+    else if (args.length > 1) {
+      System.err.println("Invalid number of arguments.");
+      System.exit(1);
+    }
+    
+    
     try {
       SocketChannel sChannel = SocketChannel.open();
       sChannel.configureBlocking(true);
@@ -72,16 +95,15 @@ public class MetrixClient {
           nki.objects.Command sendCommand = new nki.objects.Command();
 
           // Set a value for command
-          sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
-          sendCommand.setState(Constants.STATE_RUNNING); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
+          sendCommand.setFormat(Constants.COM_FORMAT_JSON);
+          //sendCommand.setState(Constants.STATE_FINISHED); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
           //sendCommand.setRunId("Z:\\120210_SN867_0084_AD0HDPACXX-RUN137");
-          sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here.
-          //sendCommand.setRetType(Constants.COM_INITIALIZE);
+          sendCommand.setRunIdSearch("AC3NJ6ACXX");
+          //sendCommand.setType(Constants.COM_TYPE_DETAIL); // You can also make use of the available Constants here.
+          sendCommand.setRetType(Constants.COM_SEARCH);
 
           oos.writeObject(sendCommand);
           oos.flush();
-
-          boolean listen = true;
 
           Object serverAnswer = new Object();
 
@@ -103,70 +125,13 @@ public class MetrixClient {
               for (Summary sum : sc.getSummaryCollection()) {
                 // The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
                 System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
-                listen = false;
 
-                System.out.println("QScore Distribution");
-                if (sum.hasQScoreDist()) {
-                  System.out.println(sum.getQScoreDist().toTab());
-                }
-                else {
-                  System.out.println("No QScore Distribution available at this time.");
-                }
-
-                System.out.println("Cluster Density / Lane");
-                if (sum.hasClusterDensity()) {
-                  System.out.println(sum.getClusterDensity().toTab());
-                }
-                else {
-                  System.out.println("No Cluster Density metrics available at this time.");
-                }
-
-                System.out.println("Cluster Density Passing Filter / Lane");
-                if (sum.hasClusterDensityPF()) {
-                  System.out.println(sum.getClusterDensityPF().toTab());
-                }
-                else {
-                  System.out.println("No Cluster Density Passing Filter metrics available at this time.");
-                }
-
-                System.out.println("Phasing / Lane");
-                if (sum.hasPhasing()) {
-                  System.out.println(sum.getPhasingMap().toTab());
-                }
-                else {
-                  System.out.println("No Phasing metrics available at this time.");
-                }
-
-                System.out.println("Prephasing / Lane");
-                if (sum.hasPhasing()) {
-                  System.out.println(sum.getPrephasingMap().toTab());
-                }
-                else {
-                  System.out.println("No Prephasing metrics available at this time.");
-                }
-
-                System.out.println("IntensityScore Avg");
-                if (sum.hasIntensityDistAvg()) {
-                  
-//                  System.out.println(sum.getIntensityDistAvg().toTab());
-                }
-
-                System.out.println("IntensityScore CC Avg");
-                if (sum.hasIntensityDistCCAvg()) {
-//                  System.out.println(sum.getIntensityDistCCAvg().toTab());
-                }
-
-                System.out.println("Project/Sample overview");
-                if (sum.hasSampleInfo()) {
-                  System.out.println(sum.getSampleInfo().toTab());
-                }
               }
             }
 
             if (serverAnswer instanceof String) {      // Server returned a XML String with results.
               String srvResp = (String) serverAnswer;
               System.out.println(srvResp);
-              listen = false;
             }
 
             /*
@@ -184,25 +149,20 @@ public class MetrixClient {
             /*
              *	Exceptions
              */
-
             if (serverAnswer instanceof EmptyResultSetCollection) {
               System.out.println(serverAnswer.toString());
-              listen = false;
             }
 
             if (serverAnswer instanceof InvalidCredentialsException) {
               System.out.println(serverAnswer.toString());
-              listen = false;
             }
 
             if (serverAnswer instanceof MissingCommandDetailException) {
               System.out.println(serverAnswer.toString());
-              listen = false;
             }
 
             if (serverAnswer instanceof UnimplementedCommandException) {
               System.out.println(serverAnswer.toString());
-              listen = false;
             }
           }
         }

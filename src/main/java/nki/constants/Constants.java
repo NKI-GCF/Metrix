@@ -105,6 +105,7 @@ public final class Constants {
   public static final String COM_RET_TYPE_BYSTATE = "BYSTATE";  // Retrieve runs by run state (use setState())
   public static final String COM_RET_TYPE_BYRUN = "BYRUN";    // Retrieve single run by run identifier (use setRunId())
   public static final String COM_INITIALIZE = "INITIALIZE";    // Parsed all available runs and initialize
+  public static final String COM_SEARCH = "SEARCH";    // Search in run_id string using runIdSearch in Command
   
   public static final long METRIC_UPDATE_TIME = 7200000;    // Update every 120 minutes
   public static final long ACTIVE_TIMEOUT = 86400000;    // Time out age of InterOp files while run is active. Default: 24 hours.

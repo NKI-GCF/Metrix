@@ -34,7 +34,8 @@ public class DataStore {
   static final String READ_OBJECT_SQL_STATE = "SELECT object_value FROM metrix_objects WHERE state = ?";
   static final String READ_OBJECT_SQL_ALL = "SELECT object_value FROM metrix_objects;";
   static final String CHECK_RUN_ID_FOR_RUNNAME = "SELECT run_id FROM metrix_objects WHERE run_id = ?";
-
+  static final String READ_OBJECTS_SEARCH_RUNID = "SELECT object_value FROM metrix_objects WHERE run_id LIKE '%?%'";
+  
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
   private static Properties configFile = new Properties();
@@ -49,9 +50,9 @@ public class DataStore {
 
     fin.close();
     try {
-      LoggerWrapper.log.log(Level.FINER, "Opening connection");
+      LoggerWrapper.log.log(Level.FINEST, "Opening connection");
       conn = getConnection();
-      LoggerWrapper.log.log(Level.FINER, "Opened connection");
+      LoggerWrapper.log.log(Level.FINEST, "Opened connection");
     }
     catch (Exception ex) {
       metrixLogger.log.severe("Error setting up database connection. " + ex.toString());
@@ -122,14 +123,10 @@ public class DataStore {
       id = rs.getInt(1);
     }
     try {
-      if (rs != null) {
         rs.close();
-      }
-      if (pstmt != null) {
         pstmt.close();
-      }
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
     return id;
@@ -145,14 +142,10 @@ public class DataStore {
     String className = sum.getClass().getName();
 
     try {
-      if (rs != null) {
         rs.close();
-      }
-      if (pstmt != null) {
         pstmt.close();
-      }
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
 
@@ -179,14 +172,10 @@ public class DataStore {
     }
 
     try {
-      if (rs != null) {
         rs.close();
-      }
-      if (pstmt != null) {
         pstmt.close();
-      }
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
 
@@ -214,12 +203,39 @@ public class DataStore {
     }
 
     try {
-      if (rs != null) {
         rs.close();
-      }
-      if (pstmt != null) {
         pstmt.close();
+    }
+    catch (SQLException E) {
+      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+    }
+
+    return sc;
+  }
+
+    public static SummaryCollection getSummaryCollectionBySearch(String searchTerm) throws Exception {
+    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECTS_SEARCH_RUNID);
+    metrixLogger.log.fine("Fetching by state.");
+    
+    pstmt.setString(1, searchTerm);
+   
+    ResultSet rs = pstmt.executeQuery();
+    SummaryCollection sc = new SummaryCollection();
+
+    while (rs.next()) {
+      byte[] buf = rs.getBytes(1);
+      ObjectInputStream objectIn = null;
+      if (buf != null) {
+        objectIn = new ObjectInputStream(new ByteArrayInputStream(buf));
       }
+      Object sumObject = objectIn.readObject();
+      Summary sum = (Summary) sumObject;
+      sc.appendSummary(sum);
+    }
+
+    try {
+        rs.close();
+        pstmt.close();
     }
     catch (Exception E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
@@ -227,7 +243,7 @@ public class DataStore {
 
     return sc;
   }
-
+  
   public static SummaryCollection getSummaryCollections() throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_ALL);
     metrixLogger.log.fine("Fetching all summaries.");
@@ -247,14 +263,10 @@ public class DataStore {
     }
 
     try {
-      if (rs != null) {
         rs.close();
-      }
-      if (pstmt != null) {
         pstmt.close();
-      }
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
 
@@ -271,11 +283,9 @@ public class DataStore {
     pstmt.executeUpdate();
 
     try {
-      if (pstmt != null) {
-        pstmt.close();
-      }
+      pstmt.close();
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
   }
@@ -289,11 +299,9 @@ public class DataStore {
     pstmt.executeUpdate();
 
     try {
-      if (pstmt != null) {
         pstmt.close();
-      }
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
   }
@@ -309,14 +317,10 @@ public class DataStore {
     }
 
     try {
-      if (s2 != null) {
         s2.close();
-      }
-      if (rs2 != null) {
         rs2.close();
-      }
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
 
@@ -347,7 +351,7 @@ public class DataStore {
       rs.close();
       pstmt.close();
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
 
@@ -374,7 +378,7 @@ public class DataStore {
       rs.close();
       pstmt.close();
     }
-    catch (Exception E) {
+    catch (SQLException E) {
       metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
     }
     return ret;

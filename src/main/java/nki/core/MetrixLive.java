@@ -52,7 +52,7 @@ public class MetrixLive {
   //  final JSONObject json = (JSONObject) JSONSerializer.toJSON(jsonArg);
 
      // Set a value for command
-    sendCommand.setFormat(Constants.COM_FORMAT_XML);
+    sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
     sendCommand.setState(Constants.STATE_RUNNING); 
     sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here
     
@@ -109,11 +109,12 @@ public class MetrixLive {
               SummaryCollection sc = (SummaryCollection) serverAnswer;
               for (Summary sum : sc.getSummaryCollection()) {
                   
-                MetrixContainer mc = new MetrixContainer(sum.getRunDirectory());
-                JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
-                consoleOut += ("," + allOut.toString());
+                //MetrixContainer mc = new MetrixContainer(sum.getRunDirectory());
+                //JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
+                //consoleOut += ("," + allOut.toString());
+                System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
               }
-              System.out.print(consoleOut);
+              //System.out.print(consoleOut);
             }
 
             if (serverAnswer instanceof String) {      // Server returned a XML String with results.
