@@ -1,6 +1,6 @@
 package nki.decorators;
 
-import net.sf.json.JSONObject;
+import org.json.simple.JSONObject;
 import nki.objects.Summary;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

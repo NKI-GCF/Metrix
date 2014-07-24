@@ -1,6 +1,6 @@
 package nki.decorators;
 
-import net.sf.json.JSONObject;
+import org.json.simple.JSONObject;
 import nki.core.MetrixContainer;
 import nki.objects.Summary;
 

@@ -4,8 +4,8 @@ import java.util.ListIterator;
 import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import nki.constants.Constants;
 import nki.core.MetrixContainer;
 import nki.objects.Summary;
@@ -115,7 +115,7 @@ public class MetrixSummaryCollectionDecorator {
           
       }
       // Add statistics to json object.
-      json.accumulate("summaries", jsonCollection);
+      json.put("summaries", jsonCollection);
       sc = null; // Destroy the summarycollection.
       return json;
   }

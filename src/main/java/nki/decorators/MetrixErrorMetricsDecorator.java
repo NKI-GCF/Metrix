@@ -1,7 +1,7 @@
 package nki.decorators;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import nki.objects.ErrorCollection;
 import nki.objects.ErrorDist;
 import nki.util.ArrayUtils;

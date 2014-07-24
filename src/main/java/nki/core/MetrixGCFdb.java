@@ -6,7 +6,7 @@ package nki.core;
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
 
-import net.sf.json.JSONObject;
+import org.json.simple.JSONObject;
 import nki.decorators.MetrixContainerDecorator;
 
 import java.io.*;

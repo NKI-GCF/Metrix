@@ -3,8 +3,8 @@ package nki.decorators;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import nki.objects.*;
 import nki.parsers.illumina.TileMetrics;
 

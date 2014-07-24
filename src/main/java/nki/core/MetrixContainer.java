@@ -8,7 +8,6 @@ package nki.core;
 // under certain conditions; for more information please see LICENSE.txt
 
 import java.io.*;
-import java.util.HashMap;
 import java.text.*;
 import java.util.Map;
 import java.util.logging.Level;

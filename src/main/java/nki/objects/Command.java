@@ -5,21 +5,23 @@
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
 
-// TYPES:
-// 	SIMPLE
-// 	DETAIL
-// FORMATS:
-// XML is a SummaryCollection XML format.
-// OBJ is a SummaryCollection POJO.
-// JSON is a SummaryCollection JSON format.
+/* TYPES:
+    SIMPLE                  Constants.COM_TYPE_SIMPLE
+    DETAIL                  Constants.COM_TYPE_DETAIL
 
-// STATES:
-// 1 = Running              Constants.STATE_RUNNING
-// 2 = Finished             Constants.STATE_FINISHED
-// 3 = Halted               Constants.STATE_HANG
-// 4 = Turn                 Constants.STATE_TURN
-// 5 = Initialization       Constants.STATE_INIT
-// 12 = All                 Constants.STATE_ALL_PSEUDO
+   FORMATS:
+     XML                    Constants.COM_FORMAT_XML
+     OBJ                    Constants.COM_FORMAT_OBJ
+     JSON                   Constants.COM_FORMAT_JSON
+
+   STATES:
+    1 = Running              Constants.STATE_RUNNING
+    2 = Finished             Constants.STATE_FINISHED
+    3 = Halted               Constants.STATE_HANG
+    4 = Turn                 Constants.STATE_TURN
+    5 = Initialization       Constants.STATE_INIT
+    12 = All                 Constants.STATE_ALL_PSEUDO
+*/
 
 package nki.objects;
 
@@ -39,7 +41,6 @@ public final class Command implements Serializable {
   private MetricFilter filter;
   private Date dateTime;
   private String runId = "";
-  private String info;
   private String message;
   private String retType = Constants.COM_RET_TYPE_BYSTATE;  // Type of retrieval.
   private String runIdSearch;
@@ -97,10 +98,6 @@ public final class Command implements Serializable {
     return runIdSearch;
   }
   
-  public void setInfo(String infomsg) {
-    this.info = infomsg;
-  }
-
   public String getType() {
     return type;
   }

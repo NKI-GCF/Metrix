@@ -1,8 +1,7 @@
 package nki.decorators;
 
-import java.io.IOException;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import nki.objects.Indices;
 import nki.objects.SampleInfo;
 import java.util.Map;

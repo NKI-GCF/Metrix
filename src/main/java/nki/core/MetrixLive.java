@@ -15,8 +15,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.*;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
+import org.json.simple.JSONObject;
 
 import nki.constants.Constants;
 import nki.objects.Command;
