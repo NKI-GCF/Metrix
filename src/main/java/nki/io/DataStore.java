@@ -154,7 +154,7 @@ public class DataStore {
 
   public static Summary getSummaryByRunName(String runName) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME);
-    metrixLogger.log.fine("Fetching summary by run name . " + runName);
+    metrixLogger.log.fine("Fetching summary by run name: " + runName);
     
     pstmt.setString(1, runName);
 

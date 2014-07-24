@@ -5,16 +5,6 @@ import nki.objects.Summary;
 import nki.objects.SummaryCollection;
 import nki.constants.Constants;
 import nki.io.DataStore;
-import nki.objects.QualityScores;
-import nki.objects.QScoreDist;
-import nki.objects.IntensityScores;
-import nki.objects.Indices;
-import nki.objects.Update;
-import nki.objects.Reads;
-import nki.parsers.illumina.QualityMetrics;
-import nki.parsers.illumina.TileMetrics;
-import nki.parsers.illumina.CorrectedIntensityMetrics;
-import nki.parsers.illumina.IndexMetrics;
 import nki.exceptions.InvalidCredentialsException;
 import nki.exceptions.CommandValidityException;
 import nki.exceptions.UnimplementedCommandException;
@@ -25,7 +15,6 @@ import nki.util.LoggerWrapper;
 import java.io.*;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ListIterator;
 import java.util.logging.Level;
 import nki.decorators.MetrixSummaryCollectionDecorator;
 
@@ -35,9 +24,9 @@ public final class CommandProcessor {
   private boolean valApi = false;
 
   private Command retCom;
-  private Command recCom;
+  private final Command recCom;
 
-  private ObjectOutputStream oos;
+  private final ObjectOutputStream oos;
   private ObjectInputStream ois;
   private DataStore ds;
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();

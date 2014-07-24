@@ -98,7 +98,7 @@ public class MetrixClient {
           sendCommand.setFormat(Constants.COM_FORMAT_JSON);
           //sendCommand.setState(Constants.STATE_FINISHED); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
           //sendCommand.setRunId("Z:\\120210_SN867_0084_AD0HDPACXX-RUN137");
-          sendCommand.setRunIdSearch("AC3NJ6ACXX");
+          sendCommand.setRunIdSearch(searchTerm);
           //sendCommand.setType(Constants.COM_TYPE_DETAIL); // You can also make use of the available Constants here.
           sendCommand.setRetType(Constants.COM_SEARCH);
 
