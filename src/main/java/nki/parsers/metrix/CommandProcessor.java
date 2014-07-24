@@ -133,15 +133,6 @@ public final class CommandProcessor {
         DataStore.closeAll();
     }    
     
-    if(recCom.getRetType().equals(Constants.COM_SEARCH)){
-        if(recCom.getRunIdSearch() != null){
-            metrixLogger.log.log(Level.INFO, "Searching runID database using : {0}", recCom.getRunIdSearch());
-            sc = DataStore.getSummaryCollectionBySearch(recCom.getRunIdSearch());
-            metrixLogger.log.log(Level.FINE, "Found {0} runs.", sc.getCollectionCount());
-        }else{
-            throw new MissingCommandDetailException("Missing search query for command. Please set RunIdSearch in Command.");
-        }
-    }
     // Check actual command types.
     if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE) && !recCom.checkState(recCom.getState())) {
       throw new MissingCommandDetailException("Summary State of received command is missing.");
@@ -153,6 +144,15 @@ public final class CommandProcessor {
     }
     else if (recCom.getState() == Constants.STATE_ALL_PSEUDO && recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE)) {
       sc = DataStore.getSummaryCollections();
+    }
+    else if(recCom.getRetType().equals(Constants.COM_SEARCH)){
+        if(recCom.getRunIdSearch() != null){
+            metrixLogger.log.log(Level.INFO, "Searching runID database using : {0}", recCom.getRunIdSearch());
+            sc = DataStore.getSummaryCollectionBySearch(recCom.getRunIdSearch());
+            metrixLogger.log.log(Level.FINE, "Found {0} runs.", sc.getCollectionCount());
+        }else{
+            throw new MissingCommandDetailException("Missing search query for command. Please set RunIdSearch in Command.");
+        }
     }
     else {
       sc = DataStore.getSummaryCollectionByState(recCom.getState());

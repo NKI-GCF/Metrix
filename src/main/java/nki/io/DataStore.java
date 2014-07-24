@@ -184,7 +184,7 @@ public class DataStore {
 
   public static SummaryCollection getSummaryCollectionByState(int state) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_STATE);
-    metrixLogger.log.fine("Fetching by state.");
+    metrixLogger.log.fine("Fetching SC by state .");
     
     pstmt.setInt(1, state);
    
@@ -215,7 +215,7 @@ public class DataStore {
 
     public static SummaryCollection getSummaryCollectionBySearch(String searchTerm) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECTS_SEARCH_RUNID);
-    metrixLogger.log.fine("Fetching by state.");
+    metrixLogger.log.fine("Fetching by search ID. " + searchTerm);
     
     pstmt.setString(1, '%' + searchTerm + '%'); // Do global search.
    
