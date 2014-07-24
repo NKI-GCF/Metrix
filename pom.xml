@@ -118,7 +118,21 @@
               <goal>one-jar</goal>
             </goals>
           </execution>          
-                              
+
+          <execution>
+            <id>MetrixClient</id>
+            <configuration>
+              <onejarVersion>0.97</onejarVersion>
+              <attachToBuild>true</attachToBuild>
+              <classifier>onejar</classifier>
+              <mainClass>nki.core.MetrixClient</mainClass>
+              <filename>MetrixClient.jar</filename>
+            </configuration>
+            <goals>
+              <goal>one-jar</goal>
+            </goals>
+          </execution>                              
+                                                                                          
           <execution>
             <id>Metrix</id>
             <configuration>
