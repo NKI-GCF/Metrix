@@ -414,9 +414,9 @@ public class PostProcessing {
       return exitStatus;
     }
 
-		/*
-		*  Is process a copy operation?
-		*/
+    /*
+    *  Is process a copy operation?
+    */
     if (fo.isCopyOperation()) {
 
       // Is globbing used?
@@ -489,9 +489,9 @@ public class PostProcessing {
       }
     }
 
-		/*
-		* Is process a symlink operation?
-		*/
+    /*
+    * Is process a symlink operation?
+    */
     if (fo.isSymlinkOperation()) {
       try {
         Files.createSymbolicLink(sourceFile.toPath(), destinationFile.toPath());
@@ -505,9 +505,9 @@ public class PostProcessing {
       }
     }
 
-		/*
-		* Process is another operation type
-		*/
+    /*
+    * Process is another operation type
+    */
     // Not yet implemented.
 
     if (exitStatus == 0) {

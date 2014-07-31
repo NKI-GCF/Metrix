@@ -6,13 +6,15 @@ package nki.core;
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
 
-import org.json.simple.JSONObject;
-import nki.decorators.MetrixContainerDecorator;
 
 import java.io.*;
-import java.util.regex.*;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.regex.*;
+import nki.decorators.MetrixContainerDecorator;
+import nki.io.DataStore;
+import nki.objects.Summary;
+import org.json.simple.JSONObject;
 
 public class MetrixGCFdb {
   public static void main(String[] args) {
@@ -66,43 +68,50 @@ public class MetrixGCFdb {
       System.exit(1);
     }
 
-    File dir = new File(runDir);
+    try{
+        Summary sum = DataStore.getSummaryBySearch(searchTerm);
+        if(sum != null){
+            processSummary(sum);
+        }else{
+            File dir = new File(runDir);
     
-    if(!dir.exists()){
-      System.err.println("[Error] Search directory does not exist.");
-      System.exit(1);
-    }
-    
-    File[] files = dir.listFiles();
-    for (File file : files) {
-      if (file.isFile()) {
-        continue;
-      }
-      if (file.isDirectory()) {
-        if (Pattern.compile(Pattern.quote(searchTerm), Pattern.CASE_INSENSITIVE).matcher(file.getName()).find()) {
-          searchResults.add(file.getName());
+            if(!dir.exists()){
+              System.err.println("[Error] Search directory does not exist.");
+              System.exit(1);
+            }
+
+            File[] files = dir.listFiles();
+            for (File file : files) {
+              if (file.isFile()) {
+                continue;
+              }
+              if (file.isDirectory()) {
+                if (Pattern.compile(Pattern.quote(searchTerm), Pattern.CASE_INSENSITIVE).matcher(file.getName()).find()) {
+                  searchResults.add(file.getName());
+                }
+              }
+            }
+
+            if (searchResults.size() > 0) {
+              if (searchResults.size() == 1) {
+                // Process single result
+                // Parse 1st option.
+                processResult(searchResults.get(0));
+              }
+              else {
+                // More than one result found. 
+                System.err.println("Multiple results have been found. ");
+                System.exit(1);
+              }
+            }
+            else {
+              System.err.println("No results for " + searchTerm);
+              System.exit(1);
+            }
         }
-      }
+    }catch(Exception Ex){
+        System.err.println("Exception. "+ Ex);
     }
-
-    if (searchResults.size() > 0) {
-      if (searchResults.size() == 1) {
-        // Process single result
-        arrIdx = 0;
-      }
-      else {
-        // More than one result found. 
-        System.err.println("Multiple results have been found. ");
-        System.exit(1);
-      }
-    }
-    else {
-      System.err.println("No results for " + searchTerm);
-      System.exit(1);
-    }
-
-    procResult += searchResults.get(arrIdx);
-    processResult(procResult);
   }
 
   public static boolean isInteger(String s) {
@@ -115,8 +124,15 @@ public class MetrixGCFdb {
     return true;
   }
 
-  public static void processResult(String runName) {
-    MetrixContainer mc = new MetrixContainer(runName);
+  public static void processSummary(Summary sum) {
+    MetrixContainer mc = new MetrixContainer(sum);
+
+    JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
+    System.out.print(allOut.toString());
+  }
+  
+  public static void processResult(String sum) {
+    MetrixContainer mc = new MetrixContainer(sum);
 
     JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
     System.out.print(allOut.toString());

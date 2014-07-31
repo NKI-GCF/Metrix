@@ -97,6 +97,12 @@ public class Metrix {
     System.out.println("Searching for: " + searchTerm);
     File dir = new File(runDir);
     File[] files = dir.listFiles();
+    
+    if(files == null){
+      System.out.println("[Error] Reading Illumina run directory path.");
+      System.exit(1);
+    }
+    
     for (File file : files) {
       if (file.isFile()) {
         continue;

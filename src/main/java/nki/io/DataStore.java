@@ -243,7 +243,37 @@ public class DataStore {
 
     return sc;
   }
-  
+
+    public static Summary getSummaryBySearch(String searchTerm) throws Exception {
+    PreparedStatement pstmt = conn.prepareStatement(READ_OBJECTS_SEARCH_RUNID);
+    metrixLogger.log.fine("Fetching by search ID. " + searchTerm);
+    
+    pstmt.setString(1, '%' + searchTerm + '%'); // Do global search.
+   
+    ResultSet rs = pstmt.executeQuery();
+    Summary sum = null;
+
+    while (rs.next()) {
+      byte[] buf = rs.getBytes(1);
+      ObjectInputStream objectIn = null;
+      if (buf != null) {
+        objectIn = new ObjectInputStream(new ByteArrayInputStream(buf));
+      }
+      Object sumObject = objectIn.readObject();
+      sum = (Summary) sumObject;
+    }
+
+    try {
+        rs.close();
+        pstmt.close();
+    }
+    catch (Exception E) {
+      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+    }
+
+    return sum;
+  }    
+    
   public static SummaryCollection getSummaryCollections() throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_ALL);
     metrixLogger.log.fine("Fetching all summaries.");

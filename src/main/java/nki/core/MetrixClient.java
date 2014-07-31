@@ -61,19 +61,19 @@ public class MetrixClient {
     int arrIdx = 0;
     
     if (args.length == 0) {
-        System.err.println("Invalid number of arguments.");
+        System.err.println("[ERROR] Invalid number of arguments.");
         System.exit(1);
     }
     else if (args.length == 1) {
       searchTerm = args[0];
 
       if (searchTerm.length() <= 2) {
-        System.err.println("Need a bigger search string.");
+        System.err.println("[ERROR] Need a bigger search string.");
         System.exit(1);
       }
     }
     else if (args.length > 1) {
-      System.err.println("Invalid number of arguments.");
+      System.err.println("[ERROR] Invalid number of arguments.");
       System.exit(1);
     }
     
@@ -96,10 +96,7 @@ public class MetrixClient {
 
           // Set a value for command
           sendCommand.setFormat(Constants.COM_FORMAT_JSON);
-          //sendCommand.setState(Constants.STATE_FINISHED); // Select run state (1 - running, 2 - finished, 3 - errors / halted, 4 - FC needs turn, 5 - init) || 12 - ALL
-          //sendCommand.setRunId("Z:\\120210_SN867_0084_AD0HDPACXX-RUN137");
           sendCommand.setRunIdSearch(searchTerm);
-          //sendCommand.setType(Constants.COM_TYPE_DETAIL); // You can also make use of the available Constants here.
           sendCommand.setRetType(Constants.COM_SEARCH);
 
           oos.writeObject(sendCommand);
@@ -119,7 +116,6 @@ public class MetrixClient {
             /*
              * Requested Data collection
              */
-
             if (serverAnswer instanceof SummaryCollection) {
               SummaryCollection sc = (SummaryCollection) serverAnswer;
               for (Summary sum : sc.getSummaryCollection()) {
@@ -168,7 +164,6 @@ public class MetrixClient {
         }
         catch (IOException Ex) {
           //	System.out.println("Error" + Ex);
-          LoggerWrapper.log.log(Level.WARNING, "Ex "+Ex);
         }
       }
     }
