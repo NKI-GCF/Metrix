@@ -72,16 +72,16 @@ public class MetrixIntensityMetricsDecorator {
       for (int cycle : cycleContent.keySet()) {
         Map<String, MutableInt> cycleIntensities = cycleContent.get(cycle);
         for (String intensity : cycleIntensities.keySet()) {
-          if (intensity.equals(Constants.METRIC_VAR_ACI_A)) {
+          if (intensity.equals(Constants.METRIC_VAR_ACI_A) || intensity.equals(Constants.METRIC_VAR_ACICC_A)) {
             cyclesA.add(cycleIntensities.get(intensity).get());
           }
-          if (intensity.equals(Constants.METRIC_VAR_ACI_C)) {
+          if (intensity.equals(Constants.METRIC_VAR_ACI_C) || intensity.equals(Constants.METRIC_VAR_ACICC_C)) {
             cyclesC.add(cycleIntensities.get(intensity).get());
           }
-          if (intensity.equals(Constants.METRIC_VAR_ACI_T)) {
+          if (intensity.equals(Constants.METRIC_VAR_ACI_T) || intensity.equals(Constants.METRIC_VAR_ACICC_T)) {
             cyclesT.add(cycleIntensities.get(intensity).get());
           }
-          if (intensity.equals(Constants.METRIC_VAR_ACI_G)) {
+          if (intensity.equals(Constants.METRIC_VAR_ACI_G) || intensity.equals(Constants.METRIC_VAR_ACICC_G)) {
             cyclesG.add(cycleIntensities.get(intensity).get());
           }
         }
