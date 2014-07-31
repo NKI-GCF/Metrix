@@ -32,7 +32,7 @@ public class IndexMetrics extends GenericIlluminaParser {
     return indices;
   }
 
-	/*
+   /*
    * Binary structure
 	 * byte 0: file version number (1)
 	 * bytes (variable length): record:
@@ -85,7 +85,7 @@ public class IndexMetrics extends GenericIlluminaParser {
 
         indices.setIndex(projectSeq, sampleSeq, indexSeq, numClustersIdx, laneNr, readNr);
 
-        //System.out.println(laneNr + "\t" + tileNr + "\t" + numClustersIdx);
+        System.out.println(laneNr + "\t" + tileNr + "\t" + numClustersIdx);
       }
     }
     catch (IOException ExMain) {

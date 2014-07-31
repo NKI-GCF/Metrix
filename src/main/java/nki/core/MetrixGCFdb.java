@@ -152,6 +152,9 @@ public class MetrixGCFdb {
     boolean isRemote = true;
     MetrixContainer mc = new MetrixContainer(sum);
     
+      System.out.println("TAB THINGIES");
+    System.out.println(sum.getSampleInfo().toTab());
+    
     JSONObject allOut = new MetrixContainerDecorator(mc, isRemote).toJSON();
     System.out.print(allOut.toString());
   }
