@@ -8,12 +8,21 @@ package nki.core;
 
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.regex.*;
+import nki.constants.Constants;
 import nki.decorators.MetrixContainerDecorator;
+import nki.exceptions.EmptyResultSetCollection;
+import nki.exceptions.InvalidCredentialsException;
+import nki.exceptions.MissingCommandDetailException;
+import nki.exceptions.UnimplementedCommandException;
 import nki.io.DataStore;
+import nki.objects.Command;
 import nki.objects.Summary;
+import nki.objects.SummaryCollection;
 import org.json.simple.JSONObject;
 
 public class MetrixGCFdb {
@@ -43,13 +52,7 @@ public class MetrixGCFdb {
       System.exit(1);
     }
 
-    // BEFORE COMPILING; DEFINE RUN DIRECTORY BELOW
-    String runDir = configFile.getProperty("RUNDIR", "/tmp/") + "/";
-
     String searchTerm = "";
-    ArrayList<String> searchResults = new ArrayList<>();
-    String procResult = runDir;
-    int arrIdx = 0;
 
     if (args.length == 0) {
         System.err.println("Invalid number of arguments.");
@@ -68,51 +71,63 @@ public class MetrixGCFdb {
       System.exit(1);
     }
 
-    try{
-        System.out.println(searchTerm);
-        DataStore ds = new DataStore();
-        Summary sum = ds.getSummaryBySearch(searchTerm);
-        if(sum != null){
-            processSummary(sum);
-        }else{
-            File dir = new File(runDir);
+    int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
+    String host = configFile.getProperty("HOST", "localhost");
     
-            if(!dir.exists()){
-              System.err.println("[Error] Search directory does not exist.");
-              System.exit(1);
-            }
+       
+    try{
+        SocketChannel sChannel = SocketChannel.open();
+        sChannel.configureBlocking(true);
 
-            File[] files = dir.listFiles();
-            for (File file : files) {
-              if (file.isFile()) {
-                continue;
-              }
-              if (file.isDirectory()) {
-                if (Pattern.compile(Pattern.quote(searchTerm), Pattern.CASE_INSENSITIVE).matcher(file.getName()).find()) {
-                  searchResults.add(file.getName());
+        if (sChannel.connect(new InetSocketAddress(host, port))) {
+            // Create OutputStream for sending objects.
+            ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
+
+            // Cteate Inputstream for receiving objects.
+            ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
+            String prevUpdate = "";
+
+            Command cmd = new Command();
+            cmd.setRetType(Constants.COM_SEARCH);
+            cmd.setFormat(Constants.COM_FORMAT_OBJ);
+            cmd.setRunIdSearch(searchTerm);
+            
+            oos.writeObject(cmd);
+            oos.flush();
+            
+            Object srvResp = new Object();
+            
+            while(ois != null ){
+                srvResp = ois.readObject();
+                // Process expected response
+                if (srvResp instanceof SummaryCollection) {
+                    SummaryCollection sc = (SummaryCollection) srvResp;
+                    Summary sum = sc.getSummaryCollection().get(0);
+                    processResult(sum);
+                }                
+
+                /*
+                 *	Exceptions
+                 */
+                if (srvResp instanceof EmptyResultSetCollection) {
+                  System.out.println(srvResp.toString());
                 }
-              }
-            }
 
-            if (searchResults.size() > 0) {
-              if (searchResults.size() == 1) {
-                // Process single result
-                // Parse 1st option.
-                processResult(searchResults.get(0));
-              }
-              else {
-                // More than one result found. 
-                System.err.println("Multiple results have been found. ");
-                System.exit(1);
-              }
-            }
-            else {
-              System.err.println("No results for " + searchTerm);
-              System.exit(1);
+                if (srvResp instanceof InvalidCredentialsException) {
+                  System.out.println(srvResp.toString());
+                }
+
+                if (srvResp instanceof MissingCommandDetailException) {
+                  System.out.println(srvResp.toString());
+                }
+
+                if (srvResp instanceof UnimplementedCommandException) {
+                  System.out.println(srvResp.toString());
+                }            
             }
         }
     }catch(Exception Ex){
-        System.err.println("Exception. "+ Ex.toString());
+        System.err.println("Exception. "+ Ex);
         Ex.printStackTrace();
     }
   }
@@ -127,14 +142,7 @@ public class MetrixGCFdb {
     return true;
   }
 
-  public static void processSummary(Summary sum) {
-    MetrixContainer mc = new MetrixContainer(sum);
-
-    JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
-    System.out.print(allOut.toString());
-  }
-  
-  public static void processResult(String sum) {
+  public static void processResult(Summary sum) {
     MetrixContainer mc = new MetrixContainer(sum);
 
     JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
