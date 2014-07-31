@@ -244,7 +244,7 @@ public class DataStore {
     return sc;
   }
 
-    public static Summary getSummaryBySearch(String searchTerm) throws Exception {
+    public Summary getSummaryBySearch(String searchTerm) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECTS_SEARCH_RUNID);
     metrixLogger.log.fine("Fetching by search ID. " + searchTerm);
     

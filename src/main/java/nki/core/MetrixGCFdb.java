@@ -69,7 +69,9 @@ public class MetrixGCFdb {
     }
 
     try{
-        Summary sum = DataStore.getSummaryBySearch(searchTerm);
+        System.out.println(searchTerm);
+        DataStore ds = new DataStore();
+        Summary sum = ds.getSummaryBySearch(searchTerm);
         if(sum != null){
             processSummary(sum);
         }else{
@@ -110,7 +112,8 @@ public class MetrixGCFdb {
             }
         }
     }catch(Exception Ex){
-        System.err.println("Exception. "+ Ex);
+        System.err.println("Exception. "+ Ex.toString());
+        Ex.printStackTrace();
     }
   }
 
