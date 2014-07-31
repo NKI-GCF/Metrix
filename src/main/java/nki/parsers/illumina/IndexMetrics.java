@@ -74,7 +74,7 @@ public class IndexMetrics extends GenericIlluminaParser {
 
         String indexSeq = leis.readUTF8String(numBytesIdx);
 
-        long numClustersIdx = (long)leis.readFloat();
+        long numClustersIdx = (long)leis.readInt();
         int numBytesSample = leis.readUnsignedShort();
 
         String sampleSeq = leis.readUTF8String(numBytesSample);
