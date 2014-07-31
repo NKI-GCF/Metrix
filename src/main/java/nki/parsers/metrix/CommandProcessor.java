@@ -144,6 +144,7 @@ public final class CommandProcessor {
                 }else{
                     oos.writeObject(sc);
                 }
+                oos.flush();
             }else{
                 throw new MissingCommandDetailException("Missing search query for command. Please set RunIdSearch in Command.");
             }
@@ -161,31 +162,32 @@ public final class CommandProcessor {
     /*
     * Format Summary Collection according to command specifications.
     */
-    metrixLogger.log.log(Level.FINE, "Creating MSCD.");
-    MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
-    mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
-    
-    if (recCom.getFormat().equals(Constants.COM_FORMAT_XML)) {
-        // Set formatting of summary collection. 
-         oos.writeObject(mscd.toXML().toString());
-    }else if(recCom.getFormat().equals(Constants.COM_FORMAT_JSON)){
-        // JSON format has to be converted to String.
-        oos.writeObject(mscd.toJSON().toString());
-    }else if(recCom.getFormat().equals(Constants.COM_FORMAT_TAB)){
-        oos.writeObject(mscd.toTab());
-    }else if(recCom.getFormat().equals(Constants.COM_FORMAT_CSV)){
-        oos.writeObject(mscd.toCSV());
-    }else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
-        // Plain SummaryCollection format can be sent through the outputstream.
-        metrixLogger.log.log(Level.FINE, "Sending SC!");
-        oos.writeObject(sc);
-    }else{
-        // Return plain text
-        oos.writeObject("I dont understand.");
-    }
+    if(!recCom.getRetType().equals(Constants.COM_SEARCH)){
+        metrixLogger.log.log(Level.FINE, "Creating MSCD.");
+        MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
+        mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
 
-    sc = null;
-    oos.flush();
-    DataStore.closeAll();
+        if (recCom.getFormat().equals(Constants.COM_FORMAT_XML)) {
+            // Set formatting of summary collection. 
+             oos.writeObject(mscd.toXML().toString());
+        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_JSON)){
+            // JSON format has to be converted to String.
+            oos.writeObject(mscd.toJSON().toString());
+        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_TAB)){
+            oos.writeObject(mscd.toTab());
+        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_CSV)){
+            oos.writeObject(mscd.toCSV());
+        }else if(recCom.getFormat().equals(Constants.COM_FORMAT_OBJ)){
+            // Plain SummaryCollection format can be sent through the outputstream.
+            oos.writeObject(sc);
+        }else{
+            // Return plain text
+            oos.writeObject("I dont understand.");
+        }
+
+        sc = null;
+        oos.flush();
+        DataStore.closeAll();
+    }
   }
 }

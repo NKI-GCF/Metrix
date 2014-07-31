@@ -101,8 +101,11 @@ public class MetrixGCFdb {
                 srvResp = ois.readObject();
                 // Process expected response
                 if (srvResp instanceof SummaryCollection) {
+                    System.out.println("Test");
                     SummaryCollection sc = (SummaryCollection) srvResp;
                     Summary sum = sc.getSummaryCollection().get(0);
+                    System.out.println("RID " + sum.getRunId());
+                    
                     processResult(sum);
                 }                
 
@@ -143,9 +146,10 @@ public class MetrixGCFdb {
   }
 
   public static void processResult(Summary sum) {
+    boolean isRemote = true;
     MetrixContainer mc = new MetrixContainer(sum);
-
-    JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
+    
+    JSONObject allOut = new MetrixContainerDecorator(mc, isRemote).toJSON();
     System.out.print(allOut.toString());
   }
 }
