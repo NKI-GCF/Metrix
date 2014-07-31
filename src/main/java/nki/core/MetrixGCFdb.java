@@ -100,12 +100,14 @@ public class MetrixGCFdb {
             while(ois != null ){
                 srvResp = ois.readObject();
                 // Process expected response
+                if (srvResp instanceof Summary) {
+                    Summary sum = (Summary) srvResp;
+                    processResult(sum);
+                }                
+                
                 if (srvResp instanceof SummaryCollection) {
-                    System.out.println("Test");
                     SummaryCollection sc = (SummaryCollection) srvResp;
                     Summary sum = sc.getSummaryCollection().get(0);
-                    System.out.println("RID " + sum.getRunId());
-                    
                     processResult(sum);
                 }                
 
@@ -129,8 +131,9 @@ public class MetrixGCFdb {
                 }            
             }
         }
+    }catch(EOFException EOF){
+    
     }catch(Exception Ex){
-        System.err.println("Exception. "+ Ex);
         Ex.printStackTrace();
     }
   }
