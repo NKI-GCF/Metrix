@@ -34,9 +34,6 @@ public class MetrixErrorMetricsDecorator {
   
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
-    /*if(this.errorCollection != null && this.eDist == null){
-        eDist = errorCollection.getErrorDistribution();
-    }*/
     
     if(this.eDist != null){
         DecimalFormat df = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.US));

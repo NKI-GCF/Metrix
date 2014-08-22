@@ -321,11 +321,11 @@ public class MetrixWatch extends Thread {
           }
         }
 
-        // If a new run gets started, register for monitoring. Wait for 10 seconds whilst files are being created.
+        // If a new run gets started, register for monitoring. Wait for 30 seconds whilst files are being created.
         if (kind == ENTRY_CREATE) {
           File send = new File(child.toString());
           try {
-            Thread.sleep(10000);
+            Thread.sleep(30000);
           }
           catch (InterruptedException IEX) {
             metrixLogger.log.severe("Sleeping of thread while creating a new run failed!");

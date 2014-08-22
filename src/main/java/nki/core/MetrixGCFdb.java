@@ -88,9 +88,9 @@ public class MetrixGCFdb {
             String prevUpdate = "";
 
             Command cmd = new Command();
-            cmd.setRetType(Constants.COM_SEARCH);
-            cmd.setFormat(Constants.COM_FORMAT_OBJ);
-            cmd.setRunIdSearch(searchTerm);
+            cmd.setRetType(Constants.COM_INITIALIZE);
+            //cmd.setFormat(Constants.COM_FORMAT_OBJ);
+            //cmd.setRunIdSearch(searchTerm);
             
             oos.writeObject(cmd);
             oos.flush();

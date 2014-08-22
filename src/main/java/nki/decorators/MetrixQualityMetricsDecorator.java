@@ -56,6 +56,11 @@ public class MetrixQualityMetricsDecorator {
         qScoreDist = qualityScores.getQScoreDistribution();
     }
 
+    if(qScoreDist == null){
+        json.put("NoContent", "No Distribution is available.");
+        return json;
+    }
+    
     if (qScoreDist.aboveQ(20) != -1d) {
       combQs.put(">Q20", qScoreDist.aboveQ(20));
     }
