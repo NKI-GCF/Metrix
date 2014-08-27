@@ -67,12 +67,15 @@ public class MetrixContainer {
   
   private boolean timeCheck;
   private boolean update = false;
+  private boolean remote = false;
+  
   /*
   * MetrixContainer to support previously parsed Summary objects.
   */
-  public MetrixContainer(Summary summary){
+  public MetrixContainer(Summary summary, boolean remote){
       this.sum = summary;
-
+      this.remote = remote;
+      
       if (sum != null) {
         runDir = sum.getRunDirectory();
 
@@ -225,7 +228,7 @@ public class MetrixContainer {
   private void initSummary(){
         log.debug("Processing RunInfo details");
         try {
-          if (!sum.getXmlInfo()) {
+          if (!sum.getXmlInfo() && !this.remote) {
             XmlDriver xmd = new XmlDriver(runDir, sum);
             if (xmd.parseRunInfo()) {
               sum = xmd.getSummary();
@@ -249,11 +252,11 @@ public class MetrixContainer {
         }
       // Load TileMetrics
         // Process Cluster Density and phasing / prephasing
-        if (!sum.hasClusterDensity() ||
+        if ((!sum.hasClusterDensity() ||
             !sum.hasClusterDensityPF() ||
             !sum.hasPhasing() ||
             !sum.hasPrephasing() ||
-            timeCheck
+            timeCheck) && !this.remote
             ) {
        
             //if (!tm.getFileMissing()) {                // If TileMetrics File is present - process.
@@ -275,7 +278,7 @@ public class MetrixContainer {
         // Load QualityMetrics
         // Process QScore Dist
         log.debug("Checking Quality Metrics");
-        if (!sum.hasQScores() || timeCheck) {
+        if ((!sum.hasQScores() || timeCheck) && !this.remote){
            log.debug("Processing Quality Metrics");
            QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
            //if (!qm.getFileMissing()) {
@@ -297,7 +300,7 @@ public class MetrixContainer {
         // Process Corrected Intensities (+ Avg Cor Int Called Clusters)
         log.debug("Checking Corrected Intensity Metrics");
         CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
-        if (((!sum.hasIntensityDistAvg() || !sum.hasIntensityDistCCAvg() || !sum.hasIntensityDistRaw()) && !cim.getFileMissing())  || timeCheck) {
+        if ((((!sum.hasIntensityDistAvg() || !sum.hasIntensityDistCCAvg() || !sum.hasIntensityDistRaw()) && !cim.getFileMissing())  || timeCheck) && !this.remote) {
             log.debug("Processing Corrected Intensity Metrics");
             if (!cim.getFileMissing()) {
               IntensityScores isOut = cim.digestData();
@@ -315,7 +318,7 @@ public class MetrixContainer {
         // Load ExtractionMetrics
         // Process Raw Intensities
         ExtractionMetrics eim = new ExtractionMetrics(extractionMetrics, 0);
-        if(!sum.hasIntensityDistRaw() || timeCheck) {
+        if((!sum.hasIntensityDistRaw() || timeCheck) && !this.remote) {
             if (!eim.getFileMissing()) {
               IntensityScores risOut = eim.digestData();
 
@@ -330,7 +333,7 @@ public class MetrixContainer {
         
         // Load IndexMetrics
         IndexMetrics im = new IndexMetrics(indexMetrics, 0);
-        if(!sum.hasSampleInfo()){
+        if(!sum.hasSampleInfo() && !this.remote){
             log.debug("Processing Index Metrics");
             Indices indices = im.digestData();
             sum.setSampleInfo(indices);
@@ -341,7 +344,7 @@ public class MetrixContainer {
         
         
       // Load ErrorMetrics
-      if(!sum.hasErrorDist()){
+      if(!sum.hasErrorDist() && !this.remote){
         if (sum.getCurrentCycle() > 52) {
           log.debug("Processing Error Metrics");
           ErrorMetrics em = new ErrorMetrics(errorMetrics, 0);
@@ -360,7 +363,7 @@ public class MetrixContainer {
         }          
       }
         
-      if (update == true) {
+      if (update == true && !this.remote) {
           try {
             DataStore ds = new DataStore();
             sum.setLastUpdated();

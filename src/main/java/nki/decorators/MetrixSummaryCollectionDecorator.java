@@ -42,7 +42,7 @@ public class MetrixSummaryCollectionDecorator {
       for(ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();){
           Summary sum = iter.next();
           LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
-          MetrixContainer mc = new MetrixContainer(sum);
+          MetrixContainer mc = new MetrixContainer(sum, false);
           mc = null; // Cleanup MC.
           LoggerWrapper.log.log(Level.INFO, "Done processing ...");
       }
@@ -52,6 +52,7 @@ public class MetrixSummaryCollectionDecorator {
   public JSONObject toJSON(){
       JSONObject json = new JSONObject();
       JSONArray jsonCollection = new JSONArray();
+      boolean isRemote = false;
       
       //for(Summary sum : sc.getSummaryCollection()){
       for(ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();){
@@ -64,7 +65,7 @@ public class MetrixSummaryCollectionDecorator {
             if(sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG){
                 summary = new MetrixSummaryDecorator(sum).toJSON();
             }else{
-                MetrixContainer mc = new MetrixContainer(sum);
+                MetrixContainer mc = new MetrixContainer(sum, isRemote);
                 summary = new MetrixSummaryDecorator(mc.getSummary()).toJSON();
             }
             metrixJson.put("summary", summary);
@@ -74,7 +75,7 @@ public class MetrixSummaryCollectionDecorator {
             if((sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG) && sum.hasIntensityDistRaw()){
                 procSum = sum;
             }else{
-                MetrixContainer mc = new MetrixContainer(sum);
+                MetrixContainer mc = new MetrixContainer(sum, isRemote);
                 procSum = mc.getSummary();
                 mc = null;
             }
@@ -121,10 +122,10 @@ public class MetrixSummaryCollectionDecorator {
   }
   
   public String toCSV(){
-      
+      boolean isRemote = false;
       for(Summary sum : sc.getSummaryCollection()){
           JSONObject metrixJson = new JSONObject();
-          MetrixContainer mc = new MetrixContainer(sum);
+          MetrixContainer mc = new MetrixContainer(sum, isRemote);
           
       }
       return "";
@@ -153,7 +154,7 @@ public class MetrixSummaryCollectionDecorator {
         for(ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();){
           Summary sum = iter.next();
           LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
-          MetrixContainer mc = new MetrixContainer(sum);          
+          MetrixContainer mc = new MetrixContainer(sum, false);          
           
           Element sumXml = xmlDoc.createElement("Summary");
           sumXml.setAttribute("runId", sum.getRunId());
