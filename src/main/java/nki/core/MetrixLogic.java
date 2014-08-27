@@ -262,6 +262,10 @@ public class MetrixLogic {
       DataStore tmpDS = new DataStore();
       // Final processing run before finishing.
       processMetrics(Paths.get(path), -1, tmpDS);
+      metrixLogger.log.info("Performing final parse of data to create distributions.");
+      MetrixContainer mc = new MetrixContainer(summary, false);
+      metrixLogger.log.info("Finished parsing " + summary.getRunId());
+      mc=null;
       tmpDS.closeAll();
       if (tmpDS != null) {
         tmpDS = null;
