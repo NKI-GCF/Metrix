@@ -138,7 +138,7 @@ public final class CommandProcessor {
             if(recCom.getRunIdSearch() != null){
                 metrixLogger.log.log(Level.INFO, "Searching runID database using : {0}", recCom.getRunIdSearch());
                 sc = DataStore.getSummaryCollectionBySearch(recCom.getRunIdSearch());
-                metrixLogger.log.log(Level.FINE, "Found {0} run(s).", sc.getCollectionCount());
+                metrixLogger.log.log(Level.INFO, "Found {0} run(s).", sc.getCollectionCount());
                 if(sc.getCollectionCount() == 1){
                     oos.writeObject(sc.getSummaryCollection().get(0));
                 }else{

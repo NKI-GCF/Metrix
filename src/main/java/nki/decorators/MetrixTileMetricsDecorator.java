@@ -56,8 +56,13 @@ public class MetrixTileMetricsDecorator {
     JSONObject json = new JSONObject();
 
     if(clusterDensity == null || clusterDensityPassingFilter == null){
-        clusterDensity = tileMetrics.getCDmap();
-        clusterDensityPassingFilter = tileMetrics.getCDpfMap();
+        if(tileMetrics != null){
+            clusterDensity = tileMetrics.getCDmap();
+            clusterDensityPassingFilter = tileMetrics.getCDpfMap();
+        }else{
+            json.put("clusterDensities", "[NoDistAvailable]");
+            return json;
+        }
     }
     
     JSONArray clusterDensities = new JSONArray();

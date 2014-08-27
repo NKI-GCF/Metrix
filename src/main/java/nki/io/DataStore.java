@@ -215,7 +215,7 @@ public class DataStore {
 
     public static SummaryCollection getSummaryCollectionBySearch(String searchTerm) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECTS_SEARCH_RUNID);
-    metrixLogger.log.fine("Fetching by search ID. " + searchTerm);
+    metrixLogger.log.info("Fetching by search ID. " + searchTerm);
     
     pstmt.setString(1, '%' + searchTerm + '%'); // Do global search.
    

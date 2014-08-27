@@ -151,6 +151,7 @@ public class MetrixGCFdb {
 
   public static void processResult(Summary sum) {
     boolean isRemote = true;
+    
     MetrixContainer mc = new MetrixContainer(sum, isRemote);
     
     JSONObject allOut = new MetrixContainerDecorator(mc, isRemote).toJSON();

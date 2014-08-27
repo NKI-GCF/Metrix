@@ -58,7 +58,7 @@ public class MetrixThread extends Thread {
             commandClient = (Command) clientMsg;
 
             try {
-                LoggerWrapper.log.log(Level.INFO, "[SERVER] Received command [{0}]: Fetch run(s) with state: {1} ({2}) in format {3}", new Object[]{sChannel.socket().getInetAddress().getHostAddress(), commandClient.getState(), commandClient.getRetType(), commandClient.getFormat()});
+                //LoggerWrapper.log.log(Level.INFO, "[SERVER] Received command [{0}]: Fetch run(s) with state: {1} ({2}) in format {3}", new Object[]{sChannel.socket().getInetAddress().getHostAddress(), commandClient.getState(), commandClient.getRetType(), commandClient.getFormat()});
                 CommandProcessor cp = new CommandProcessor(commandClient, oos, ds);
                 LoggerWrapper.log.log(Level.INFO, "[SERVER] Hopefully called Command processor.");
             }
