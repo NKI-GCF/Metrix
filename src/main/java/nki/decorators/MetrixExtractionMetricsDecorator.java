@@ -37,7 +37,11 @@ public class MetrixExtractionMetricsDecorator {
 
 public JSONObject toJSON() {
     JSONObject jsonCombined = new JSONObject();
-    jsonCombined.put("rawIntensities", generateJSON(riDist));
+    if(riDist != null){
+        jsonCombined.put("rawIntensities", generateJSON(riDist));
+    }else{
+        jsonCombined.put("rawIntensities", "NoDistAvailable");
+    }
     
     return jsonCombined;
   }

@@ -59,7 +59,7 @@ public class MetrixTileMetricsDecorator {
         clusterDensity = tileMetrics.getCDmap();
         clusterDensityPassingFilter = tileMetrics.getCDpfMap();
     }
-
+    
     JSONArray clusterDensities = new JSONArray();
     for (int lane : clusterDensity.toObj().keySet()) {
       JSONObject cdLane = new JSONObject();
@@ -84,7 +84,11 @@ public class MetrixTileMetricsDecorator {
         clusterDensities.add(cdLane);
       }
     }
-    json.put("clusterDensities", clusterDensities);
+    if(clusterDensity != null){
+        json.put("clusterDensities", clusterDensities);
+    }else{
+        json.put("clusterDensities", "[NoDistAvailable]");
+    }
 
     if(phasingMap == null || prephasingMap == null){
         phasingMap = tileMetrics.getPhasingMap();
@@ -110,8 +114,11 @@ public class MetrixTileMetricsDecorator {
 
       phasingMetrics.add(pLane);
     }
-
-    json.put("phasingMetrics", phasingMetrics);
+    if(phasingMap != null){
+        json.put("phasingMetrics", phasingMetrics);
+    }else{
+        json.put("phasingMetrics", "NoDistAvailable");
+    }
 
     return json;
   }

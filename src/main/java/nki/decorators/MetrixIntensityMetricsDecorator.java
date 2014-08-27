@@ -51,8 +51,17 @@ public class MetrixIntensityMetricsDecorator {
   public JSONObject toJSON() {
     JSONObject jsonCombined = new JSONObject();
     
-    jsonCombined.put("averageCorrected", generateJSON(iDistAvg));
-    jsonCombined.put("averageCorrectedCalledClusters", generateJSON(iDistAvgCC));
+    if(iDistAvg != null){
+        jsonCombined.put("averageCorrected", generateJSON(iDistAvg));
+    }else{
+        jsonCombined.put("averageCorrected", "NoDistAvailable");
+    }
+    
+    if(iDistAvgCC != null){
+        jsonCombined.put("averageCorrectedCalledClusters", generateJSON(iDistAvgCC));
+    }else{
+        jsonCombined.put("averageCorrectedCalledClusters", "NoDistAvailable");
+    }
     
     return jsonCombined;
   }

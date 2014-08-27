@@ -106,7 +106,7 @@ public class MetrixSummaryCollectionDecorator {
             LoggerWrapper.log.log(Level.FINEST, "Emptying MetrixContainer");
             procSum = null;
             iter.remove();
-            LoggerWrapper.log.log(Level.INFO, "Removed summary from list.");
+            LoggerWrapper.log.log(Level.FINER, "Removed summary from list.");
           }else{
               metrixJson.put("Unknown request type. ", new JSONObject());
           }

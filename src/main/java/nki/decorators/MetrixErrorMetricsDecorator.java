@@ -64,7 +64,7 @@ public class MetrixErrorMetricsDecorator {
         }
         json.put("byLane", lanes);
     }else{
-        json.put("noDistributionAvailable", "NODIST");
+        json.put("byLane", "NoDistAvailable");
     }
     /*
     JSONArray cycles = new JSONArray();
