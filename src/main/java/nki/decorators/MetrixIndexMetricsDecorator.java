@@ -26,7 +26,13 @@ public class MetrixIndexMetricsDecorator {
 
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
-    Map<String, Map<String, SampleInfo>> indexMap = indices.getIndices();
+    Map<String, Map<String, SampleInfo>> indexMap = null;
+    if(indices != null){
+        indexMap = indices.getIndices();
+    }else{
+        json.put("NoDistFound", "[NoIndexDist]");
+        return json;
+    }
 
     for (String projectName : indexMap.keySet()) {
       Map<String, SampleInfo> samples = indexMap.get(projectName);

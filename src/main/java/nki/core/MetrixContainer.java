@@ -342,7 +342,6 @@ public class MetrixContainer {
         im.closeSourceStream();
         im = null; // Manual GC
         
-        
       // Load ErrorMetrics
       if(!sum.hasErrorDist() && !this.remote){
         if (sum.getCurrentCycle() > 52) {

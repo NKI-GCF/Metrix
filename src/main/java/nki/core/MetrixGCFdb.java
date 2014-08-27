@@ -103,6 +103,7 @@ public class MetrixGCFdb {
                 // Process expected response
                 if (srvResp instanceof Summary) {
                     Summary sum = (Summary) srvResp;
+                    System.out.println("Got my run: " + sum.getRunId());
                     processResult(sum);
                 }                
                 
