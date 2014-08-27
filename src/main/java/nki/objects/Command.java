@@ -42,7 +42,7 @@ public final class Command implements Serializable {
   private Date dateTime;
   private String runId = "";
   private String message;
-  private String retType = Constants.COM_RET_TYPE_BYSTATE;  // Type of retrieval.
+  private String retType = Constants.COM_RET_TYPE_BYRUN;  // Type of retrieval.
   private String runIdSearch;
   
   public static final int[] STATES = {

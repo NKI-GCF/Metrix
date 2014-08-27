@@ -91,6 +91,7 @@ public class MetrixGCFdb {
             //cmd.setRetType(Constants.COM_INITIALIZE);
             cmd.setFormat(Constants.COM_FORMAT_OBJ);
             cmd.setRunIdSearch(searchTerm);
+            cmd.setRetType(Constants.COM_SEARCH);
             
             oos.writeObject(cmd);
             oos.flush();
