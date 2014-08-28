@@ -167,9 +167,9 @@ public final class CommandProcessor {
                         json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated.");
                         json.put("data", mcd.toJSON());
                     }else{
-                        metrixLogger.log.log(Level.FINER, "Failed during enclosure procedure in container.");
+                        metrixLogger.log.log(Level.FINER, "Update failed. All metrics present and run has finished.");
                         json.put("result", "failed");
-                        json.put("message", "An error occurred while updating run " + mc.getSummary().getRunId() + ".");
+                        json.put("message", "All metrics present and run " + mc.getSummary().getRunId() + " has finished.");
                     }
                 }else{
                     metrixLogger.log.log(Level.FINER, "Failed more than 1 result.");
@@ -198,7 +198,7 @@ public final class CommandProcessor {
     * Format Summary Collection according to command specifications.
     */
     String retType = recCom.getRetType();
-    if(!retType.equals(Constants.COM_SEARCH) || !retType.equals(Constants.COM_PARSE)){
+    if(!retType.equals(Constants.COM_SEARCH) && !retType.equals(Constants.COM_PARSE)){
         metrixLogger.log.log(Level.FINE, "Creating MSCD.");
         MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
         mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
