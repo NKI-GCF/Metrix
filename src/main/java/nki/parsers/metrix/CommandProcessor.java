@@ -138,7 +138,7 @@ public final class CommandProcessor {
         }
         else if(recCom.getRetType().equals(Constants.COM_SEARCH)){
             if(recCom.getRunIdSearch() != null){
-                metrixLogger.log.log(Level.INFO, "Searching runID database using : {0}", recCom.getRunIdSearch());
+                metrixLogger.log.log(Level.INFO, "Searching runID database using: {0}", recCom.getRunIdSearch());
                 sc = DataStore.getSummaryCollectionBySearch(recCom.getRunIdSearch());
                 metrixLogger.log.log(Level.INFO, "Found {0} run(s).", sc.getCollectionCount());
                 if(sc.getCollectionCount() == 1){
@@ -153,23 +153,27 @@ public final class CommandProcessor {
         }
         else if(recCom.getRetType().equals(Constants.COM_PARSE)){
             if(recCom.getRunIdSearch() != null){
-                metrixLogger.log.log(Level.INFO, "Searching runID database using : {0}", recCom.getRunIdSearch());
+                metrixLogger.log.log(Level.INFO, "Force parsing: {0}", recCom.getRunIdSearch());
                 sc = DataStore.getSummaryCollectionBySearch(recCom.getRunIdSearch());
                 metrixLogger.log.log(Level.INFO, "Found {0} run(s).", sc.getCollectionCount());
                 JSONObject json = new JSONObject();
                 if(sc.getCollectionCount() == 1){
                     MetrixContainer mc = new MetrixContainer(sc.getSummaryCollection().get(0), false);
                     if(mc.hasUpdated){
+                        metrixLogger.log.log(Level.FINER, "Success.");
                         json.put("result", "success");
                         json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated.");
                     }else{
+                        metrixLogger.log.log(Level.FINER, "Failed during enclosure procedure in container.");
                         json.put("result", "Failed");
                         json.put("message", "An error occurred while updating run " + mc.getSummary().getRunId() + ".");
                     }
                 }else{
+                    metrixLogger.log.log(Level.FINER, "Failed more than 1 result.");
                     json.put("result", "Failed");
                     json.put("message", "Found: " + sc.getCollectionCount() + " results for searchterm: " + recCom.getRunIdSearch());
                 }
+                metrixLogger.log.log(Level.FINE, "Sending command " + json.toString() + " to client.");
                 // Send answer to client.
                 oos.writeObject(json.toString());
                 oos.flush();
