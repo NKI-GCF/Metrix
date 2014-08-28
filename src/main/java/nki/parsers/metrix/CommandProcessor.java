@@ -166,10 +166,12 @@ public final class CommandProcessor {
                         json.put("result", "Failed");
                         json.put("message", "An error occurred while updating run " + mc.getSummary().getRunId() + ".");
                     }
-                    oos.writeObject(json.toString());
                 }else{
-                    oos.writeObject("Got more than 1 result for parse query.");
+                    json.put("result", "Failed");
+                    json.put("message", "Found: " + sc.getCollectionCount() + " results for searchterm: " + recCom.getRunIdSearch());
                 }
+                // Send answer to client.
+                oos.writeObject(json.toString());
                 oos.flush();
             }else{
                 throw new MissingCommandDetailException("Missing search query for command. Please set RunIdSearch in Command.");
