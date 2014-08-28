@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.util.logging.Level;
 import nki.constants.Constants;
 import nki.core.MetrixContainer;
+import nki.decorators.MetrixContainerDecorator;
 import nki.decorators.MetrixSummaryCollectionDecorator;
 import nki.exceptions.CommandValidityException;
 import nki.exceptions.EmptyResultSetCollection;
@@ -161,11 +162,13 @@ public final class CommandProcessor {
                     MetrixContainer mc = new MetrixContainer(sc.getSummaryCollection().get(0), false);
                     if(mc.hasUpdated){
                         metrixLogger.log.log(Level.FINER, "Success.");
+                        MetrixContainerDecorator mcd = new MetrixContainerDecorator(mc);
                         json.put("result", "success");
                         json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated.");
+                        json.put("data", mcd.toJSON());
                     }else{
                         metrixLogger.log.log(Level.FINER, "Failed during enclosure procedure in container.");
-                        json.put("result", "Failed");
+                        json.put("result", "failed");
                         json.put("message", "An error occurred while updating run " + mc.getSummary().getRunId() + ".");
                     }
                 }else{
@@ -194,7 +197,8 @@ public final class CommandProcessor {
     /*
     * Format Summary Collection according to command specifications.
     */
-    if(!recCom.getRetType().equals(Constants.COM_SEARCH)){
+    String retType = recCom.getRetType();
+    if(!retType.equals(Constants.COM_SEARCH) || !retType.equals(Constants.COM_PARSE)){
         metrixLogger.log.log(Level.FINE, "Creating MSCD.");
         MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
         mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
