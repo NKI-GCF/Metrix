@@ -162,7 +162,7 @@ public final class CommandProcessor {
                     MetrixContainer mc = new MetrixContainer(sc.getSummaryCollection().get(0), false);
                     if(mc.hasUpdated){
                         metrixLogger.log.log(Level.FINER, "Success.");
-                        MetrixContainerDecorator mcd = new MetrixContainerDecorator(mc);
+                        MetrixContainerDecorator mcd = new MetrixContainerDecorator(mc, true);
                         json.put("result", "success");
                         json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated.");
                         json.put("data", mcd.toJSON());
