@@ -212,10 +212,13 @@ public final class Command implements Serializable {
       this.retType = Constants.COM_RET_TYPE_BYSTATE;
     }else if(retType.equals(Constants.COM_SEARCH)){
         this.retType = Constants.COM_SEARCH;
+    }else if(retType.equals(Constants.COM_PARSE)){
+        this.retType = Constants.COM_PARSE;
     }else if(retType.equals(Constants.COM_INITIALIZE)){
         this.retType = Constants.COM_INITIALIZE;
     }else {
       // Default to search by run.
+      LoggerWrapper.log.finer("Defaulting to COM_RET_TYPE_BYRUN.");
       this.retType = Constants.COM_RET_TYPE_BYRUN;
     }
   }
