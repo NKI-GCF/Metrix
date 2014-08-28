@@ -10,24 +10,18 @@ package nki.core;
 import java.nio.file.*;
 import java.io.*;
 import java.util.*;
-
-import nki.util.LoggerWrapper;
-
+import java.util.Properties;
+import java.util.logging.Level;
 import java.io.IOException;
-
 import org.xml.sax.SAXException;
-
 import javax.xml.parsers.ParserConfigurationException;
-
+import nki.util.LoggerWrapper;
 import nki.parsers.illumina.*;
 import nki.io.DataStore;
 import nki.constants.Constants;
 import nki.objects.Summary;
 import nki.parsers.xml.XmlDriver;
 import nki.parsers.metrix.PostProcessing;
-
-import java.util.Properties;
-import java.util.logging.Level;
 
 public class MetrixLogic {
 

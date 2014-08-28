@@ -68,7 +68,7 @@ public class MetrixContainer {
   private boolean timeCheck;
   private boolean update = false;
   private boolean remote = false;
-  
+  public boolean hasUpdated = false;
   /*
   * MetrixContainer to support previously parsed Summary objects.
   */
@@ -370,6 +370,7 @@ public class MetrixContainer {
             ds.updateSummaryByRunName(sum, runDir);
             ds.closeAll();
             log.debug("Done.");
+            hasUpdated = true;
           }
           catch(IOException IOE){
               LoggerWrapper.log.log(Level.SEVERE, "IOException in update statement {0}", IOE.toString());

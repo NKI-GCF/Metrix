@@ -1,22 +1,24 @@
 package nki.parsers.metrix;
 
-import nki.objects.Command;
-import nki.objects.Summary;
-import nki.objects.SummaryCollection;
-import nki.constants.Constants;
-import nki.io.DataStore;
-import nki.exceptions.InvalidCredentialsException;
-import nki.exceptions.CommandValidityException;
-import nki.exceptions.UnimplementedCommandException;
-import nki.exceptions.MissingCommandDetailException;
-import nki.exceptions.EmptyResultSetCollection;
-import nki.util.LoggerWrapper;
 
 import java.io.*;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.logging.Level;
+import nki.constants.Constants;
+import nki.core.MetrixContainer;
 import nki.decorators.MetrixSummaryCollectionDecorator;
+import nki.exceptions.CommandValidityException;
+import nki.exceptions.EmptyResultSetCollection;
+import nki.exceptions.InvalidCredentialsException;
+import nki.exceptions.MissingCommandDetailException;
+import nki.exceptions.UnimplementedCommandException;
+import nki.io.DataStore;
+import nki.objects.Command;
+import nki.objects.Summary;
+import nki.objects.SummaryCollection;
+import nki.util.LoggerWrapper;
+import org.json.simple.JSONObject;
 
 public final class CommandProcessor {
 
@@ -143,6 +145,30 @@ public final class CommandProcessor {
                     oos.writeObject(sc.getSummaryCollection().get(0));
                 }else{
                     oos.writeObject(sc);
+                }
+                oos.flush();
+            }else{
+                throw new MissingCommandDetailException("Missing search query for command. Please set RunIdSearch in Command.");
+            }
+        }
+        else if(recCom.getRetType().equals(Constants.COM_PARSE)){
+            if(recCom.getRunIdSearch() != null){
+                metrixLogger.log.log(Level.INFO, "Searching runID database using : {0}", recCom.getRunIdSearch());
+                sc = DataStore.getSummaryCollectionBySearch(recCom.getRunIdSearch());
+                metrixLogger.log.log(Level.INFO, "Found {0} run(s).", sc.getCollectionCount());
+                JSONObject json = new JSONObject();
+                if(sc.getCollectionCount() == 1){
+                    MetrixContainer mc = new MetrixContainer(sc.getSummaryCollection().get(0), false);
+                    if(mc.hasUpdated){
+                        json.put("result", "success");
+                        json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated.");
+                    }else{
+                        json.put("result", "Failed");
+                        json.put("message", "An error occurred while updating run " + mc.getSummary().getRunId() + ".");
+                    }
+                    oos.writeObject(json.toString());
+                }else{
+                    oos.writeObject("Got more than 1 result for parse query.");
                 }
                 oos.flush();
             }else{

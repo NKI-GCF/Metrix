@@ -125,6 +125,20 @@
           </execution>
 
           <execution>
+            <id>MetrixParse</id>
+            <configuration>
+              <onejarVersion>0.97</onejarVersion>
+              <attachToBuild>true</attachToBuild>
+              <classifier>onejar</classifier>
+              <mainClass>nki.core.MetrixParse</mainClass>
+              <filename>MetrixParse.jar</filename>
+            </configuration>
+            <goals>
+              <goal>one-jar</goal>
+            </goals>
+          </execution>
+
+          <execution>
             <id>MetrixLive</id>
             <configuration>
               <onejarVersion>0.97</onejarVersion>
