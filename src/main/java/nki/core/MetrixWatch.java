@@ -142,7 +142,7 @@ public class MetrixWatch extends Thread {
             ml.quickLoad = false;
             metrixLogger.log.severe("Run has finished. Not available in database. Parsing...");
           }
-          LoggerWrapper.log.finer("Closing connection.");
+          LoggerWrapper.log.finest("Closing connection.");
           ds.conn.close();
           LoggerWrapper.log.finer("Started processing of finished run.");
           ml.processMetrics(Paths.get(file), Constants.STATE_FINISHED, dataStore); // Parse available info with complete state
@@ -325,6 +325,7 @@ public class MetrixWatch extends Thread {
         if (kind == ENTRY_CREATE) {
           File send = new File(child.toString());
           try {
+            metrixLogger.log.finest("New run detected... Waiting 30 seconds to allow sequencer for file creation.");
             Thread.sleep(30000);
           }
           catch (InterruptedException IEX) {
@@ -392,8 +393,8 @@ public class MetrixWatch extends Thread {
       return false;
     }
     else {
-      waitMap.put(localKey, null);    // Reset time
-      return true;      // Initiate parsing
+      waitMap.put(localKey, null); // Reset time
+      return true; // Initiate parsing
     }
   }
 

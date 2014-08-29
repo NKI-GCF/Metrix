@@ -258,9 +258,7 @@ public class MetrixContainer {
             !sum.hasPrephasing() ||
             timeCheck) && !this.remote
             ) {
-       
-            //if (!tm.getFileMissing()) {                // If TileMetrics File is present - process.
-              TileMetrics tm = new TileMetrics(tileMetrics, 0);
+               TileMetrics tm = new TileMetrics(tileMetrics, 0);
               log.debug("Processing Tile Metrics");
               //tm.digestData(rds);
               tm.digestData();
@@ -299,8 +297,8 @@ public class MetrixContainer {
         // Load CorrectedIntensityMetrics
         // Process Corrected Intensities (+ Avg Cor Int Called Clusters)
         log.debug("Checking Corrected Intensity Metrics");
-        CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
         if ((((!sum.hasIntensityDistAvg() || !sum.hasIntensityDistCCAvg() || !sum.hasIntensityDistRaw()) && !cim.getFileMissing())  || timeCheck) && !this.remote) {
+            CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
             log.debug("Processing Corrected Intensity Metrics");
             if (!cim.getFileMissing()) {
               IntensityScores isOut = cim.digestData();
@@ -317,8 +315,8 @@ public class MetrixContainer {
 
         // Load ExtractionMetrics
         // Process Raw Intensities
-        ExtractionMetrics eim = new ExtractionMetrics(extractionMetrics, 0);
         if((!sum.hasIntensityDistRaw() || timeCheck) && !this.remote) {
+            ExtractionMetrics eim = new ExtractionMetrics(extractionMetrics, 0);
             if (!eim.getFileMissing()) {
               IntensityScores risOut = eim.digestData();
 
@@ -332,15 +330,15 @@ public class MetrixContainer {
         }        
         
         // Load IndexMetrics
-        IndexMetrics im = new IndexMetrics(indexMetrics, 0);
         if(!sum.hasSampleInfo() && !this.remote){
+            IndexMetrics im = new IndexMetrics(indexMetrics, 0);
             log.debug("Processing Index Metrics");
             Indices indices = im.digestData();
             sum.setSampleInfo(indices);
             update = true;
+            im.closeSourceStream();
+            im = null; // Manual GC
         }
-        im.closeSourceStream();
-        im = null; // Manual GC
         
       // Load ErrorMetrics
       if(!sum.hasErrorDist() && !this.remote){

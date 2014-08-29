@@ -123,9 +123,8 @@ public final class CommandProcessor {
         oos.writeObject("Done with initialization.");
         oos.flush();
         DataStore.closeAll();
-    }else{    
-    
-        // Check actual command types.
+    }else{
+        // Obtain data depending on command.
         if (recCom.getRetType().equals(Constants.COM_RET_TYPE_BYSTATE) && !recCom.checkState(recCom.getState())) {
           throw new MissingCommandDetailException("Summary State of received command is missing.");
         }
@@ -169,8 +168,12 @@ public final class CommandProcessor {
                     }else{
                         metrixLogger.log.log(Level.FINER, "Update failed. All metrics present and run has finished.");
                         json.put("result", "failed");
-                        json.put("message", "All metrics present and run " + mc.getSummary().getRunId() + " has finished.");
+                        json.put("message", "No update required for " + mc.getSummary().getRunId() + ".");
                     }
+                }else if(sc.getCollectionCount() == 0){
+                    metrixLogger.log.log(Level.FINER, "Failed. No results.");
+                    json.put("result", "Failed");
+                    json.put("message", "Found no results for searchterm: " + recCom.getRunIdSearch());                   
                 }else{
                     metrixLogger.log.log(Level.FINER, "Failed more than 1 result.");
                     json.put("result", "Failed");
@@ -199,7 +202,7 @@ public final class CommandProcessor {
     */
     String retType = recCom.getRetType();
     if(!retType.equals(Constants.COM_SEARCH) && !retType.equals(Constants.COM_PARSE)){
-        metrixLogger.log.log(Level.FINE, "Creating MSCD.");
+        metrixLogger.log.log(Level.FINER, "Creating MSCD.");
         MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
         mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
 
