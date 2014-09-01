@@ -140,7 +140,7 @@ public class MetrixWatch extends Thread {
           }else{
             // Run has finished but not available in database.
             ml.quickLoad = false;
-            metrixLogger.log.severe("Run has finished. Not available in database. Parsing...");
+            metrixLogger.log.warning("Run has finished. Not available in database. Parsing...");
           }
           LoggerWrapper.log.finest("Closing connection.");
           ds.conn.close();

@@ -68,6 +68,8 @@ public class MetrixContainer {
   private boolean timeCheck;
   private boolean update = false;
   private boolean remote = false;
+  private boolean force = false;
+  
   public boolean hasUpdated = false;
   /*
   * MetrixContainer to support previously parsed Summary objects.
@@ -92,6 +94,28 @@ public class MetrixContainer {
         //throw new IOException();
       }
   }
+ 
+    public MetrixContainer(Summary summary, boolean remote, boolean force){
+      this.sum = summary;
+      this.remote = remote;
+      this.force = force;
+      
+      if (sum != null) {
+        runDir = sum.getRunDirectory();
+
+        long currEpoch = System.currentTimeMillis();
+        timeCheck = (currEpoch - sum.getLastUpdatedEpoch()) > Constants.METRIC_UPDATE_TIME &!
+                    (this.sum.getHasFinished() || this.sum.getState() == Constants.STATE_FINISHED);
+
+        initPaths(runDir);
+        initSummary();
+      }
+      else {
+        // Throw error
+        LoggerWrapper.log.severe("[WARNING] Obtained an empty summary.");
+        //throw new IOException();
+      }
+  }  
   
   /*
   * MetrixContainer to support a standalone approach where the whole run directory
@@ -228,7 +252,7 @@ public class MetrixContainer {
   private void initSummary(){
         log.debug("Processing RunInfo details");
         try {
-          if (!sum.getXmlInfo() && !this.remote) {
+          if ((!sum.getXmlInfo() || force) && !this.remote) {
             XmlDriver xmd = new XmlDriver(runDir, sum);
             if (xmd.parseRunInfo()) {
               sum = xmd.getSummary();
@@ -256,7 +280,8 @@ public class MetrixContainer {
             !sum.hasClusterDensityPF() ||
             !sum.hasPhasing() ||
             !sum.hasPrephasing() ||
-            timeCheck) && !this.remote
+            timeCheck ||
+            force) && !this.remote
             ) {
                TileMetrics tm = new TileMetrics(tileMetrics, 0);
               log.debug("Processing Tile Metrics");
@@ -276,7 +301,9 @@ public class MetrixContainer {
         // Load QualityMetrics
         // Process QScore Dist
         log.debug("Checking Quality Metrics");
-        if ((!sum.hasQScores() || timeCheck) && !this.remote){
+        if ((!sum.hasQScores() || 
+             timeCheck ||
+             force) && !this.remote){
            log.debug("Processing Quality Metrics");
            QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
            //if (!qm.getFileMissing()) {
@@ -297,7 +324,13 @@ public class MetrixContainer {
         // Load CorrectedIntensityMetrics
         // Process Corrected Intensities (+ Avg Cor Int Called Clusters)
         log.debug("Checking Corrected Intensity Metrics");
-        if ((((!sum.hasIntensityDistAvg() || !sum.hasIntensityDistCCAvg() || !sum.hasIntensityDistRaw()) && !cim.getFileMissing())  || timeCheck) && !this.remote) {
+        if ((((
+                !sum.hasIntensityDistAvg() || 
+                !sum.hasIntensityDistCCAvg() || 
+                !sum.hasIntensityDistRaw()) && 
+                !cim.getFileMissing()) || 
+                timeCheck || 
+                force) && !this.remote) {
             CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
             log.debug("Processing Corrected Intensity Metrics");
             if (!cim.getFileMissing()) {
@@ -315,7 +348,9 @@ public class MetrixContainer {
 
         // Load ExtractionMetrics
         // Process Raw Intensities
-        if((!sum.hasIntensityDistRaw() || timeCheck) && !this.remote) {
+        if((!sum.hasIntensityDistRaw() || 
+            timeCheck ||
+            force) && !this.remote) {
             ExtractionMetrics eim = new ExtractionMetrics(extractionMetrics, 0);
             if (!eim.getFileMissing()) {
               IntensityScores risOut = eim.digestData();
@@ -330,7 +365,8 @@ public class MetrixContainer {
         }        
         
         // Load IndexMetrics
-        if(!sum.hasSampleInfo() && !this.remote){
+        if((!sum.hasSampleInfo() ||
+            force) && !this.remote){
             IndexMetrics im = new IndexMetrics(indexMetrics, 0);
             log.debug("Processing Index Metrics");
             Indices indices = im.digestData();
@@ -341,7 +377,8 @@ public class MetrixContainer {
         }
         
       // Load ErrorMetrics
-      if(!sum.hasErrorDist() && !this.remote){
+      if((!sum.hasErrorDist() ||
+            force) && !this.remote){
         if (sum.getCurrentCycle() > 52) {
           log.debug("Processing Error Metrics");
           ErrorMetrics em = new ErrorMetrics(errorMetrics, 0);
@@ -360,7 +397,8 @@ public class MetrixContainer {
         }          
       }
         
-      if (update == true && !this.remote) {
+      if ((update == true ||
+            force) && !this.remote) {
           try {
             DataStore ds = new DataStore();
             sum.setLastUpdated();

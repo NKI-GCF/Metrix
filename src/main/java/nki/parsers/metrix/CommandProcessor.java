@@ -158,7 +158,7 @@ public final class CommandProcessor {
                 metrixLogger.log.log(Level.INFO, "Found {0} run(s).", sc.getCollectionCount());
                 JSONObject json = new JSONObject();
                 if(sc.getCollectionCount() == 1){
-                    MetrixContainer mc = new MetrixContainer(sc.getSummaryCollection().get(0), false);
+                    MetrixContainer mc = new MetrixContainer(sc.getSummaryCollection().get(0), false, true);
                     if(mc.hasUpdated){
                         metrixLogger.log.log(Level.FINER, "Success.");
                         MetrixContainerDecorator mcd = new MetrixContainerDecorator(mc, true);
