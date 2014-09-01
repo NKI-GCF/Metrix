@@ -166,7 +166,7 @@ public final class CommandProcessor {
                         json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated.");
                         json.put("data", mcd.toJSON());
                     }else{
-                        metrixLogger.log.log(Level.FINER, "Update failed. All metrics present and run has finished.");
+                        metrixLogger.log.log(Level.FINER, "Update failed. Eventhough the parsing was forced, no results were returned.");
                         json.put("result", "failed");
                         json.put("message", "No update required for " + mc.getSummary().getRunId() + ".");
                     }
@@ -179,7 +179,13 @@ public final class CommandProcessor {
                     json.put("result", "Failed");
                     json.put("message", "Found: " + sc.getCollectionCount() + " results for searchterm: " + recCom.getRunIdSearch());
                 }
-                metrixLogger.log.log(Level.FINE, "Sending command " + json.toString() + " to client.");
+                // Do logging levels.
+                metrixLogger.log.log(Level.FINE, "Sending command " + json.get("result").toString() + " to client.");
+                metrixLogger.log.log(Level.FINER, "Command message "+json.get("message").toString());
+                
+                if(json.containsKey("data")){
+                    metrixLogger.log.log(Level.FINEST, "Command data: "+json.get("data").toString());
+                }
                 // Send answer to client.
                 oos.writeObject(json.toString());
                 oos.flush();
