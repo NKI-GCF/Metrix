@@ -325,10 +325,9 @@ public class MetrixContainer {
         // Process Corrected Intensities (+ Avg Cor Int Called Clusters)
         log.debug("Checking Corrected Intensity Metrics");
         CorrectedIntensityMetrics cim = new CorrectedIntensityMetrics(intensityMetrics, 0);
-        if (((( !sum.hasIntensityDistAvg() || 
+        if ((( !sum.hasIntensityDistAvg() || 
                 !sum.hasIntensityDistCCAvg() || 
-                !sum.hasIntensityDistRaw()) && 
-                !cim.getFileMissing()) || 
+                !sum.hasIntensityDistRaw()) || 
                 timeCheck || 
                 force) && !this.remote) {
             log.debug("Processing Corrected Intensity Metrics");
