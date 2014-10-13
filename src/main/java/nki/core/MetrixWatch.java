@@ -327,7 +327,7 @@ public class MetrixWatch extends Thread {
           File send = new File(child.toString());
           try {
             metrixLogger.log.finest("New run detected... Waiting 30 seconds to allow sequencer for file creation.");
-            Thread.sleep(30000);
+            Thread.sleep(60000);
           }
           catch (InterruptedException IEX) {
             metrixLogger.log.severe("Sleeping of thread while creating a new run failed!");
