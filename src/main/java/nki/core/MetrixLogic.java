@@ -171,7 +171,7 @@ public class MetrixLogic {
             // State has not been set yet and user has not yet been notified for the turning of the flowcell.
             if (!summary.getHasNotifyTurned()) {
               summary.setState(Constants.STATE_TURN);
-              metrixLogger.log.info("Flowcell of run: " + path + " has to be turned. Current cycle: " + currentCycle);
+              metrixLogger.log.info("Flowcell of run: " + summary.getRunId() + " has to be turned. Current cycle: " + currentCycle);
               summary.setHasNotifyTurned(true);
             }
           }

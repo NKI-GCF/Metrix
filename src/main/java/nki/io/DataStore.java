@@ -184,7 +184,7 @@ public class DataStore {
 
   public static SummaryCollection getSummaryCollectionByState(int state) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_STATE);
-    metrixLogger.log.fine("Fetching SC by state .");
+    metrixLogger.log.fine("Fetching SC by state " + state + ".");
     
     pstmt.setInt(1, state);
    

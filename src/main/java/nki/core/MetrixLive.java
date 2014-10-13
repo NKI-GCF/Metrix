@@ -90,11 +90,11 @@ public class MetrixLive {
             if (serverAnswer instanceof SummaryCollection) {
               SummaryCollection sc = (SummaryCollection) serverAnswer;
               for (Summary sum : sc.getSummaryCollection()) {
-                  
-                //MetrixContainer mc = new MetrixContainer(sum.getRunDirectory());
-                //JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
-                //consoleOut += ("," + allOut.toString());
-                System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
+                if(sum.getState() == Constants.STATE_INIT){
+                    System.out.println("Run " + sum.getRunId() + " is in the initialization phase.");
+                }else if(sum.getState() == Constants.STATE_RUNNING){
+                    System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
+                }
               }
             }
 

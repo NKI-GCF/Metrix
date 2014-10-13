@@ -25,7 +25,9 @@ public class MetrixSummaryDecorator {
     json.put("runType", summary.getRunType());
     json.put("totalCycles", summary.getTotalCycles());
     json.put("currentCycle", summary.getCurrentCycle());
-
+    json.put("runDirectory", summary.getRunDirectory());
+    json.put("instrument", summary.getInstrument());
+        
     if (summary.getReads() != null) {
       json.put("demultiplexIndex", summary.getReads().getDemultiplexIndex());
     }

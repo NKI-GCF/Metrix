@@ -315,6 +315,7 @@ public class MetrixWatch extends Thread {
             if (ml.checkFinished(child.getParent().toString())) {
               //ml.finishRun(child.getParent()+"");
               // Remove keys from watch hash.
+              watchKey.cancel();
               keys.remove(watchKey);
               waitMap.remove(watchKey);
             }
@@ -374,7 +375,7 @@ public class MetrixWatch extends Thread {
       metrixLogger.log.severe("Error closing the watcher. " + ex.toString());
     }
   }
-
+  
   private boolean checkPollTime(WatchKey localKey) {
     long currentTime = System.currentTimeMillis();
 
