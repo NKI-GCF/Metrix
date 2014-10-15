@@ -86,12 +86,18 @@ public class MetrixWatch extends Thread {
     String file;
     this.trace = true;
 
-    for (int i = 0; i < listOfFiles.length; i++) {
-      if (!checkRegisterIllumina(listOfFiles[i], false)) {
-        continue;
-      }
+    if(listOfFiles != null){
+        metrixLogger.log.fine(listOfFiles.length + " files found in Illumina run directory. Scanning for directories...");
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (!checkRegisterIllumina(listOfFiles[i], false)) {
+                continue;
+            }
+        }
+        processEvents();
+    }else{
+        metrixLogger.log.info("No files available in argumented Illumina run directory. ");
+        metrixLogger.log.info("Waiting for new directories...");
     }
-    processEvents();
   }
 
   /**
