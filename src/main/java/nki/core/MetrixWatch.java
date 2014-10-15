@@ -7,15 +7,17 @@ package nki.core;
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
 
-import java.util.regex.*;
 import java.io.*;
 import java.nio.file.*;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-
+import java.util.regex.*;
 import nki.constants.Constants;
 import nki.io.DataStore;
 import nki.objects.Summary;
@@ -129,10 +131,10 @@ public class MetrixWatch extends Thread {
         DataStore ds = null;
         try{
           ds = new DataStore();
-          if(ds.checkSummaryByRunId(ds.conn, file) && (System.currentTimeMillis() - fileComplete.lastModified()) < 1814400000){
-            // Run is finished, available in database. But has completed last then three weeks ago.
-            ml.quickLoad = false;
-            metrixLogger.log.info("Quick loading a finished run. Available in database.");
+          if(ds.checkSummaryByRunId(ds.conn, file) && (System.currentTimeMillis() - fileComplete.lastModified()) > 1814400000){
+            // Run is finished, available in database. But has completed over three weeks ago.
+            ml.quickLoad = true;
+            metrixLogger.log.info("Old run - Quick loading a finished run. Available in database.");
           }else if(ds.checkSummaryByRunId(ds.conn, file)){
             // Run is finished, available in database.
             ml.quickLoad = true;
@@ -229,7 +231,37 @@ public class MetrixWatch extends Thread {
       }
     }
     else {
-      metrixLogger.log.info("Directory: " + file + " does not comply with the Illumina run directory format. RunInfo.xml is missing.");
+      // Add run directory to monitor to check again after 120 minutes. 
+      // Whenever a rundirectory is created several files have to be created first (RunInfo.xml & RunParameters.xml e.g.)
+      // First fail observed after updating the MiSeq software to the 2.5 version (September 2014). 
+      // Copy of files seems to be delayed till onboard cluster generation has finished (120 minutes) 
+      // FAIL : If it fails after 120 minutes. Remove and ignore.
+      // SUCCESS : Run will be registered and backlog parsed for the missing time.
+      metrixLogger.log.info("Checking whether argumented directory has been created less than 24 hours ago.");
+      metrixLogger.log.fine("Checking age of run directory.");
+      // Check if file has been created the last 24 hours.
+      long ageDiff = (System.currentTimeMillis() - fileArg.lastModified());
+      if(ageDiff < 86400000){
+        metrixLogger.log.fine("Created less than 24 hours ago.");
+        // Create single thread executor.
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+         metrixLogger.log.finer("Delaying rescan for 120 minutes.");
+        final File taskFile = fileArg;
+        final Runnable task = new Runnable(){
+            @Override
+            public void run() {
+                metrixLogger.log.log(Level.FINE, "Executing delayed task for {0}", taskFile.getName());
+                checkRegisterIllumina(taskFile, true);
+            }
+        };
+       executor.schedule(task, 120, TimeUnit.MINUTES);
+       // Shutdown executor.
+       LoggerWrapper.log.fine("Gracefully shutting down executor service for delayed task.");
+       executor.shutdown();         
+      }else{
+        metrixLogger.log.info("Directory " + file + " does not match standard format. RunInfo.xml is missing.");
+        metrixLogger.log.fine("Directory is older than 24 hours. Not creating a delayed task.");
+      }
     }
 
     return true;
