@@ -10,22 +10,15 @@ package nki.core;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.Properties;
-import java.util.regex.*;
 import nki.constants.Constants;
-import nki.decorators.MetrixContainerDecorator;
 import nki.exceptions.EmptyResultSetCollection;
 import nki.exceptions.InvalidCredentialsException;
 import nki.exceptions.MissingCommandDetailException;
 import nki.exceptions.UnimplementedCommandException;
-import nki.io.DataStore;
 import nki.objects.Command;
-import nki.objects.Summary;
-import nki.objects.SummaryCollection;
-import org.json.simple.JSONObject;
 
-public class MetrixGCFdb {
+public class MetrixInitialize {
   public static void main(String[] args) {
     Properties configFile;
 
@@ -52,29 +45,9 @@ public class MetrixGCFdb {
       System.exit(1);
     }
 
-    String searchTerm = "";
-
-    if (args.length == 0) {
-        System.err.println("Invalid number of arguments.");
-        System.exit(1);
-    }
-    else if (args.length == 1) {
-      searchTerm = args[0];
-
-      if (searchTerm.length() <= 2) {
-        System.err.println("Need a bigger search string.");
-        System.exit(1);
-      }
-    }
-    else if (args.length > 1) {
-      System.err.println("Invalid number of arguments.");
-      System.exit(1);
-    }
-
     int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
     String host = configFile.getProperty("HOST", "localhost");
     
-       
     try{
         SocketChannel sChannel = SocketChannel.open();
         sChannel.configureBlocking(true);
@@ -88,10 +61,9 @@ public class MetrixGCFdb {
             String prevUpdate = "";
 
             Command cmd = new Command();
-            cmd.setFormat(Constants.COM_FORMAT_OBJ);
-            cmd.setRunIdSearch(searchTerm);
-            cmd.setRetType(Constants.COM_SEARCH);
-            
+            cmd.setRetType(Constants.COM_INITIALIZE);
+
+            // Send command
             oos.writeObject(cmd);
             oos.flush();
             
@@ -100,17 +72,11 @@ public class MetrixGCFdb {
             while(ois != null ){
                 srvResp = ois.readObject();
                 // Process expected response
-                if (srvResp instanceof Summary) {
-                    Summary sum = (Summary) srvResp;
-                    System.out.println("Got my run: " + sum.getRunId());
-                    processResult(sum);
-                }                
-                
-                if (srvResp instanceof SummaryCollection) {
-                    SummaryCollection sc = (SummaryCollection) srvResp;
-                    Summary sum = sc.getSummaryCollection().get(0);
-                    processResult(sum);
-                }                
+            
+                if (srvResp instanceof String) {
+                    String ans = (String) srvResp;
+                    System.out.println("Server responded: " + ans);
+                }              
 
                 /*
                  *	Exceptions
@@ -137,24 +103,5 @@ public class MetrixGCFdb {
     }catch(Exception Ex){
         Ex.printStackTrace();
     }
-  }
-
-  public static boolean isInteger(String s) {
-    try {
-      Integer.parseInt(s);
-    }
-    catch (NumberFormatException e) {
-      return false;
-    }
-    return true;
-  }
-
-  public static void processResult(Summary sum) {
-    boolean isRemote = true;
-    
-    MetrixContainer mc = new MetrixContainer(sum, isRemote);
-    
-    JSONObject allOut = new MetrixContainerDecorator(mc, isRemote).toJSON();
-    System.out.print(allOut.toString());
   }
 }

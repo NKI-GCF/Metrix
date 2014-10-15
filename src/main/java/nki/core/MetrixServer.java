@@ -92,8 +92,8 @@ public class MetrixServer {
       ssChannel.configureBlocking(true);
       ssChannel.socket().bind(new InetSocketAddress(port));  // Call server / Bind socket and port.
 
-      metrixLogger.log.info("Metrix Thread Server initialized.");
-      metrixLogger.log.info("Initializing backlog service.");
+      metrixLogger.log.info("Metrix communication thread initialized.");
+      metrixLogger.log.info("Metrix backlog service initializing...");
       final Runnable backlog = new Runnable() {
         @Override
         public void run() {

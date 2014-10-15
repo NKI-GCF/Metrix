@@ -199,7 +199,7 @@ public class MetrixSummaryCollectionDecorator {
             root.appendChild(sumXml);
           }
           iter.remove();
-          LoggerWrapper.log.log(Level.INFO, "Removed from list.");
+          LoggerWrapper.log.log(Level.FINER, "Removed from list.");
       }
         return root; 
     }
