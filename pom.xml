@@ -109,7 +109,21 @@
               <goal>one-jar</goal>
             </goals>
           </execution>
-          
+
+          <execution>
+            <id>MetrixInitialize</id>
+            <configuration>
+              <onejarVersion>0.97</onejarVersion>
+              <attachToBuild>true</attachToBuild>
+              <classifier>onejar</classifier>
+              <mainClass>nki.core.MetrixInitialize</mainClass>
+              <filename>MetrixInitialize.jar</filename>
+            </configuration>
+            <goals>
+              <goal>one-jar</goal>
+            </goals>
+          </execution>          
+                              
           <execution>
             <id>MetrixGCFdb</id>
             <configuration>
