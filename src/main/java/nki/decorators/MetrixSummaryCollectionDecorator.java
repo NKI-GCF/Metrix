@@ -38,7 +38,7 @@ public class MetrixSummaryCollectionDecorator {
   }
   
   public void initializeMetrix(){
-      LoggerWrapper.log.log(Level.INFO, "Starting full initialization of Metrix. ");
+      LoggerWrapper.log.log(Level.INFO, "Starting full initialization of Metrix... ");
       for(ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();){
           Summary sum = iter.next();
           LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());

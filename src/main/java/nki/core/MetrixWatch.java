@@ -29,6 +29,7 @@ public class MetrixWatch extends Thread {
   protected WatchService watcher;
   private Map<WatchKey, Path> keys;
   private Map<WatchKey, Long> waitMap;
+  private ArrayList<String> finishedMap;
   private boolean recursive;
   private boolean trace = false;
   private Path runDirPath;
@@ -59,6 +60,7 @@ public class MetrixWatch extends Thread {
     this.keys = new HashMap<WatchKey, Path>();
     this.waitMap = new HashMap<WatchKey, Long>();
     this.dataStore = ds;
+    this.finishedMap = new ArrayList<String>();
   }
 
   @SuppressWarnings("unchecked")
@@ -158,7 +160,7 @@ public class MetrixWatch extends Thread {
               metrixLogger.log.severe("Exception while checking finished run in database. "+ Ex);
         }finally{
             ds = null;
-            metrixLogger.log.finest("Datastore for finished run check dismantled.");
+            metrixLogger.log.finest("Clearing datastore connection for run finished check.");
         }
         
         // Run has completed.
@@ -351,8 +353,8 @@ public class MetrixWatch extends Thread {
         if (kind == ENTRY_CREATE) {
           if ((child.toString()).matches("^.+?RTAComplete.txt$")) {
             if (ml.checkFinished(child.getParent().toString())) {
-              //ml.finishRun(child.getParent()+"");
               // Remove keys from watch hash.
+              finishedMap.add(keys.get(watchKey).toString());
               watchKey.cancel();
               keys.remove(watchKey);
               waitMap.remove(watchKey);
@@ -440,14 +442,30 @@ public class MetrixWatch extends Thread {
   public void checkForceTime() {
     long currentTime = System.currentTimeMillis();
 
-    Iterator it = waitMap.entrySet().iterator();
-    while (it.hasNext()) {
-
-      Map.Entry watchPairs = (Map.Entry) it.next();
-      long mapTime = (Long) watchPairs.getValue();
-
-      Path watchDir = keys.get(watchPairs.getKey());
-
+    for(Iterator<WatchKey> it = waitMap.keySet().iterator(); it.hasNext();){
+      WatchKey watchDirKey = it.next();
+      long mapTime = waitMap.get(watchDirKey);
+      
+      // Get the path for watchDir.
+      Path watchDir = keys.get(watchDirKey);
+      
+      // Run has been marked finished.
+      if(finishedMap.contains(watchDir.toString())){
+        LoggerWrapper.log.finer("Key is in finished map - " + watchDir.toString() + " - Removing entries.");
+        if(watchDirKey.isValid()){
+            watchDirKey.cancel();
+        }
+        if(keys.containsKey(watchDirKey)){
+            keys.remove(watchDirKey);
+        }
+        
+        if(waitMap.containsKey(watchDirKey)){
+            waitMap.remove(watchDirKey);
+        }
+        it.remove();
+        continue;
+      }
+      
       // Because the initial run directory watched is present in the waitMap as well,
       // We need to skip this forced scan.
       if (watchDir.toString().equals(runDirString)) {
@@ -459,7 +477,6 @@ public class MetrixWatch extends Thread {
       }
 
       Summary sum = new Summary();
-
       String nonInterOp = watchDir.toString().replace("/InterOp", "");
 
       try {
@@ -475,13 +492,13 @@ public class MetrixWatch extends Thread {
       }
       if(sum.getRunId() != null){
         if (sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG) {
-          waitMap.remove(watchPairs.getKey());      // if watchkey is present, remove it from waitMap
-          keys.remove(watchPairs.getKey());      // Remove watchkeys from Watcher Service
+          waitMap.remove(watchDirKey);      // if watchkey is present, remove it from waitMap
+          keys.remove(watchDirKey);      // Remove watchkeys from Watcher Service
         }
 
         if ((currentTime - mapTime) > forceTime) {
           if (ml.processMetrics(Paths.get(nonInterOp), sum.getState(), dataStore)) {
-            waitMap.put((WatchKey) watchPairs.getKey(), System.currentTimeMillis());
+            waitMap.put((WatchKey) watchDirKey, System.currentTimeMillis());
             metrixLogger.log.info("Forcefully parsed " + nonInterOp);
           }
         }
