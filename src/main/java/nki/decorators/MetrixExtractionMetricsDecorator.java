@@ -6,12 +6,14 @@ import java.util.Map;
 import java.util.TreeMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import nki.constants.Constants;
+import nki.objects.FWHMDist;
 import nki.objects.IntensityDist;
+import nki.objects.MutableDouble;
 import nki.objects.MutableInt;
 import nki.parsers.illumina.ExtractionMetrics;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -25,14 +27,17 @@ import org.w3c.dom.Element;
 public class MetrixExtractionMetricsDecorator {
   private ExtractionMetrics extractionMetrics;
   private IntensityDist riDist;
+  private FWHMDist fwhmDist;
 
   public MetrixExtractionMetricsDecorator(ExtractionMetrics extractionMetrics) {
     this.extractionMetrics = extractionMetrics;
     this.riDist = extractionMetrics.getIntensityScores().getRawIntensityDist();
+    this.fwhmDist = extractionMetrics.getFWHMScores().getAverageFWHMDist();
   }
   
-  public MetrixExtractionMetricsDecorator(IntensityDist iDist){
+  public MetrixExtractionMetricsDecorator(IntensityDist iDist, FWHMDist fwhmDist){
       this.riDist = iDist;
+      this.fwhmDist = fwhmDist;
   }
 
 public JSONObject toJSON() {
@@ -41,6 +46,12 @@ public JSONObject toJSON() {
         jsonCombined.put("rawIntensities", generateJSON(riDist));
     }else{
         jsonCombined.put("rawIntensities", "NoDistAvailable");
+    }
+    
+    if(fwhmDist != null){
+        jsonCombined.put("fwhmDistribution", generateFWHMJSON(fwhmDist));
+    }else{
+        jsonCombined.put("fwhmDistribution", "NoDistAvailable");
     }
     
     return jsonCombined;
@@ -86,6 +97,46 @@ public JSONObject toJSON() {
       return averages;
   }
 
+    private JSONArray generateFWHMJSON(FWHMDist fd){
+    JSONArray averages = new JSONArray();
+
+    for (int lane : fd.getFWHMvalues().keySet()) {
+      JSONObject l = new JSONObject();
+      Map<Integer, Map<String, MutableDouble>> cycleContent = new TreeMap<>(fd.getFWHMvalues().get(lane));
+
+      JSONArray cyclesA = new JSONArray();
+      JSONArray cyclesC = new JSONArray();
+      JSONArray cyclesT = new JSONArray();
+      JSONArray cyclesG = new JSONArray();
+
+      for (int cycle : cycleContent.keySet()) {
+        Map<String, MutableDouble> cycleFWHMs = cycleContent.get(cycle);
+        for (String fwhm : cycleFWHMs.keySet()) {
+          if (fwhm.equals(Constants.METRIC_EX_RAWINT_A)) {
+            cyclesA.add(cycleFWHMs.get(fwhm).get());
+          }
+          if (fwhm.equals(Constants.METRIC_EX_RAWINT_C)) {
+            cyclesC.add(cycleFWHMs.get(fwhm).get());
+          }
+          if (fwhm.equals(Constants.METRIC_EX_RAWINT_T)) {
+            cyclesT.add(cycleFWHMs.get(fwhm).get());
+          }
+          if (fwhm.equals(Constants.METRIC_EX_RAWINT_G)) {
+            cyclesG.add(cycleFWHMs.get(fwhm).get());
+          }
+        }
+      }
+
+      l.put("lane", lane);
+      l.put("fwhmA", cyclesA);
+      l.put("fwhmC", cyclesC);
+      l.put("fwhmT", cyclesT);
+      l.put("fwhmG", cyclesG);
+      averages.add(l);
+    }
+      return averages;
+  }
+  
   public Element toXML() {
     Document xmlDoc = null;
     Element root = null;

@@ -85,7 +85,7 @@ public class MetrixContainerDecorator {
         qualityMetrics = new MetrixQualityMetricsDecorator(s.getQScoreDist(), s.getQScoreDistByLane(), s.getQScoreDistByCycle()).toJSON();
         errorMetrics = new MetrixErrorMetricsDecorator(s.getErrorDist()).toJSON();
         indexMetrics = new MetrixIndexMetricsDecorator(s.getSampleInfo()).toJSON();
-        extractionMetrics = new MetrixExtractionMetricsDecorator(s.getIntensityDistRaw()).toJSON();
+        extractionMetrics = new MetrixExtractionMetricsDecorator(s.getIntensityDistRaw(), s.getFWHMDist()).toJSON();
         //TODO generates muchness output
         intensityMetrics = new MetrixIntensityMetricsDecorator(s.getIntensityDistAvg(), s.getIntensityDistCCAvg()).toJSON();
     }else{

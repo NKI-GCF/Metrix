@@ -91,7 +91,7 @@ public class MetrixSummaryCollectionDecorator {
             JSONObject qualityMetrics = new MetrixQualityMetricsDecorator(procSum).toJSON();
             JSONObject errorMetrics = new MetrixErrorMetricsDecorator(procSum.getErrorDist()).toJSON();
             JSONObject indexMetrics = new MetrixIndexMetricsDecorator(procSum.getSampleInfo()).toJSON();
-            JSONObject extractionMetrics = new MetrixExtractionMetricsDecorator(procSum.getIntensityDistRaw()).toJSON();
+            JSONObject extractionMetrics = new MetrixExtractionMetricsDecorator(procSum.getIntensityDistRaw(), procSum.getFWHMDist()).toJSON();
             JSONObject intensityMetrics = new MetrixIntensityMetricsDecorator(procSum.getIntensityDistAvg(),
                                                                               procSum.getIntensityDistCCAvg()
                                           ).toJSON();
@@ -184,7 +184,7 @@ public class MetrixSummaryCollectionDecorator {
             sumXml.appendChild(index);
             
             Element extraction = xmlDoc.createElement("extractionMetrics");
-            extraction = new MetrixExtractionMetricsDecorator(mc.getSummary().getIntensityDistRaw()).toXML();
+            extraction = new MetrixExtractionMetricsDecorator(mc.getSummary().getIntensityDistRaw(), mc.getSummary().getFWHMDist()).toXML();
             sumXml.appendChild(extraction);
             
             Element intensity = xmlDoc.createElement("intensityMetrics");
