@@ -65,6 +65,8 @@ public class Summary implements Serializable {
   private IntensityDist iDistCCAvg;
   private IntensityDist iDistRaw;
 
+  private FWHMDist fwhmDist;
+  
   /*
    Quality Metrics distributions.
   */
@@ -432,6 +434,14 @@ public class Summary implements Serializable {
 
   public IntensityDist getIntensityDistRaw() {
     return iDistRaw;
+  }
+  
+  public void setFWHMDist(FWHMDist fwhmDist) {
+    this.fwhmDist = fwhmDist;
+  }
+
+  public FWHMDist getFWHMDist() {
+    return fwhmDist;
   }
   
   public void setSampleInfo(Indices sampleInfo) {

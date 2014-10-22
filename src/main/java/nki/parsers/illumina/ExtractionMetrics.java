@@ -19,12 +19,15 @@ import java.util.logging.Level;
 import nki.constants.Constants;
 import nki.objects.IntensityMap;
 import nki.objects.IntensityScores;
+import nki.objects.FWHMMap;
+import nki.objects.FWHMScores;
 
 import nki.util.LoggerWrapper;
 
 public class ExtractionMetrics extends GenericIlluminaParser {
   List<Integer> cycles = new ArrayList<>();
   private IntensityScores iScores;
+  private FWHMScores fScores;
   // Instantiate Logger
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
@@ -34,11 +37,18 @@ public class ExtractionMetrics extends GenericIlluminaParser {
   
   public IntensityScores getIntensityScores() {
     if (iScores == null) {
-      iScores = digestData();
+      digestData();
     }
     return iScores;
   }
 
+  public FWHMScores getFWHMScores() {
+    if (fScores == null) {
+      digestData();
+    }
+    return fScores;
+  }
+  
     /*
      * Binary structure:
      *	byte 0: file version number (2)
@@ -53,16 +63,24 @@ public class ExtractionMetrics extends GenericIlluminaParser {
      *
      */
 
-  public IntensityScores digestData() {
+  public void digestData() {
     iScores = new IntensityScores();
+    fScores = new FWHMScores();
     if (fileMissing) {
-      return iScores;
+      metrixLogger.log.finest("ExtractionMetrics file is missing for digest.");
+      return;
     }
 
     try {
-      iScores.setVersion(leis.readByte());
-      iScores.setRecordLength(leis.readByte());
+      this.version = leis.readByte();
+      iScores.setVersion(this.version);
+      fScores.setVersion(this.version);
+      this.recordLength = leis.readByte();
+      iScores.setRecordLength(this.recordLength);
+      fScores.setRecordLength(this.recordLength);
+    
       iScores.setSource(this.getSource());
+      fScores.setSource(this.getSource());
     }
     catch (IOException Ex) {
       metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
@@ -70,7 +88,9 @@ public class ExtractionMetrics extends GenericIlluminaParser {
 
     try {
       Map<Integer, IntensityMap> cycleMap;
+      Map<Integer, FWHMMap> cycleFWHMMap;
       IntensityMap iMap;
+      FWHMMap fMap;
       
       while (leis.available() > 40) {
         int laneNr = leis.readUnsignedShort();
@@ -83,6 +103,13 @@ public class ExtractionMetrics extends GenericIlluminaParser {
         else {
           cycleMap = new HashMap<>();
         }
+
+        if (fScores.getLane(laneNr) != null) {
+          cycleFWHMMap = fScores.getLane(laneNr);
+        }
+        else {
+          cycleFWHMMap = new HashMap<>();
+        }        
         
         if (cycleMap.containsKey(cycleNr)) {
           iMap = cycleMap.get(cycleNr);
@@ -90,11 +117,25 @@ public class ExtractionMetrics extends GenericIlluminaParser {
         else {
           iMap = new IntensityMap();
         }
+
+        if (cycleFWHMMap.containsKey(cycleNr)) {
+          fMap = cycleFWHMMap.get(cycleNr);
+        }
+        else {
+          fMap = new FWHMMap();
+        }        
         
-        float fA = leis.readFloat();
-        float fC = leis.readFloat();
-        float fG = leis.readFloat();
-        float fT = leis.readFloat();
+        //-- FWHM Score A
+        fMap.addMapping(tileNr, Constants.METRIC_VAR_FWHM_A, (double) leis.readFloat());
+        
+        //-- FWHM Score C
+        fMap.addMapping(tileNr, Constants.METRIC_VAR_FWHM_C, (double) leis.readFloat());
+        
+        //-- FWHM Score G
+        fMap.addMapping(tileNr, Constants.METRIC_VAR_FWHM_G, (double) leis.readFloat());
+        
+        //-- FWHM Score T
+        fMap.addMapping(tileNr, Constants.METRIC_VAR_FWHM_T, (double) leis.readFloat());
 
         //-- Raw Int A
         iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_A, (double)leis.readUnsignedShort());
@@ -111,7 +152,10 @@ public class ExtractionMetrics extends GenericIlluminaParser {
         long dateTime = leis.readLong();
         
         cycleMap.put(cycleNr, iMap);
+        cycleFWHMMap.put(cycleNr, fMap);
+        
         iScores.setLane(cycleMap, laneNr);
+        fScores.setLane(cycleFWHMMap, laneNr);
       }
     }catch (EOFException eof) {
       // Reached end of file
@@ -122,8 +166,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
       metrixLogger.log.log(Level.SEVERE, "Error in main parsing of metrics data: {0}", exMain.toString());
     }
 
-    // Return the qualityScores object.
-    return iScores;
+    return;
   }
 
   public List<Integer> getUniqueCycles() {

@@ -51,6 +51,8 @@ public class MetrixContainer {
 
   private IntensityDist iDistAvg;
   private IntensityDist iDistCCAvg;
+  private FWHMDist fwhmDist;
+ 
   private QualityScores qsOut;
   private IntensityScores isOut;
   private ErrorCollection ecOut;
@@ -351,12 +353,14 @@ public class MetrixContainer {
             force) && !this.remote) {
             ExtractionMetrics eim = new ExtractionMetrics(extractionMetrics, 0);
             if (!eim.getFileMissing()) {
-              IntensityScores risOut = eim.digestData();
+              eim.digestData();
+              IntensityScores risOut = eim.getIntensityScores();
+              FWHMScores fsOut = eim.getFWHMScores();
 
               // Calculate distribution
               sum.setIntensityDistRaw(risOut.getRawIntensityDist());
+              sum.setFWHMDist(fsOut.getAverageFWHMDist());
               update = true;
-
             }
         eim.closeSourceStream();
         eim = null; // Manual GC

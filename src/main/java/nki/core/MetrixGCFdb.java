@@ -104,13 +104,13 @@ public class MetrixGCFdb {
                     Summary sum = (Summary) srvResp;
                     System.out.println("Got my run: " + sum.getRunId());
                     processResult(sum);
-                }                
+                }
                 
                 if (srvResp instanceof SummaryCollection) {
                     SummaryCollection sc = (SummaryCollection) srvResp;
                     Summary sum = sc.getSummaryCollection().get(0);
                     processResult(sum);
-                }                
+                }
 
                 /*
                  *	Exceptions

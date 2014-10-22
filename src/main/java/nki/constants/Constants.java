@@ -57,6 +57,11 @@ public final class Constants {
   public static final String METRIC_VAR_ACICC_G = "AvgCorIntClusG";
   public static final String METRIC_VAR_ACICC_T = "AvgCorIntClusT";
 
+  public static final String METRIC_VAR_FWHM_A = "AvgFWHMA";
+  public static final String METRIC_VAR_FWHM_C = "AvgFWHMC";
+  public static final String METRIC_VAR_FWHM_G = "AvgFWHMG";
+  public static final String METRIC_VAR_FWHM_T = "AvgFWHMT";
+  
   public static final String METRIC_VAR_NUM_BCS_NC = "BaseCallsNoCall";  // Float
   public static final String METRIC_VAR_NUM_BCS_A = "BaseCallsA";      // UnsignedShort (uint16)
   public static final String METRIC_VAR_NUM_BCS_C = "BaseCallsC";      // UnsignedShort (uint16)

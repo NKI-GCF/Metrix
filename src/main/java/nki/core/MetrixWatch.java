@@ -124,7 +124,7 @@ public class MetrixWatch extends Thread {
       file = fileArg.getCanonicalPath();
     }
     catch (IOException Ex) {
-      metrixLogger.log.info("Argumented filepath cannot be resolved. " + Ex.toString());
+      metrixLogger.log.warning("Argumented filepath cannot be resolved. " + Ex.toString());
       return false;
     }
     File fileRI = new File(file + "/RunInfo.xml");
@@ -142,11 +142,11 @@ public class MetrixWatch extends Thread {
           if(ds.checkSummaryByRunId(ds.conn, file) && (System.currentTimeMillis() - fileComplete.lastModified()) > 1814400000){
             // Run is finished, available in database. But has completed over three weeks ago.
             ml.quickLoad = true;
-            metrixLogger.log.info("Old run - Quick loading a finished run. Available in database.");
+            metrixLogger.log.fine("Old run - Quick loading a finished run. Available in database.");
           }else if(ds.checkSummaryByRunId(ds.conn, file)){
             // Run is finished, available in database.
             ml.quickLoad = true;
-            metrixLogger.log.info("Quick loading a finished run. Available in database.");
+            metrixLogger.log.fine("Quick loading a finished run. Available in database.");
           }else{
             // Run has finished but not available in database.
             ml.quickLoad = false;
@@ -193,15 +193,15 @@ public class MetrixWatch extends Thread {
             // Run is older than three weeks and is available in database.
             if(difference > 1814400000 && ds.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = true;
-              metrixLogger.log.info("Quick loading a stopped run. Age is older than 3 weeks.");
+              metrixLogger.log.fine("Quick loading a stopped run. Age is older than 3 weeks.");
             // Run is less than three weeks old and is available in database.
             }else if(difference < 1814400000 && ds.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = false;
-              metrixLogger.log.info("Parsing a recent run which has stopped. Age is less than 3 weeks.");
+              metrixLogger.log.fine("Parsing a recent run which has stopped. Age is less than 3 weeks.");
             // Run is older than three weeks but hasn't been found in database.
             }else if(!ds.checkSummaryByRunId(ds.conn, file)){
               ml.quickLoad = false;
-              metrixLogger.log.info("Parsing a run which has stopped but not found in database.");
+              metrixLogger.log.fine("Parsing a run which has stopped but not found in database.");
             }else{
               metrixLogger.log.severe("Parsing a run which has stopped. Alternative processing.");
             }
@@ -245,7 +245,7 @@ public class MetrixWatch extends Thread {
       // Copy of files seems to be delayed till onboard cluster generation has finished (120 minutes) 
       // FAIL : If it fails after 120 minutes. Remove and ignore.
       // SUCCESS : Run will be registered and backlog parsed for the missing time.
-      metrixLogger.log.info("Checking whether argumented directory has been created less than 24 hours ago.");
+      metrixLogger.log.info("Checking whether directory has been created less than 24 hours ago.");
       metrixLogger.log.fine("Checking age of run directory.");
       // Check if file has been created the last 24 hours.
       long ageDiff = (System.currentTimeMillis() - fileArg.lastModified());
@@ -265,7 +265,7 @@ public class MetrixWatch extends Thread {
        executor.schedule(task, 120, TimeUnit.MINUTES);
        // Shutdown executor.
        LoggerWrapper.log.fine("Gracefully shutting down executor service for delayed task.");
-       executor.shutdown();         
+       executor.shutdown();
       }else{
         metrixLogger.log.info("Directory " + file + " does not match standard format. RunInfo.xml is missing.");
         metrixLogger.log.fine("Directory is older than 24 hours. Not creating a delayed task.");
@@ -406,7 +406,7 @@ public class MetrixWatch extends Thread {
 
       watchKey.reset();  // Reset the watchkey to put it back for monitoring.
 
-    }  // End while loop line 198
+    }  // End while loop
 
     try {
       watcher.close();
@@ -451,7 +451,7 @@ public class MetrixWatch extends Thread {
       
       // Run has been marked finished.
       if(finishedMap.contains(watchDir.toString())){
-        LoggerWrapper.log.finer("Key is in finished map - " + watchDir.toString() + " - Removing entries.");
+        LoggerWrapper.log.log(Level.FINER, "Key is in finished map - {0} - Removing entries.", watchDir.toString());
         if(watchDirKey.isValid()){
             watchDirKey.cancel();
         }
