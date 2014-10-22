@@ -112,16 +112,16 @@ public JSONObject toJSON() {
       for (int cycle : cycleContent.keySet()) {
         Map<String, MutableDouble> cycleFWHMs = cycleContent.get(cycle);
         for (String fwhm : cycleFWHMs.keySet()) {
-          if (fwhm.equals(Constants.METRIC_EX_RAWINT_A)) {
+          if (fwhm.equals(Constants.METRIC_VAR_FWHM_A)) {
             cyclesA.add(cycleFWHMs.get(fwhm).get());
           }
-          if (fwhm.equals(Constants.METRIC_EX_RAWINT_C)) {
+          if (fwhm.equals(Constants.METRIC_VAR_FWHM_C)) {
             cyclesC.add(cycleFWHMs.get(fwhm).get());
           }
-          if (fwhm.equals(Constants.METRIC_EX_RAWINT_T)) {
+          if (fwhm.equals(Constants.METRIC_VAR_FWHM_T)) {
             cyclesT.add(cycleFWHMs.get(fwhm).get());
           }
-          if (fwhm.equals(Constants.METRIC_EX_RAWINT_G)) {
+          if (fwhm.equals(Constants.METRIC_VAR_FWHM_G)) {
             cyclesG.add(cycleFWHMs.get(fwhm).get());
           }
         }
