@@ -80,16 +80,19 @@ public class Reads implements Serializable {
 
   public String getDemultiplexIndex() {
     String demuxIndex = "";
+    int cnt = 0;
     for (List<String> l : readMap.values()) {
+      if(cnt++>0){
+          demuxIndex += ",";
+      }
       if (l.get(1).equals("N")) {
-        demuxIndex += "y";  // Read is not an index
+        demuxIndex += "y"+ l.get(0);  // Read is not an index
       }
       else {
-        demuxIndex += "I"; // Read is an index
+        demuxIndex += "I"+ l.get(0); // Read is an index
       }
-      demuxIndex += l.get(0);
     }
-
+ 
     return demuxIndex;
   }
 }
