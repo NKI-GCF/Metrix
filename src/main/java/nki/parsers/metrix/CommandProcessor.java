@@ -163,7 +163,7 @@ public final class CommandProcessor {
                         metrixLogger.log.log(Level.FINER, "Success.");
                         MetrixContainerDecorator mcd = new MetrixContainerDecorator(mc, true);
                         json.put("result", "success");
-                        json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated.");
+                        json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated. " + mc.getSummary().getRunId() + " - " + mc.getSummary().getCurrentCycle() + " - " + mc.getSummary().getTotalCycles());
                         json.put("data", mcd.toJSON());
                     }else{
                         metrixLogger.log.log(Level.FINER, "Update failed. Eventhough the parsing was forced, no results were returned.");
