@@ -258,7 +258,7 @@ public class MetrixLogic {
       // Final processing run before finishing.
       processMetrics(Paths.get(path), -1, tmpDS);
       metrixLogger.log.info("Performing final parse of data to create distributions.");
-      MetrixContainer mc = new MetrixContainer(summary, false);
+      MetrixContainer mc = new MetrixContainer(summary, false, true);
       metrixLogger.log.info("Finished parsing " + summary.getRunId());
       mc=null;
       tmpDS.closeAll();
