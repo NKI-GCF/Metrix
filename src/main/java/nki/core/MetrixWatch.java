@@ -449,6 +449,26 @@ public class MetrixWatch extends Thread {
       // Get the path for watchDir.
       Path watchDir = keys.get(watchDirKey);
       
+      LoggerWrapper.log.info("Showing contents FinishedMap: \n");
+      
+      for(String fr : finishedMap){
+         LoggerWrapper.log.info("String : " + fr);
+      }
+
+      LoggerWrapper.log.info("Showing contents WaitMap: \n");
+      
+      for(Iterator<WatchKey> wm = waitMap.keySet().iterator(); wm.hasNext();){
+         WatchKey wmWK = wm.next();
+         LoggerWrapper.log.info("Path: " + wmWK.toString() + "\t-" + waitMap.get(wmWK));
+      }      
+
+      LoggerWrapper.log.info("Showing contents keys Map: \n");
+      
+      for(Iterator<WatchKey> kys = keys.keySet().iterator(); kys.hasNext();){
+         WatchKey kysMp = kys.next();
+         LoggerWrapper.log.info("Path: " + kysMp.toString() + "\t-" + keys.get(kysMp));
+      }       
+      
       // Run has been marked finished.
       if(finishedMap.contains(watchDir.toString())){
         LoggerWrapper.log.log(Level.FINER, "Key is in finished map - {0} - Removing entries.", watchDir.toString());

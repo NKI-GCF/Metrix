@@ -589,11 +589,15 @@ public class PostProcessing {
     final String arguments = app.getArguments();
 
     ProcessBuilder pb = new ProcessBuilder(scriptPath.toString(), arguments);
-
+    
+    if(app.getWorkingDirectory() != null){
+        pb.directory(new File(app.getWorkingDirectory()));
+    }
+    
     // Instantiate the ProcessBuilder
     pb.redirectOutput(outputFile);
     pb.redirectErrorStream(true);
-
+    
     // Default exitstatus -255 for return without processing.
     int exitStatus = -255;
 

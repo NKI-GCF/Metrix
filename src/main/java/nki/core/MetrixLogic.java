@@ -250,6 +250,7 @@ public class MetrixLogic {
   }
 
   public void finishRun(String path) {
+    this.quickLoad = false;
     this.checkSummary(path);
     summary.setState(Constants.STATE_FINISHED);  // Set state to STATE_FINISED (2): Complete
     try {
