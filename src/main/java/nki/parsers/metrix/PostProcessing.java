@@ -158,7 +158,9 @@ public class PostProcessing {
       // - postprocessing.mtx	(properties file)
       // - postprocessing.xsd (default location in root)
       xml = new FileInputStream(xmlFile);
-      xsd = new FileInputStream("./postprocessing.xsd");
+      String ppFormatPath = configFile.getProperty("POSTPROCESSING_FORMAT", "./postprocessing.xsd");
+      String xsdFile = (new File(ppFormatPath).getAbsolutePath());
+      xsd = new FileInputStream(xsdFile);
 
       SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
       Schema schema = factory.newSchema(new StreamSource(xsd));

@@ -23,6 +23,13 @@ import nki.objects.Summary;
 import nki.parsers.xml.XmlDriver;
 import nki.parsers.metrix.PostProcessing;
 
+  /**
+   * Class that determines state, progress and parsing interfaces.
+   * Sequencing runs are parsed and stored in a Metrix Summary object
+   * which in turn is serialized into the database.
+   *
+   */
+
 public class MetrixLogic {
 
   // Instantiate Logger
@@ -37,7 +44,14 @@ public class MetrixLogic {
   public MetrixLogic() {
 
   }
-
+   /**
+   * ProcessMetrics is the main parsing class. 
+   * 
+   * @param Path Sequencing directory
+   * @param int Initial run state
+   * @param DataStore Datastore instance
+   */
+  
   public boolean processMetrics(Path runDir, int st, DataStore ds) {
     boolean success = false;
     boolean finishBool = false;

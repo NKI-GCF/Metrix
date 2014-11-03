@@ -95,7 +95,7 @@ public class MetrixContainer {
         LoggerWrapper.log.severe("[WARNING] Obtained an empty summary.");
         //throw new IOException();
       }
-  }
+   }
  
     public MetrixContainer(Summary summary, boolean remote, boolean force){
       this.sum = summary;

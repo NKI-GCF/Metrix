@@ -44,14 +44,6 @@ public class MetrixWatch extends Thread {
   private MetrixLogic ml = new MetrixLogic();
   private DataStore dataStore;
 
-  /**
-   * Creates a WatchService and registers the given run directory
-   *
-   * @param dirN
-   * @param rec
-   * @param ds
-   * @throws java.io.IOException
-   */
   public MetrixWatch(String dirN, boolean rec, DataStore ds) throws IOException {
     this.runDirString = dirN;
     this.runDirPath = Paths.get(dirN);
