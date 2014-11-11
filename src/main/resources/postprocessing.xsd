@@ -73,6 +73,33 @@
             <xs:attribute type="xs:string" name="title" use="required"/>
           </xs:complexType>
         </xs:element>
+        <xs:element name="DemuxOperation">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Script" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="BclToFastQPath"/>
+                    <xs:element type="xs:string" name="Arguments"/>
+                    <xs:element type="xs:string" name="BaseMask"/>
+                    <xs:element type="xs:string" name="BaseRunDir" />
+                    <xs:element type="xs:string" name="BaseOutputDir" />
+                    <xs:element type="xs:string" name="BaseWorkingDir" />
+                    <xs:element type="xs:string" name="MakePath" />
+                    <xs:element type="xs:string" name="MakeArguments" />
+                    <xs:element type="xs:string" name="LoggingPath" />
+                  </xs:sequence>
+                  <xs:attribute type="xs:positiveInteger" name="execOrder" use="required"/>
+                  <xs:attribute type="xs:string" name="id" use="required"/>
+                  <xs:attribute type="xs:string" name="title" use="required"/>
+                </xs:complexType>
+              </xs:element>
+             </xs:sequence>
+            <xs:attribute type="xs:positiveInteger" name="execOrder" use="required"/>
+            <xs:attribute type="xs:string" name="id" use="required"/>
+            <xs:attribute type="xs:string" name="title" use="required"/>
+          </xs:complexType>
+        </xs:element>        
       </xs:choice>
       <xs:attribute type="xs:float" name="version"/>
     </xs:complexType>
