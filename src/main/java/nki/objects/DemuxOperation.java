@@ -59,6 +59,9 @@ public final class DemuxOperation extends PostProcess {
       else if (p.getNodeName().equalsIgnoreCase("Arguments")) {
         this.setArguments(p.getTextContent());
       }
+      else if (p.getNodeName().equalsIgnoreCase("BaseMask")) {
+        this.setBaseMask(p.getTextContent());
+      }
       else if (p.getNodeName().equalsIgnoreCase("BaseRunDir")) {
         this.setBaseRunDir(p.getTextContent());
       }
@@ -73,6 +76,9 @@ public final class DemuxOperation extends PostProcess {
       }
       else if (p.getNodeName().equalsIgnoreCase("MakeArguments")) {
         this.setMakeArguments(p.getTextContent());
+      }
+      else if (p.getNodeName().equalsIgnoreCase("LoggingPath")) {
+        this.setLoggingPath(p.getTextContent());
       }
     }
   }
