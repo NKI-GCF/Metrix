@@ -397,17 +397,34 @@ public class PostProcessing {
     }
     
     // Set input, output dirs and samplesheet path.
-    String args = " ";
+    /*String args = "";
     args += " --input-dir " + dmx.getBaseWorkingDir();
     args += " --output-dir " + dmxBaseOut.toString();
     args += " --sample-sheet " + samplesheet.getAbsolutePath();
     args += " --use-bases-mask " + dmx.getBaseMask();
     args += " --force ";
+    */
     
-    // additional arguments
-    args += dmx.getArguments();
-
-    String cmd = dmx.getBclToFastQPath()+ args;
+    ArrayList<String> cmd = new ArrayList<>();
+    cmd.add(dmx.getBclToFastQPath());
+    // Add input dir
+    cmd.add("--input-dir");
+    cmd.add(dmx.getBaseWorkingDir());
+    cmd.add("--output-dir");
+    cmd.add(dmxBaseOut.toString());
+    cmd.add("--sample-sheet");
+    cmd.add(samplesheet.getAbsolutePath());
+    cmd.add("--use-bases-mask");
+    cmd.add(dmx.getBaseMask());
+    cmd.add("--force");
+        
+    if(dmx.getArguments() != null){
+        String[] spl = dmx.getArguments().split(" ");
+        for(String i : spl){
+            cmd.add(i);
+        }
+    }
+    
     LoggerWrapper.log.log(Level.INFO, "Executing : " + cmd);
     ProcessBuilder pb = new ProcessBuilder(cmd);
    
