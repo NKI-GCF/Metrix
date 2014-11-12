@@ -204,8 +204,8 @@ public final class DemuxOperation extends PostProcess {
     // Determine header first (type of SampleSheet)
     String firstLineWord = fullSamplesheet.get(0)[0];
     
-    LoggerWrapper.log.log(Level.FINE, "First line - {0}", Arrays.toString(fullSamplesheet.get(0)));
-    LoggerWrapper.log.log(Level.FINE, "First word - {0}", firstLineWord);
+    //LoggerWrapper.log.log(Level.FINE, "First line - {0}", Arrays.toString(fullSamplesheet.get(0)));
+    //LoggerWrapper.log.log(Level.FINE, "First word - {0}", firstLineWord);
     
     switch (firstLineWord) {
         // MiSeq format
@@ -354,7 +354,6 @@ public final class DemuxOperation extends PostProcess {
                 
                 for(String s : ssContents) {
                     builder.append(s);
-                    LoggerWrapper.log.log(Level.FINE, "Line size : {0}", lineSize + " idx "+ idx);
                     if(idx < lineSize-1){
                         builder.append("\n");
                     }

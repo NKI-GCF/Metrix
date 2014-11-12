@@ -400,16 +400,16 @@ public class PostProcessing {
     // Set input, output dirs and samplesheet path.
     String[] cmd = {
         dmx.getBclToFastQPath(),
-        dmx.getArguments(),
         " --input-dir " + dmx.getBaseWorkingDir(),
-        " --output-dir " + dmxBaseOut,
+        " --output-dir " + dmxBaseOut
+        + dmx.getArguments() +
         " --sample-sheet " + samplesheet.getAbsolutePath(),
         " --use-bases-mask " + dmx.getBaseMask(),
         " --force"
     };
     
     LoggerWrapper.log.log(Level.INFO, "Executing: " + dmx.getBclToFastQPath());
-    LoggerWrapper.log.log(Level.INFO, "With: " + cmd);
+    LoggerWrapper.log.log(Level.INFO, "With: ", cmd);
     
     ProcessBuilder pb = new ProcessBuilder(cmd);
    
