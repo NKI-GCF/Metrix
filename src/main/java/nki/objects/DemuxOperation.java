@@ -288,13 +288,17 @@ public final class DemuxOperation extends PostProcess {
       ArrayList<String> ssContents;
       
       for(String[] line : fullSamplesheet){
+          LoggerWrapper.log.log(Level.INFO, "Processing line : "+ line);
+          LoggerWrapper.log.log(Level.INFO, "Line IDX = " + line[lineIdx]);
           ssContents = null;
           if(sampleSheets.get(line[lineIdx]) == null){
+              LoggerWrapper.log.log(Level.INFO, "Not present in samplesheets");
               ssContents = new ArrayList<>();
               // Add default HiSeq header.
               ssContents.add(hiseqHeader);
           }else{
               ssContents = sampleSheets.get(line[lineIdx]);
+              LoggerWrapper.log.log(Level.INFO, "ssContents already present in samplesheet :: ", ssContents);
           }
          
           if(line[lineIdx] != null || !line[lineIdx].equals("") && !line[0].equals("FCID")){
@@ -305,7 +309,8 @@ public final class DemuxOperation extends PostProcess {
             }
             ssContents.add(builder.toString());
           }
-          
+          LoggerWrapper.log.log(Level.INFO, "Pushing ", ssContents);
+          LoggerWrapper.log.log(Level.INFO, "Into ", line[lineIdx]);
           sampleSheets.put(line[lineIdx], ssContents);
       }
       
