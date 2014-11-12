@@ -304,6 +304,7 @@ public final class DemuxOperation extends PostProcess {
             // Add the line to the contents of the samplesheet.
             StringBuilder builder = new StringBuilder();
             for(String s : line) {
+                
                 builder.append(s + ",");
             }
             ssContents.add(builder.toString());
@@ -349,7 +350,9 @@ public final class DemuxOperation extends PostProcess {
                 
                 LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: " + key);
                 
-                builder.deleteCharAt(0);
+                if(Character.valueOf(builder.charAt(0)).equals(",")){
+                    builder.deleteCharAt(0);
+                }
                 out.println(builder.toString());
                
                 out.close();
