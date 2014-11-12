@@ -53,6 +53,8 @@ public final class DemuxOperation extends PostProcess {
     for (int i = 0; i < foProps.getLength(); i++) {
       // Iterate over node properties
       Node p = foProps.item(i);
+      LoggerWrapper.log.log(Level.INFO, "Prop: " + p.getNodeName() + " - " + p.getTextContent());
+      
       if (p.getNodeName().equalsIgnoreCase("BclToFastQPath")) {
         this.setBclToFastQPath(p.getTextContent());
       }
@@ -63,6 +65,7 @@ public final class DemuxOperation extends PostProcess {
         this.setBaseMask(p.getTextContent());
       }
       else if (p.getNodeName().equalsIgnoreCase("BaseRunDir")) {
+        LoggerWrapper.log.log(Level.INFO, "Setting Base run dir " + p.getTextContent());
         this.setBaseRunDir(p.getTextContent());
       }
       else if (p.getNodeName().equalsIgnoreCase("BaseOutputDir")) {
@@ -136,7 +139,7 @@ public final class DemuxOperation extends PostProcess {
   
   public File getSampleSheetPath(){
       if(baseRunDir != null || !baseRunDir.equals("")){
-        return new File(this.getBaseRunDir() + "/SampleSheet.csv");
+        return new File(getBaseRunDir() + "/SampleSheet.csv");
       }else{
         return new File("./SampleSheet.csv");
       }
