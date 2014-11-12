@@ -340,9 +340,9 @@ public final class DemuxOperation extends PostProcess {
            try{
                 String filename = "";
                 if(getSplitBy().equals("lane")){
-                    filename = ssBaseDirectory.toString()+"/L"+key.toString();
+                    filename = ssBaseDirectory.toString()+"/L"+key.toString()+".csv";
                 }else{
-                    filename = ssBaseDirectory.toString()+"/"+key.toString();
+                    filename = ssBaseDirectory.toString()+"/"+key.toString()+".csv";
                 }
                 File samplesheetOut = new File(filename);
                 samplesheetLocations.add(samplesheetOut);
