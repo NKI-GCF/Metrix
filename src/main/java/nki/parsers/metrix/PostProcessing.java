@@ -425,6 +425,7 @@ public class PostProcessing {
       // Start the process and wait for it to finish.
       LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Waiting for...");
       exitStatus = p.waitFor();
+      LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Exit status : " + exitStatus);
     }
     catch (IOException IO) {
       LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{dmx.getId(), IO.toString()});
@@ -432,35 +433,37 @@ public class PostProcessing {
     catch (InterruptedException IE) {
       LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{dmx.getId(), IE.toString()});
     }
-    
-    String makeArgs = dmx.getMakeArguments();
-    makeArgs += " -C " + dmxBaseOut;
-    
-    ProcessBuilder pbMake = new ProcessBuilder(dmx.getMakePath(), makeArgs);
-    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting Make for : {0}", pbMake.command());
-    pbMake.directory(dmxBaseOut);
+    if(exitStatus == 0){
+        LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Exited as 0 - starting make");
+        String makeArgs = dmx.getMakeArguments();
+        makeArgs += " -C " + dmxBaseOut;
 
-    // Instantiate the ProcessBuilder for make
-    pbMake.redirectOutput(loggingFile);
-    pbMake.redirectErrorStream(true);
-    
-    try {
-      Process pMake = pbMake.start();
-      // Start the process and wait for it to finish.
-      exitStatus += pMake.waitFor(); 
-    }
-    catch (IOException IO) {
-      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{dmx.getId(), IO.toString()});
-    }
-    catch (InterruptedException IE) {
-      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{dmx.getId(), IE.toString()});
-    }    
-    
-    if (exitStatus == 0) {
-      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Application block ({0} :: {1} :: {2}) has finished successfully.  ", new Object[]{dmx.getOrder(), dmx.getSubOrder(), dmx.getId()});
-    }
-    else {
-      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Application block ''{0}'' has exited with errors.", dmx.getId());
+        ProcessBuilder pbMake = new ProcessBuilder(dmx.getMakePath(), makeArgs);
+        LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting Make for : {0}", pbMake.command());
+        pbMake.directory(dmxBaseOut);
+
+        // Instantiate the ProcessBuilder for make
+        pbMake.redirectOutput(loggingFile);
+        pbMake.redirectErrorStream(true);
+
+        try {
+          Process pMake = pbMake.start();
+          // Start the process and wait for it to finish.
+          exitStatus += pMake.waitFor(); 
+        }
+        catch (IOException IO) {
+          LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{dmx.getId(), IO.toString()});
+        }
+        catch (InterruptedException IE) {
+          LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{dmx.getId(), IE.toString()});
+        }    
+
+        if (exitStatus == 0) {
+          LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Application block ({0} :: {1} :: {2}) has finished successfully.  ", new Object[]{dmx.getOrder(), dmx.getSubOrder(), dmx.getId()});
+        }
+        else {
+          LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Application block ''{0}'' has exited with errors.", dmx.getId());
+        }
     }
     
     return exitStatus;
