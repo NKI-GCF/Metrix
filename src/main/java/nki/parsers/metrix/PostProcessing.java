@@ -399,7 +399,7 @@ public class PostProcessing {
     // Set input, output dirs and samplesheet path.
     String args = "";
     args += "--input-dir " + dmx.getBaseWorkingDir();
-    args += " --output-dir " + dmxBaseOut;
+    args += " --output-dir " + dmxBaseOut.toString();
     args += " --sample-sheet " + samplesheet.getAbsolutePath();
     args += " --use-bases-mask " + dmx.getBaseMask();
     args += " --force";
@@ -415,7 +415,7 @@ public class PostProcessing {
         LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Setting base working directory for postprocessing to: {0}", dmx.getBaseWorkingDir());
         pb.directory(new File(dmx.getBaseWorkingDir())); // Data/Intensities/BaseCalls
     }*/
-    
+   
     // Instantiate the ProcessBuilder
     pb.redirectOutput(loggingFile);
     pb.redirectErrorStream(true);
