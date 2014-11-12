@@ -452,7 +452,7 @@ public class PostProcessing {
         pbMake.directory(dmxBaseOut);
 
         // Instantiate the ProcessBuilder for make
-        pbMake.redirectOutput(loggingFile);
+        pbMake.redirectOutput(new File(dmx.getBaseOutputDir() + "/make.log"));
         pbMake.redirectErrorStream(true);
 
         try {
