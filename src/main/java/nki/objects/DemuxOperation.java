@@ -354,7 +354,8 @@ public final class DemuxOperation extends PostProcess {
                 
                 for(String s : ssContents) {
                     builder.append(s);
-                    if(idx < lineSize-1){
+                    LoggerWrapper.log.log(Level.FINE, "Line size : {0}", lineSize + " idx "+ idx);
+                    if(idx != lineSize-1){
                         builder.append("\n");
                     }
                     idx++;
