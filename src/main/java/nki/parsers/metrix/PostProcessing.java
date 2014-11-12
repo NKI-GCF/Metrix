@@ -406,10 +406,12 @@ public class PostProcessing {
         "--force", dmx.getArguments()
     };
     
+    
+    
     // additional arguments
     //args += " " + dmx.getArguments();
 
-    LoggerWrapper.log.log(Level.INFO, "Executing : " + cmd);
+    LoggerWrapper.log.log(Level.INFO, "Executing : " + dmx.getArguments());
     ProcessBuilder pb = new ProcessBuilder(cmd);
    
     /*if(dmx.getBaseWorkingDir() != null){
