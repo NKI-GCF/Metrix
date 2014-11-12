@@ -312,9 +312,11 @@ public final class DemuxOperation extends PostProcess {
       for(Object key : sampleSheets.keySet()){
         ArrayList<String> ssCon = sampleSheets.get(key);
         LoggerWrapper.log.log(Level.INFO, "Samplesheet for: " + key);
-        for(String s : ssCon){
-            LoggerWrapper.log.log(Level.INFO, s);
+        StringBuilder builder = new StringBuilder();
+        for(String s : ssCon) {
+            builder.append(","+s);
         }
+        LoggerWrapper.log.log(Level.INFO, builder.toString());
       }
       printSamplesheets();
     }
@@ -331,6 +333,7 @@ public final class DemuxOperation extends PostProcess {
       ArrayList<String> ssContents;
       // Foreach samplesheet key generated new samplesheet with contents.
       for(Object key : sampleSheets.keySet()){
+           LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: " + key);
            ssContents = sampleSheets.get(key);
            try{
                 String filename = "";
@@ -345,10 +348,15 @@ public final class DemuxOperation extends PostProcess {
                 PrintWriter out = new PrintWriter(new FileWriter(samplesheetOut));
                 
                 // Write each string in the array on a separate line
-                for (String s : ssContents) {
-                    out.println(s + "\n");
+                StringBuilder builder = new StringBuilder();
+                for(String s : ssContents) {
+                    LoggerWrapper.log.log(Level.FINE, "Building " + s);
+                    builder.append(","+s);
                 }
                 
+                builder.deleteCharAt(0);
+                out.println(builder.toString());
+               
                 out.close();
            }catch(IOException ioe){
                LoggerWrapper.log.log(Level.WARNING, "Error while create and or writing to samplesheet. {0}", ioe);
