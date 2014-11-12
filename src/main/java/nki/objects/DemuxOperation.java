@@ -303,9 +303,14 @@ public final class DemuxOperation extends PostProcess {
           if(line[lineIdx] != null || !line[lineIdx].equals("") && !line[0].equals("FCID")){
             // Add the line to the contents of the samplesheet.
             StringBuilder builder = new StringBuilder();
+            int lineSize = line.length;
+            int idx = 0;
             for(String s : line) {
-                
-                builder.append(s + ",");
+                builder.append(s);
+                if(idx < lineSize-1 ){
+                     builder.append(",");
+                }
+                idx++;
             }
             ssContents.add(builder.toString());
           }
