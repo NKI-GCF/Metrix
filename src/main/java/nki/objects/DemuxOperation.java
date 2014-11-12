@@ -195,7 +195,9 @@ public final class DemuxOperation extends PostProcess {
     
     // Read full CSV.
     BufferedReader br = new BufferedReader(new FileReader(this.getSampleSheetPath()));
-    while ((nextLine = br.readLine().split(",")) != null) {
+    String line = null;
+    while ((line = br.readLine()) != null) {
+       nextLine = line.split(",");
        fullSamplesheet.add(nextLine);
     }
   
