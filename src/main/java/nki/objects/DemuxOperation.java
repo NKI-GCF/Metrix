@@ -32,7 +32,7 @@ public final class DemuxOperation extends PostProcess {
   private String makePath;
   private String makeArguments;
   private String splitBy = "project"; // Split by project or lane
-  private ArrayList<File> samplesheetLocations;
+  private ArrayList<File> samplesheetLocations = new ArrayList<>();
   private String baseMask;  
   private List<String[]> fullSamplesheet = new ArrayList<>();
   private HashMap<Object, ArrayList<String>> sampleSheets = new HashMap<>(); // Store samplesheets by splitBy type.
@@ -314,7 +314,7 @@ public final class DemuxOperation extends PostProcess {
         LoggerWrapper.log.log(Level.INFO, "Samplesheet for: " + key);
         StringBuilder builder = new StringBuilder();
         for(String s : ssCon) {
-            builder.append(","+s);
+            builder.append(","+s + "\n");
         }
         LoggerWrapper.log.log(Level.INFO, builder.toString());
       }
@@ -354,6 +354,7 @@ public final class DemuxOperation extends PostProcess {
                     builder.append(","+s);
                 }
                 
+                LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: " + key);
                 builder.deleteCharAt(0);
                 out.println(builder.toString());
                
