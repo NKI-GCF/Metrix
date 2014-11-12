@@ -304,22 +304,14 @@ public final class DemuxOperation extends PostProcess {
             // Add the line to the contents of the samplesheet.
             StringBuilder builder = new StringBuilder();
             for(String s : line) {
-                builder.append(s);
+                builder.append(s + ",");
             }
             ssContents.add(builder.toString());
           }
 
           sampleSheets.put(line[lineIdx], ssContents);
       }
-      for(Object key : sampleSheets.keySet()){
-        ArrayList<String> ssCon = sampleSheets.get(key);
-        LoggerWrapper.log.log(Level.INFO, "Samplesheet for: " + key);
-        StringBuilder builder = new StringBuilder();
-        for(String s : ssCon) {
-            builder.append(","+s + "\n");
-        }
-        LoggerWrapper.log.log(Level.INFO, builder.toString());
-      }
+
       printSamplesheets();
     }
   
@@ -352,7 +344,7 @@ public final class DemuxOperation extends PostProcess {
                 // Write each string in the array on a separate line
                 StringBuilder builder = new StringBuilder();
                 for(String s : ssContents) {
-                    builder.append(","+s + "\n");
+                    builder.append(s + "\n");
                 }
                 
                 LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: " + key);
