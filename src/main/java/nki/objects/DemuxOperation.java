@@ -201,9 +201,6 @@ public final class DemuxOperation extends PostProcess {
     // Determine header first (type of SampleSheet)
     String firstLineWord = fullSamplesheet.get(0)[0];
     
-    //LoggerWrapper.log.log(Level.FINE, "First line - {0}", Arrays.toString(fullSamplesheet.get(0)));
-    //LoggerWrapper.log.log(Level.FINE, "First word - {0}", firstLineWord);
-    
     switch (firstLineWord) {
         // MiSeq format
         // Grab all contents and transform to Hiseq format.
