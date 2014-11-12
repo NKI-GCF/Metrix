@@ -388,23 +388,7 @@ public class PostProcessing {
     
     // Does Data output folder exist?
     File dmxBaseOut = new File(dmx.getBaseOutputDir() + "/Demux/" + samplesheet.getName() + "/");
-    if(!dmxBaseOut.exists()){
-        if(dmxBaseOut.mkdirs()){
-            LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Successfuly created folder {0}", dmxBaseOut);
-        }else{
-            LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Error creating directory! ");
-        }
-    }
-    
-    // Set input, output dirs and samplesheet path.
-    /*String args = "";
-    args += " --input-dir " + dmx.getBaseWorkingDir();
-    args += " --output-dir " + dmxBaseOut.toString();
-    args += " --sample-sheet " + samplesheet.getAbsolutePath();
-    args += " --use-bases-mask " + dmx.getBaseMask();
-    args += " --force ";
-    */
-    
+
     ArrayList<String> cmd = new ArrayList<>();
     cmd.add(dmx.getBclToFastQPath());
     // Add input dir
@@ -420,18 +404,16 @@ public class PostProcessing {
         
     if(dmx.getArguments() != null){
         String[] spl = dmx.getArguments().split(" ");
-        for(String i : spl){
-            cmd.add(i);
-        }
+        cmd.addAll(Arrays.asList(spl));
     }
     
     LoggerWrapper.log.log(Level.INFO, "Executing : " + cmd);
     ProcessBuilder pb = new ProcessBuilder(cmd);
    
-    /*if(dmx.getBaseWorkingDir() != null){
+    if(dmx.getBaseWorkingDir() != null){
         LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Setting base working directory for postprocessing to: {0}", dmx.getBaseWorkingDir());
         pb.directory(new File(dmx.getBaseWorkingDir())); // Data/Intensities/BaseCalls
-    }*/
+    }
    
     // Instantiate the ProcessBuilder
     pb.redirectOutput(loggingFile);
@@ -441,9 +423,7 @@ public class PostProcessing {
       LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting process for: {0}", pb.command());
       Process p = pb.start();
       // Start the process and wait for it to finish.
-      LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Waiting for...");
       exitStatus = p.waitFor();
-      LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Exit status : " + exitStatus);
     }
     catch (IOException IO) {
       LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{dmx.getId(), IO.toString()});
@@ -453,10 +433,13 @@ public class PostProcessing {
     }
     if(exitStatus == 0){
         LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Exited as 0 - starting make");
-        String makeArgs = dmx.getMakeArguments();
-        makeArgs += " -C " + dmxBaseOut;
+        ArrayList<String> cmdMake = new ArrayList<>();
+        cmdMake.add(dmx.getMakePath());
+        
+        String[] makeArgs = dmx.getMakeArguments().split(" ");
+        cmdMake.addAll(Arrays.asList(makeArgs));
 
-        ProcessBuilder pbMake = new ProcessBuilder(dmx.getMakePath(), makeArgs);
+        ProcessBuilder pbMake = new ProcessBuilder(cmdMake);
         LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting Make for : {0}", pbMake.command());
         pbMake.directory(dmxBaseOut);
 
