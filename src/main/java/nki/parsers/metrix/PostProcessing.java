@@ -399,11 +399,11 @@ public class PostProcessing {
     // Set input, output dirs and samplesheet path.
     String[] cmd = {
         dmx.getBclToFastQPath(), 
-        "--input-dir ", dmx.getBaseWorkingDir(),
-        "--output-dir ", dmxBaseOut.toString(),
-        "--sample-sheet ", samplesheet.getAbsolutePath(),
-        "--use-bases-mask ", dmx.getBaseMask(),
-        "--force ", dmx.getArguments()
+        "--input-dir", dmx.getBaseWorkingDir(),
+        "--output-dir", dmxBaseOut.toString(),
+        "--sample-sheet", samplesheet.getAbsolutePath(),
+        "--use-bases-mask", dmx.getBaseMask(),
+        "--force", dmx.getArguments()
     };
     
     // additional arguments
