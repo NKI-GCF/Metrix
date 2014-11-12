@@ -288,7 +288,6 @@ public final class DemuxOperation extends PostProcess {
       ArrayList<String> ssContents;
       
       for(String[] line : fullSamplesheet){
-          LoggerWrapper.log.log(Level.INFO, "Processing line : ", line);
           ssContents = null;
           if(line[0] != null && line[0].equals("FCID")){
               continue;
@@ -357,6 +356,7 @@ public final class DemuxOperation extends PostProcess {
                 }
                 
                 LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: " + key);
+                
                 builder.deleteCharAt(0);
                 out.println(builder.toString());
                

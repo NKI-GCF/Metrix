@@ -404,6 +404,9 @@ public class PostProcessing {
     args += " --sample-sheet " + samplesheet.getAbsolutePath();
     args += " --use-bases-mask " + dmx.getBaseMask();
 
+    LoggerWrapper.log.log(Level.INFO, "Executing: " + dmx.getBclToFastQPath());
+    LoggerWrapper.log.log(Level.INFO, "With: " + args);
+    
     ProcessBuilder pb = new ProcessBuilder(dmx.getBclToFastQPath(), args);
    
     if(dmx.getBaseWorkingDir() != null){
