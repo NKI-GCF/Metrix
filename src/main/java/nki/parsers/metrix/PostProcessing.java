@@ -376,8 +376,7 @@ public class PostProcessing {
   
   private int processSamplesheet(DemuxOperation dmx, File samplesheet){
     int exitStatus = -255;
-    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Setting base working directory for postprocessing to: {0}", dmx.getBaseWorkingDir());
- 
+    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting demultiplexing for: {0}", dmx.getBaseRunDir());
     
     // The output file. All console activity is written to this file.
     final File loggingFile;
@@ -398,19 +397,18 @@ public class PostProcessing {
     }
     
     // Set input, output dirs and samplesheet path.
-    String[] cmd = {
-        dmx.getBclToFastQPath(),
-        " --input-dir " + dmx.getBaseWorkingDir(),
-        " --output-dir " + dmxBaseOut
-        + " " + dmx.getArguments() +
-        " --sample-sheet " + samplesheet.getAbsolutePath(),
-        " --use-bases-mask " + dmx.getBaseMask(),
-        " --force"
-    };
+    String args = "";
+    args += " --input-dir " + dmx.getBaseWorkingDir();
+    args += " --output-dir " + dmxBaseOut;
+    args += " --sample-sheet " + samplesheet.getAbsolutePath();
+    args += " --use-bases-mask " + dmx.getBaseMask();
+    args += " --force";
     
-    LoggerWrapper.log.log(Level.INFO, "Executing: " + dmx.getBclToFastQPath());
-    LoggerWrapper.log.log(Level.INFO, "With: ", cmd);
-    
+    // additional arguments
+    args += " " + dmx.getArguments();
+
+    String cmd = dmx.getBclToFastQPath() + " "+ args;
+    LoggerWrapper.log.log(Level.INFO, "Executing : " + cmd);
     ProcessBuilder pb = new ProcessBuilder(cmd);
    
     if(dmx.getBaseWorkingDir() != null){
@@ -425,7 +423,6 @@ public class PostProcessing {
     try {
       LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting process for: {0}", pb.command());
       Process p = pb.start();
-
       // Start the process and wait for it to finish.
       LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Waiting for...");
       exitStatus = p.waitFor();
