@@ -289,37 +289,33 @@ public final class DemuxOperation extends PostProcess {
       
       for(String[] line : fullSamplesheet){
           LoggerWrapper.log.log(Level.INFO, "Processing line : ", line);
-          LoggerWrapper.log.log(Level.INFO, "Line IDX = " + line[lineIdx]);
           ssContents = null;
           if(sampleSheets.get(line[lineIdx]) == null){
-              LoggerWrapper.log.log(Level.INFO, "Not present in samplesheets");
               ssContents = new ArrayList<>();
               // Add default HiSeq header.
               ssContents.add(hiseqHeader);
           }else{
               ssContents = sampleSheets.get(line[lineIdx]);
-              LoggerWrapper.log.log(Level.INFO, "ssContents already present in samplesheet :: ", ssContents);
           }
           
-          LoggerWrapper.log.log(Level.INFO, "Adding? for ", line);
-          
           if(line[lineIdx] != null || !line[lineIdx].equals("") && !line[0].equals("FCID")){
-            LoggerWrapper.log.log(Level.INFO, "Line not empty, null or FCID ", line);
             // Add the line to the contents of the samplesheet.
             StringBuilder builder = new StringBuilder();
             for(String s : line) {
-                LoggerWrapper.log.log(Level.INFO, "Adding to ssContents builder. ", s);
                 builder.append(s);
             }
             ssContents.add(builder.toString());
           }
-          LoggerWrapper.log.log(Level.INFO, "Contents for: " + line[lineIdx]);
-          for (String s : ssContents){
-              LoggerWrapper.log.log(Level.INFO, "- " + s);
-          }
+
           sampleSheets.put(line[lineIdx], ssContents);
       }
-      
+      for(Object key : sampleSheets.keySet()){
+        ArrayList<String> ssCon = sampleSheets.get(key);
+        LoggerWrapper.log.log(Level.INFO, "Samplesheet for: " + key);
+        for(String s : ssCon){
+            LoggerWrapper.log.log(Level.INFO, s);
+        }
+      }
       printSamplesheets();
     }
   
