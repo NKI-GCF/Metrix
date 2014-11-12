@@ -88,6 +88,7 @@
                     <xs:element type="xs:string" name="MakePath" />
                     <xs:element type="xs:string" name="MakeArguments" />
                     <xs:element type="xs:string" name="LoggingPath" />
+                    <xs:element type="xs:string" name="SplitBySamplesheetColumn" />
                   </xs:sequence>
                   <xs:attribute type="xs:positiveInteger" name="execOrder" use="required"/>
                   <xs:attribute type="xs:string" name="id" use="required"/>

@@ -41,7 +41,7 @@ public class MetrixLive {
 
     // Set a value for command
     sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
-    sendCommand.setState(Constants.STATE_RUNNING);
+    sendCommand.setRunId("");
     sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here
     
     try (InputStream fin = new FileInputStream(new File(absFile))) {

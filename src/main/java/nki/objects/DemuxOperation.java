@@ -53,7 +53,7 @@ public final class DemuxOperation extends PostProcess {
     for (int i = 0; i < foProps.getLength(); i++) {
       // Iterate over node properties
       Node p = foProps.item(i);
-      if (p.getNodeName().equalsIgnoreCase("DemuxScriptPath")) {
+      if (p.getNodeName().equalsIgnoreCase("BclToFastQPath")) {
         this.setBclToFastQPath(p.getTextContent());
       }
       else if (p.getNodeName().equalsIgnoreCase("Arguments")) {
@@ -79,6 +79,9 @@ public final class DemuxOperation extends PostProcess {
       }
       else if (p.getNodeName().equalsIgnoreCase("LoggingPath")) {
         this.setLoggingPath(p.getTextContent());
+      }
+      else if (p.getNodeName().equalsIgnoreCase("SplitBySamplesheetColumn")) {
+        this.setSplitBy(p.getTextContent());
       }
     }
   }

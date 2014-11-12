@@ -179,7 +179,21 @@
               <goal>one-jar</goal>
             </goals>
           </execution>                              
-                                                                                          
+
+          <execution>
+            <id>MetrixPostProcess</id>
+            <configuration>
+              <onejarVersion>0.97</onejarVersion>
+              <attachToBuild>true</attachToBuild>
+              <classifier>onejar</classifier>
+              <mainClass>nki.core.MetrixPostProcess</mainClass>
+              <filename>MetrixPostProcess.jar</filename>
+            </configuration>
+            <goals>
+              <goal>one-jar</goal>
+            </goals>
+          </execution> 
+                                                                                                                                                                                                                                                                              
           <execution>
             <id>Metrix</id>
             <configuration>

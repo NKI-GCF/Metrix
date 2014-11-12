@@ -356,16 +356,8 @@ public class PostProcessing {
         LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Cannot find the Bcl conversion script. Argument is not set in postprocessing.");
         return exitStatus;
     }
-    final File scriptPath = new File(dmx.getBclToFastQPath());
-    
 
-    // Base output directory for this run.
-    final File outputBaseDir = new File(dmx.getBaseOutputDir());
-    
-    // The supplied arguments for the script
-    final String arguments = dmx.getArguments();
-  
-     // Split SampleSheet based on projects.
+    // Split SampleSheet based on projects.
     try{
         dmx.generateSampleSheets();
     }catch(FileNotFoundException FNFE){
