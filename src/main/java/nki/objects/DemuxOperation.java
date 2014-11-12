@@ -290,6 +290,9 @@ public final class DemuxOperation extends PostProcess {
       for(String[] line : fullSamplesheet){
           LoggerWrapper.log.log(Level.INFO, "Processing line : ", line);
           ssContents = null;
+          if(line[0] != null && line[0].equals("FCID")){
+              continue;
+          }
           if(sampleSheets.get(line[lineIdx]) == null){
               ssContents = new ArrayList<>();
               // Add default HiSeq header.
@@ -350,8 +353,7 @@ public final class DemuxOperation extends PostProcess {
                 // Write each string in the array on a separate line
                 StringBuilder builder = new StringBuilder();
                 for(String s : ssContents) {
-                    LoggerWrapper.log.log(Level.FINE, "Building " + s);
-                    builder.append(","+s);
+                    builder.append(","+s + "\n");
                 }
                 
                 LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: " + key);
