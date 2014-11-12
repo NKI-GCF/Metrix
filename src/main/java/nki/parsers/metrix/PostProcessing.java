@@ -399,7 +399,7 @@ public class PostProcessing {
     
     // Set input, output dirs and samplesheet path.
     String args = dmx.getArguments();
-    args += " --input-dir " + dmx.getBaseRunDir();
+    //args += " --input-dir " + dmx.getBaseRunDir();
     args += " --output-dir " + dmxBaseOut;
     args += " --sample-sheet " + samplesheet.getAbsolutePath();
     args += " --use-bases-mask " + dmx.getBaseMask();
