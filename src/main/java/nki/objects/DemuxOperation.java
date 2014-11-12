@@ -124,7 +124,11 @@ public final class DemuxOperation extends PostProcess {
   public void setBaseWorkingDir(String baseWorkingDir) {
     this.baseWorkingDir = baseWorkingDir;
   }
-
+  
+  public String getBaseWorkingDir() {
+    return this.baseWorkingDir;
+  }
+  
   public void setBaseMask(String baseMask) {
     this.baseMask = baseMask;
   }
@@ -132,11 +136,7 @@ public final class DemuxOperation extends PostProcess {
   public String getBaseMask() {
     return this.baseMask;
   }    
-  
-  public String getBaseWorkingDir() {
-    return this.baseOutputDir;
-  }  
-  
+    
   public File getSampleSheetPath(){
       if(baseRunDir != null || !baseRunDir.equals("")){
         return new File(getBaseRunDir() + "/SampleSheet.csv");
