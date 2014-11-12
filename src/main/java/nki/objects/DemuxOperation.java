@@ -65,13 +65,13 @@ public final class DemuxOperation extends PostProcess {
         this.setBaseMask(p.getTextContent());
       }
       else if (p.getNodeName().equalsIgnoreCase("BaseRunDir")) {
-        LoggerWrapper.log.log(Level.INFO, "Setting Base run dir " + p.getTextContent());
         this.setBaseRunDir(p.getTextContent());
       }
       else if (p.getNodeName().equalsIgnoreCase("BaseOutputDir")) {
         this.setBaseOutputDir(p.getTextContent());
       }
       else if (p.getNodeName().equalsIgnoreCase("BaseWorkingDir")) {
+        LoggerWrapper.log.log(Level.INFO, "Setting working run dir " + p.getTextContent());
         this.setBaseWorkingDir(p.getTextContent());
       }
       else if (p.getNodeName().equalsIgnoreCase("MakePath")) {
