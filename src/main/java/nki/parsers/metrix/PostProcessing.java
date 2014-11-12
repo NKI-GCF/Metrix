@@ -389,20 +389,20 @@ public class PostProcessing {
     
     // Does Data output folder exist?
     File dmxBaseOut = new File(dmx.getBaseOutputDir() + "/Demux/" + samplesheet.getName() + "/");
-    /*if(!dmxBaseOut.exists()){
+    if(!dmxBaseOut.exists()){
         if(dmxBaseOut.mkdirs()){
             LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Successfuly created folder {0}", dmxBaseOut);
         }else{
             LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Error creating directory! ");
         }
-    }*/
+    }
     
     // Set input, output dirs and samplesheet path.
     String[] cmd = {
         dmx.getBclToFastQPath(),
         " --input-dir " + dmx.getBaseWorkingDir(),
         " --output-dir " + dmxBaseOut
-        + dmx.getArguments() +
+        + " " + dmx.getArguments() +
         " --sample-sheet " + samplesheet.getAbsolutePath(),
         " --use-bases-mask " + dmx.getBaseMask(),
         " --force"
