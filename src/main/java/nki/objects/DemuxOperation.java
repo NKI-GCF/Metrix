@@ -349,13 +349,13 @@ public final class DemuxOperation extends PostProcess {
                 
                 // Write each string in the array on a separate line
                 StringBuilder builder = new StringBuilder();
-                int lineSize = builder.length();
+                int lineSize = ssContents.size();
                 int idx = 0;
                 
                 for(String s : ssContents) {
                     builder.append(s);
                     LoggerWrapper.log.log(Level.FINE, "Line size : {0}", lineSize + " idx "+ idx);
-                    if(idx != lineSize-1){
+                    if(idx < lineSize-1){
                         builder.append("\n");
                     }
                     idx++;
