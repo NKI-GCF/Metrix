@@ -411,10 +411,10 @@ public class PostProcessing {
     LoggerWrapper.log.log(Level.INFO, "Executing : " + cmd);
     ProcessBuilder pb = new ProcessBuilder(cmd);
    
-    if(dmx.getBaseWorkingDir() != null){
+    /*if(dmx.getBaseWorkingDir() != null){
         LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Setting base working directory for postprocessing to: {0}", dmx.getBaseWorkingDir());
         pb.directory(new File(dmx.getBaseWorkingDir())); // Data/Intensities/BaseCalls
-    }
+    }*/
     
     // Instantiate the ProcessBuilder
     pb.redirectOutput(loggingFile);
