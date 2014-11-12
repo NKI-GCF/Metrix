@@ -175,7 +175,7 @@ public class MetrixPostProcess {
       System.exit(1);
     }
 
-    procResult += searchDirs.get(arrIdx);
+    procResult += searchResults.get(arrIdx);
     System.out.println("Processing: " + procResult);
     processResult(procResult);
   }
