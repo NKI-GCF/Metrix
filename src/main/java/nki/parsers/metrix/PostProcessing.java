@@ -403,6 +403,7 @@ public class PostProcessing {
     args += " --output-dir " + dmxBaseOut;
     args += " --sample-sheet " + samplesheet.getAbsolutePath();
     args += " --use-bases-mask " + dmx.getBaseMask();
+    args += " --force";
 
     LoggerWrapper.log.log(Level.INFO, "Executing: " + dmx.getBclToFastQPath());
     LoggerWrapper.log.log(Level.INFO, "With: " + args);
