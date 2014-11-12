@@ -35,11 +35,12 @@ public class XmlDriver {
     if (!xmlFile.isFile()) {
       return false;
     }
+    summary.setRunDirectory(directory);
     documentBuilderFactory = DocumentBuilderFactory.newInstance();
     documentBuilder = documentBuilderFactory.newDocumentBuilder();
     doc = documentBuilder.parse(xmlFile);
     doc.getDocumentElement().normalize();
-
+    
     setSummary(RunInfoHandler.parseAll(doc, summary));
     return summary.getXmlInfo();
   }

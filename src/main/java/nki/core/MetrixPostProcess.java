@@ -53,6 +53,7 @@ public class MetrixPostProcess {
 
     String searchTerm = "";
     ArrayList<String> searchResults = new ArrayList<>();
+    ArrayList<String> searchDirs = new ArrayList<>();
     String procResult = runDir;
     int arrIdx = 0;
     // If run string argumented : Search in rundir
@@ -112,6 +113,7 @@ public class MetrixPostProcess {
       if (file.isDirectory()) {
         if (Pattern.compile(Pattern.quote(searchTerm), Pattern.CASE_INSENSITIVE).matcher(file.getName()).find()) {
           searchResults.add(file.getName());
+          searchDirs.add(file.getAbsolutePath());
         }
       }
     }
@@ -173,7 +175,7 @@ public class MetrixPostProcess {
       System.exit(1);
     }
 
-    procResult += searchResults.get(arrIdx);
+    procResult += searchDirs.get(arrIdx);
     System.out.println("Processing: " + procResult);
     processResult(procResult);
   }
