@@ -442,7 +442,7 @@ public class PostProcessing {
     if(exitStatus == 0){
         LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Exited as 0 - starting make");
         ArrayList<String> cmdMake = new ArrayList<>();
-        cmdMake.add(dmx.getMakePath());
+        cmdMake.addAll(Arrays.asList(dmx.getMakePath().split(" ")));
         
         String[] makeArgs = dmx.getMakeArguments().split(" ");
         cmdMake.addAll(Arrays.asList(makeArgs));
