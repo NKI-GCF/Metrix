@@ -419,8 +419,10 @@ public class PostProcessing {
     pb.redirectErrorStream(true);
     
     try {
+      LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting process for: {0}", pb.command());
       Process p = pb.start();
       // Start the process and wait for it to finish.
+      LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Waiting for...");
       exitStatus = p.waitFor();
     }
     catch (IOException IO) {
@@ -429,11 +431,12 @@ public class PostProcessing {
     catch (InterruptedException IE) {
       LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{dmx.getId(), IE.toString()});
     }
-
+    
     String makeArgs = dmx.getMakeArguments();
     makeArgs += " -C " + dmxBaseOut;
     
     ProcessBuilder pbMake = new ProcessBuilder(dmx.getMakePath(), makeArgs);
+    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting Make for : {0}", pbMake.command());
     pbMake.directory(dmxBaseOut);
 
     // Instantiate the ProcessBuilder for make

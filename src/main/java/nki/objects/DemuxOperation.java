@@ -349,11 +349,16 @@ public final class DemuxOperation extends PostProcess {
                 
                 // Write each string in the array on a separate line
                 StringBuilder builder = new StringBuilder();
-                for(String s : ssContents) {
-                    builder.append(s + "\n");
-                }
+                int lineSize = builder.length();
+                int idx = 0;
                 
-                LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: " + key);
+                for(String s : ssContents) {
+                    builder.append(s);
+                    if(idx < lineSize-1){
+                        builder.append("\n");
+                    }
+                    idx++;
+                }
                 
                 if(Character.valueOf(builder.charAt(0)).equals(",")){
                     builder.deleteCharAt(0);
