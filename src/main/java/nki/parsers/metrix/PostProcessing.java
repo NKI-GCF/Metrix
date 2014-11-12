@@ -389,26 +389,29 @@ public class PostProcessing {
     
     // Does Data output folder exist?
     File dmxBaseOut = new File(dmx.getBaseOutputDir() + "/Demux/" + samplesheet.getName() + "/");
-    if(!dmxBaseOut.exists()){
+    /*if(!dmxBaseOut.exists()){
         if(dmxBaseOut.mkdirs()){
             LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Successfuly created folder {0}", dmxBaseOut);
         }else{
             LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Error creating directory! ");
         }
-    }
+    }*/
     
     // Set input, output dirs and samplesheet path.
-    String args = dmx.getArguments();
-    args += " --input-dir " + dmx.getBaseWorkingDir();
-    args += " --output-dir " + dmxBaseOut;
-    args += " --sample-sheet " + samplesheet.getAbsolutePath();
-    args += " --use-bases-mask " + dmx.getBaseMask();
-    args += " --force";
-
-    LoggerWrapper.log.log(Level.INFO, "Executing: " + dmx.getBclToFastQPath());
-    LoggerWrapper.log.log(Level.INFO, "With: " + args);
+    String[] cmd = {
+        dmx.getBclToFastQPath(),
+        dmx.getArguments(),
+        " --input-dir " + dmx.getBaseWorkingDir(),
+        " --output-dir " + dmxBaseOut,
+        " --sample-sheet " + samplesheet.getAbsolutePath(),
+        " --use-bases-mask " + dmx.getBaseMask(),
+        " --force"
+    };
     
-    ProcessBuilder pb = new ProcessBuilder(dmx.getBclToFastQPath(), args);
+    LoggerWrapper.log.log(Level.INFO, "Executing: " + dmx.getBclToFastQPath());
+    LoggerWrapper.log.log(Level.INFO, "With: " + cmd);
+    
+    ProcessBuilder pb = new ProcessBuilder(cmd);
    
     if(dmx.getBaseWorkingDir() != null){
         LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Setting base working directory for postprocessing to: {0}", dmx.getBaseWorkingDir());
@@ -422,6 +425,7 @@ public class PostProcessing {
     try {
       LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting process for: {0}", pb.command());
       Process p = pb.start();
+
       // Start the process and wait for it to finish.
       LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Waiting for...");
       exitStatus = p.waitFor();
