@@ -24,9 +24,7 @@ public final class DemuxOperation extends PostProcess {
   public static final long serialVersionUID = 42L;
   private String bclToFastQPath;
   private String hiseqHeader = "FCID,Lane,SampleID,SampleReferenceGenome,Index,Descr,Control,Recipe,Operator,SampleProject";
-  private String miseqHeader = "Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,Sample_Project,Description";
   private ArrayList<String> hiseqHeaderLookup = new ArrayList<>();
-  private ArrayList<String> miseqHeaderLookup = new ArrayList<>();
   private String arguments;
   private String baseRunDir;
   private String baseOutputDir;
@@ -45,7 +43,7 @@ public final class DemuxOperation extends PostProcess {
     NamedNodeMap parentAttr = parentNode.getAttributes();
     // Prepare header lookup array.
     hiseqHeaderLookup.addAll(Arrays.asList(hiseqHeader.split(",", -1)));
-    miseqHeaderLookup.addAll(Arrays.asList(miseqHeader.split(",", -1))); 
+
     // Set attribute values of inherited PostProcess
     this.setOrder(Integer.parseInt(parentAttr.getNamedItem("execOrder").getNodeValue()));
     this.setSubOrder(Integer.parseInt(parentAttr.getNamedItem("execOrder").getNodeValue()));
@@ -83,7 +81,7 @@ public final class DemuxOperation extends PostProcess {
       else if (p.getNodeName().equalsIgnoreCase("LoggingPath")) {
         this.setLoggingPath(p.getTextContent());
       }
-      else if (p.getNodeName().equalsIgnoreCase("SplitBySamplesheetColumn")) {
+      else if (p.getNodeName().equalsIgnoreCase("SplitByHiSeqSamplesheetColumn")) {
         this.setSplitBy(p.getTextContent());
       }
     }
@@ -170,7 +168,7 @@ public final class DemuxOperation extends PostProcess {
   }  
   
   public void setSplitBy(String splitBy){
-      if(hiseqHeaderLookup.indexOf(splitBy) > -1 || miseqHeaderLookup.indexOf(splitBy) > -1){
+      if(hiseqHeaderLookup.indexOf(splitBy) > -1){
         this.splitBy = splitBy;
       }else{
         this.splitBy = "SampleProject";
@@ -237,9 +235,9 @@ public final class DemuxOperation extends PostProcess {
       // MiSeq only has one lane. Add to 1.
       if(getSplitBy().equalsIgnoreCase("Lane")){
           // Just transform, everything is present in one lane.
-          lineIdx = -2;
+          lineIdx = -1;
       }else{
-          lineIdx = miseqHeaderLookup.indexOf(getSplitBy());
+          lineIdx = hiseqHeaderLookup.indexOf(getSplitBy());
           LoggerWrapper.log.log(Level.FINER, "Line IDX FOR : {0} == {1}", new Object[]{getSplitBy(), lineIdx});
       }
       
@@ -260,13 +258,7 @@ public final class DemuxOperation extends PostProcess {
             }else{
                 Object splitValue;
                 // Split by selected value.
-                if(lineIdx == -1){
-                    splitValue = miseqHeaderLookup.indexOf("Sample_Project"); // Default to SampleProject
-                }else if(lineIdx == -2){
-                    splitValue = 1;
-                }else{
-                    splitValue = line[lineIdx];
-                }
+                splitValue = lineIdx == -1 ? 1 : line[lineIdx];
                 
                 if(!line[0].equals("Sample_ID")){
                     if(sampleSheets.get(splitValue) == null){
