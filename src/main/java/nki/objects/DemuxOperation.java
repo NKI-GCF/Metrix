@@ -247,10 +247,6 @@ public final class DemuxOperation extends PostProcess {
           if(addToSet){
             if(line.length < 8){
                 LoggerWrapper.log.log(Level.FINER, "Line {0} does not have enough columns to be a valid samplesheet.", line);
-                int cnt = 1;
-                for(String i: line){
-                    LoggerWrapper.log.log(Level.FINER, "Col {0} - {1}", new Object[]{cnt, i});
-                }
             }else{
                 Object splitValue;
                 // Split by selected value.
@@ -267,7 +263,7 @@ public final class DemuxOperation extends PostProcess {
                         ssContents = sampleSheets.get(splitValue);
                     }
 
-                    ssContents.add(",1,"+line[1]+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
+                    ssContents.add(",1,"+line[1].replace(" ", "_")+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
                     sampleSheets.put(splitValue, ssContents);
                 }
             }
