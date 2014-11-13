@@ -234,7 +234,7 @@ public final class DemuxOperation extends PostProcess {
       ArrayList<String> ssContents;
       
       for(String[] line : fullSamplesheet){
-          LoggerWrapper.log.log(Level.FINER, "Processing: ", line);
+          LoggerWrapper.log.log(Level.FINER, "Processing: {0}", line);
           if(line[0].equals("[Data]")){
             foundData = true;
             continue;
@@ -247,6 +247,7 @@ public final class DemuxOperation extends PostProcess {
           if(addToSet){
             if(line.length < 8){
                 LoggerWrapper.log.log(Level.FINER, "Line {0} does not have enough columns to be a valid samplesheet.", line);
+                LoggerWrapper.log.log(Level.FINER, "Line length: {0}",line.length);
             }else{
                 Object splitValue;
                 // Split by selected value.
