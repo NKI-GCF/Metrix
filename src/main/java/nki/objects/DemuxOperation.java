@@ -169,7 +169,7 @@ public final class DemuxOperation extends PostProcess {
       if(hiseqHeaderLookup.indexOf(splitBy) > -1){
         this.splitBy = splitBy;
       }else{
-          this.splitBy = "SampleProject";
+        this.splitBy = "SampleProject";
       }
   }
   
@@ -235,7 +235,7 @@ public final class DemuxOperation extends PostProcess {
           // Just transform, everything is present in one lane.
           lineIdx = -1;
       }else{
-          lineIdx = hiseqHeaderLookup.indexOf(getSplitBy());
+          lineIdx = hiseqHeaderLookup.indexOf(getSplitBy())-1;
       }
       
       ArrayList<String> ssContents;
