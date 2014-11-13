@@ -195,7 +195,7 @@ public final class DemuxOperation extends PostProcess {
       miseqLookup.put("Control", -1);
       miseqLookup.put("Recipe", -1);
       miseqLookup.put("Operator", -1);
-      miseqLookup.put("SampleProject", 7);
+      miseqLookup.put("SampleProject", 6);
 
       LoggerWrapper.log.log(Level.INFO, "Translating set HiSeq header {0} to match MiSeq samplesheet and found it in column {1}.", new Object[]{header, miseqLookup.get(header)});
       
@@ -360,7 +360,7 @@ public final class DemuxOperation extends PostProcess {
            ssContents = sampleSheets.get(key);
            try{
                 String filename = "";
-                if(getSplitBy().equals("lane")){
+                if(getSplitBy().equalsIgnoreCase("lane")){
                     filename = ssBaseDirectory.toString()+"/L"+key.toString()+".csv";
                 }else{
                     filename = ssBaseDirectory.toString()+"/"+key.toString()+".csv";
