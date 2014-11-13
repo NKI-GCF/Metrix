@@ -41,7 +41,9 @@ public final class DemuxOperation extends PostProcess {
   
   public DemuxOperation(Node parentNode) {
     NamedNodeMap parentAttr = parentNode.getAttributes();
-
+    // Prepare header lookup array.
+    hiseqHeaderLookup.addAll(Arrays.asList(hiseqHeader.split(",", -1)));
+     
     // Set attribute values of inherited PostProcess
     this.setOrder(Integer.parseInt(parentAttr.getNamedItem("execOrder").getNodeValue()));
     this.setSubOrder(Integer.parseInt(parentAttr.getNamedItem("execOrder").getNodeValue()));
@@ -81,9 +83,6 @@ public final class DemuxOperation extends PostProcess {
         this.setSplitBy(p.getTextContent());
       }
     }
-    
-     hiseqHeaderLookup.addAll(Arrays.asList(hiseqHeader.split(",", -1)));
-    
   }
 
   public void setBclToFastQPath(String sp) {
