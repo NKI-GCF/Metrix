@@ -235,11 +235,12 @@ public final class DemuxOperation extends PostProcess {
       boolean addToSet = false;
       boolean foundData = false;
       // MiSeq only has one lane. Add to 1.
-      if(getSplitBy().equals("Lane")){
+      if(getSplitBy().equalsIgnoreCase("Lane")){
           // Just transform, everything is present in one lane.
-          lineIdx = -1;
+          lineIdx = -2;
       }else{
-          lineIdx = miseqHeaderLookup.indexOf(getSplitBy())-1;
+          lineIdx = miseqHeaderLookup.indexOf(getSplitBy());
+          LoggerWrapper.log.log(Level.FINER, "Line IDX FOR : {0} == {1}", new Object[]{getSplitBy(), lineIdx});
       }
       
       ArrayList<String> ssContents;
@@ -259,8 +260,15 @@ public final class DemuxOperation extends PostProcess {
             }else{
                 Object splitValue;
                 // Split by selected value.
-                splitValue = lineIdx == -1 ? 1 : line[lineIdx];
-                if(!splitValue.equals("Sample_Project")){
+                if(lineIdx == -1){
+                    splitValue = miseqHeaderLookup.indexOf("Sample_Project"); // Default to SampleProject
+                }else if(lineIdx == -2){
+                    splitValue = 1;
+                }else{
+                    splitValue = line[lineIdx];
+                }
+                
+                if(!line[0].equals("Sample_ID")){
                     if(sampleSheets.get(splitValue) == null){
                         ssContents = new ArrayList<>();
                         // Add default HiSeq header for demultiplexable samplesheets.
