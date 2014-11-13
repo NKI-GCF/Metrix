@@ -24,6 +24,7 @@ public final class DemuxOperation extends PostProcess {
   public static final long serialVersionUID = 42L;
   private String bclToFastQPath;
   private String hiseqHeader = "FCID,Lane,SampleID,SampleReferenceGenome,Index,Descr,Control,Recipe,Operator,SampleProject";
+  private ArrayList<String> hiseqHeaderLookup;
   private String arguments;
   private String baseRunDir;
   private String baseOutputDir;
@@ -31,24 +32,20 @@ public final class DemuxOperation extends PostProcess {
   private String loggingPath;
   private String makePath;
   private String makeArguments;
-  private String splitBy = "project"; // Split by project or lane
+  private String splitBy = "SampleProject"; // Split by project or lane
   private ArrayList<File> samplesheetLocations = new ArrayList<>();
   private String baseMask;  
   private List<String[]> fullSamplesheet = new ArrayList<>();
   private HashMap<Object, ArrayList<String>> sampleSheets = new HashMap<>(); // Store samplesheets by splitBy type.
   private HashMap<Object, String> baseMaskMap = new HashMap<>(); // Store baseMasks for every samplesheet generated.
   
-  public DemuxOperation(Node parentNode, Node childNode) {
+  public DemuxOperation(Node parentNode) {
     NamedNodeMap parentAttr = parentNode.getAttributes();
-    NamedNodeMap childAttr = childNode.getAttributes();
 
     // Set attribute values of inherited PostProcess
     this.setOrder(Integer.parseInt(parentAttr.getNamedItem("execOrder").getNodeValue()));
-    this.setSubOrder(Integer.parseInt(childAttr.getNamedItem("execOrder").getNodeValue()));
-    this.setId(childAttr.getNamedItem("id").getNodeValue());
-    this.setTitle(childAttr.getNamedItem("title").getNodeValue());
-
-    NodeList foProps = childNode.getChildNodes();
+    this.setSubOrder(Integer.parseInt(parentAttr.getNamedItem("execOrder").getNodeValue()));
+    NodeList foProps = parentNode.getChildNodes();
 
     for (int i = 0; i < foProps.getLength(); i++) {
       // Iterate over node properties
@@ -84,6 +81,9 @@ public final class DemuxOperation extends PostProcess {
         this.setSplitBy(p.getTextContent());
       }
     }
+    
+     hiseqHeaderLookup.addAll(Arrays.asList(hiseqHeader.split(",", -1)));
+    
   }
 
   public void setBclToFastQPath(String sp) {
@@ -167,14 +167,18 @@ public final class DemuxOperation extends PostProcess {
   }  
   
   public void setSplitBy(String splitBy){
-      this.splitBy = splitBy;
+      if(hiseqHeaderLookup.indexOf(splitBy) > -1){
+        this.splitBy = splitBy;
+      }else{
+          this.splitBy = "SampleProject";
+      }
   }
   
   public String getSplitBy(){
-      if(this.splitBy != null || this.splitBy.equals("")){
-        return this.splitBy;
+      if(this.splitBy == null || this.splitBy.equals("")){
+          return "SampleProject";
       }else{
-          return "project";
+          return this.splitBy;
       }
   }
   
@@ -189,6 +193,8 @@ public final class DemuxOperation extends PostProcess {
     if(!this.getSampleSheetPath().exists()){
         throw new FileNotFoundException();
     }
+    
+    LoggerWrapper.log.log(Level.INFO, "Splitting samplesheets using the {0} column.", this.getSplitBy());
     
     // Read full CSV.
     BufferedReader br = new BufferedReader(new FileReader(this.getSampleSheetPath()));
@@ -222,13 +228,15 @@ public final class DemuxOperation extends PostProcess {
   
   public void transformMiSeq(){
       // Group by project (zero based)
-      int lineIdx = 6;
+      int lineIdx;
       boolean addToSet = false;
       boolean foundData = false;
       // MiSeq only has one lane. Add to 1.
-      if(getSplitBy().equals("lane")){
+      if(getSplitBy().equals("Lane")){
           // Just transform, everything is present in one lane.
           lineIdx = -1;
+      }else{
+          lineIdx = hiseqHeaderLookup.indexOf(getSplitBy());
       }
       
       ArrayList<String> ssContents;
@@ -259,7 +267,7 @@ public final class DemuxOperation extends PostProcess {
                         ssContents = sampleSheets.get(splitValue);
                     }
 
-                    ssContents.add(",1,"+line[1].replaceAll("[ :\\.;!@#$%&*\\^\\(\\)]", "_")+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
+                    ssContents.add(",1,"+line[1].replaceAll("[ ,:\\.;!@#$%&*\\^\\(\\)]", "_")+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
                     sampleSheets.put(splitValue, ssContents);
                 }
             }
@@ -271,13 +279,8 @@ public final class DemuxOperation extends PostProcess {
   
   public void transformHiSeq(){
       LoggerWrapper.log.log(Level.FINE, "Starting HiSeq Transformation and splitting into multiple samplesheets.");
-      // Group by index (zero based)
-      int lineIdx = 9; // Default to project based splitting.
-              
-      if(getSplitBy().equals("lane")){
-         // Split lane id is in the second column.
-          lineIdx = 1;
-      }
+      // Default to project based splitting (SampleProject)
+      int lineIdx = hiseqHeaderLookup.indexOf(getSplitBy()); 
       
       ArrayList<String> ssContents;
       
@@ -293,7 +296,7 @@ public final class DemuxOperation extends PostProcess {
           }else{
               ssContents = sampleSheets.get(line[lineIdx]);
           }
-          
+          line[2] = line[2].replaceAll("[ :\\.;!@#$%&*\\^\\(\\)]", "_");
           if(line[lineIdx] != null || !line[lineIdx].equals("") && !line[0].equals("FCID")){
             // Add the line to the contents of the samplesheet.
             StringBuilder builder = new StringBuilder();

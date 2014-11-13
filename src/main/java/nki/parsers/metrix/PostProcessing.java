@@ -260,8 +260,8 @@ public class PostProcessing {
                   processList.add(appObject);
                   break;
                 case "DemuxOperation":
-                  fo = mapTemplate(fo);
-                  DemuxOperation dmxObject = new DemuxOperation(node, fo);
+                  node = mapTemplate(node);
+                  DemuxOperation dmxObject = new DemuxOperation(node);
                   processList.add(dmxObject);
                   break;                    
               }
@@ -415,9 +415,10 @@ public class PostProcessing {
         cmd.addAll(Arrays.asList(spl));
     }
     
-    LoggerWrapper.log.log(Level.INFO, "Executing : " + cmd);
     ProcessBuilder pb = new ProcessBuilder(cmd);
-   
+
+    LoggerWrapper.log.log(Level.INFO, "Executing : {0}", pb.command());
+    
     if(dmx.getBaseWorkingDir() != null){
         LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Setting base working directory for postprocessing to: {0}", dmx.getBaseWorkingDir());
         pb.directory(new File(dmx.getBaseWorkingDir())); // Data/Intensities/BaseCalls
@@ -440,7 +441,7 @@ public class PostProcessing {
       LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{dmx.getId(), IE.toString()});
     }
     if(exitStatus == 0){
-        LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Exited as 0 - starting make");
+        LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] ConfigureBclToFastQ configured successfully - Starting make...");
         ArrayList<String> cmdMake = new ArrayList<>();
         cmdMake.addAll(Arrays.asList(dmx.getMakePath().split(" ")));
         
