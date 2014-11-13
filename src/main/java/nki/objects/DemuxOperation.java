@@ -234,7 +234,7 @@ public final class DemuxOperation extends PostProcess {
       ArrayList<String> ssContents;
       
       for(String[] line : fullSamplesheet){
-          LoggerWrapper.log.log(Level.FINER, "Processing: {0}", line);
+          LoggerWrapper.log.log(Level.FINER, "Processing: ", line);
           if(line[0].equals("[Data]")){
             foundData = true;
             continue;
@@ -242,29 +242,27 @@ public final class DemuxOperation extends PostProcess {
           if(foundData){
               LoggerWrapper.log.log(Level.FINER, "Found [Data] - adding to set.");
               addToSet = true;
-              continue;
           }
           
           if(addToSet){
-            if(line.length != 8){
+            if(line.length < 8){
                 LoggerWrapper.log.log(Level.FINER, "Line {0} does not have enough columns to be a valid samplesheet.", line);
-                return;
-            }
-            
-            Object splitValue;
-            // Split by selected value.
-            splitValue = lineIdx == -1 ? 1 : line[lineIdx];
-            LoggerWrapper.log.log(Level.FINER, "Split value : {0} ", splitValue);
-            if(sampleSheets.get(splitValue) == null){
-                ssContents = new ArrayList<>();
-                // Add default HiSeq header for demultiplexable samplesheets.
-                ssContents.add(hiseqHeader);
             }else{
-                ssContents = sampleSheets.get(splitValue);
+                Object splitValue;
+                // Split by selected value.
+                splitValue = lineIdx == -1 ? 1 : line[lineIdx];
+                LoggerWrapper.log.log(Level.FINER, "Split value : {0} ", splitValue);
+                if(sampleSheets.get(splitValue) == null){
+                    ssContents = new ArrayList<>();
+                    // Add default HiSeq header for demultiplexable samplesheets.
+                    ssContents.add(hiseqHeader);
+                }else{
+                    ssContents = sampleSheets.get(splitValue);
+                }
+
+                ssContents.add(",1,"+line[1]+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
+                sampleSheets.put(splitValue, ssContents);
             }
-            
-            ssContents.add(",1,"+line[1]+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
-            sampleSheets.put(splitValue, ssContents);
           }
       }
       
