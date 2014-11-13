@@ -24,7 +24,9 @@ public final class DemuxOperation extends PostProcess {
   public static final long serialVersionUID = 42L;
   private String bclToFastQPath;
   private String hiseqHeader = "FCID,Lane,SampleID,SampleReferenceGenome,Index,Descr,Control,Recipe,Operator,SampleProject";
+  private String miseqHeader = "Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,Sample_Project,Description";
   private ArrayList<String> hiseqHeaderLookup = new ArrayList<>();
+  private ArrayList<String> miseqHeaderLookup = new ArrayList<>();
   private String arguments;
   private String baseRunDir;
   private String baseOutputDir;
@@ -43,10 +45,12 @@ public final class DemuxOperation extends PostProcess {
     NamedNodeMap parentAttr = parentNode.getAttributes();
     // Prepare header lookup array.
     hiseqHeaderLookup.addAll(Arrays.asList(hiseqHeader.split(",", -1)));
-     
+    miseqHeaderLookup.addAll(Arrays.asList(miseqHeader.split(",", -1))); 
     // Set attribute values of inherited PostProcess
     this.setOrder(Integer.parseInt(parentAttr.getNamedItem("execOrder").getNodeValue()));
     this.setSubOrder(Integer.parseInt(parentAttr.getNamedItem("execOrder").getNodeValue()));
+    this.setId(parentAttr.getNamedItem("id").getNodeValue());
+    this.setTitle(parentAttr.getNamedItem("title").getNodeValue());
     NodeList foProps = parentNode.getChildNodes();
 
     for (int i = 0; i < foProps.getLength(); i++) {
@@ -166,7 +170,7 @@ public final class DemuxOperation extends PostProcess {
   }  
   
   public void setSplitBy(String splitBy){
-      if(hiseqHeaderLookup.indexOf(splitBy) > -1){
+      if(hiseqHeaderLookup.indexOf(splitBy) > -1 || miseqHeaderLookup.indexOf(splitBy) > -1){
         this.splitBy = splitBy;
       }else{
         this.splitBy = "SampleProject";
@@ -235,13 +239,12 @@ public final class DemuxOperation extends PostProcess {
           // Just transform, everything is present in one lane.
           lineIdx = -1;
       }else{
-          lineIdx = hiseqHeaderLookup.indexOf(getSplitBy())-1;
+          lineIdx = miseqHeaderLookup.indexOf(getSplitBy())-1;
       }
       
       ArrayList<String> ssContents;
       
       for(String[] line : fullSamplesheet){
-          LoggerWrapper.log.log(Level.FINER, "Processing: {0}", line);
           if(line[0].equals("[Data]")){
             foundData = true;
             continue;
