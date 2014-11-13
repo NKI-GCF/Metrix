@@ -37,7 +37,7 @@ public final class DemuxOperation extends PostProcess {
   private String baseMask;  
   private List<String[]> fullSamplesheet = new ArrayList<>();
   private HashMap<Object, ArrayList<String>> sampleSheets = new HashMap<>(); // Store samplesheets by splitBy type.
-  private HashMap<Object, String> baseMaskMap = new HashMap<>(); // Store baseMasks for every samplesheet generated.
+  private HashMap<String, Integer> miseqLookup = new HashMap<>();
   
   public DemuxOperation(Node parentNode) {
     NamedNodeMap parentAttr = parentNode.getAttributes();
@@ -183,6 +183,23 @@ public final class DemuxOperation extends PostProcess {
       }
   }
   
+  private int lookupHiSeqHeaderForMiSeq(String header){
+      // Initialize
+      // "FCID,Lane,SampleID,SampleReferenceGenome,Index,Descr,Control,Recipe,Operator,SampleProject"
+      miseqLookup.put("FCID", -1);
+      miseqLookup.put("Lane", -1);
+      miseqLookup.put("SampleID", 1);
+      miseqLookup.put("SampleReferenceGenome", -1);
+      miseqLookup.put("Index", 5);
+      miseqLookup.put("Descr", -1);
+      miseqLookup.put("Control", -1);
+      miseqLookup.put("Recipe", -1);
+      miseqLookup.put("Operator", -1);
+      miseqLookup.put("SampleProject", 7);
+     
+      return miseqLookup.getOrDefault(header, -1); // Default return '-1' (Splits demux by Lane)
+  }
+  
   public ArrayList<File> getSamplesheetLocations(){
       return this.samplesheetLocations;
   }
@@ -237,7 +254,7 @@ public final class DemuxOperation extends PostProcess {
           // Just transform, everything is present in one lane.
           lineIdx = -1;
       }else{
-          lineIdx = hiseqHeaderLookup.indexOf(getSplitBy());
+          lineIdx = lookupHiSeqHeaderForMiSeq(getSplitBy());
           LoggerWrapper.log.log(Level.FINER, "Line IDX FOR : {0} == {1}", new Object[]{getSplitBy(), lineIdx});
       }
       
