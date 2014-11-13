@@ -24,7 +24,7 @@ public final class DemuxOperation extends PostProcess {
   public static final long serialVersionUID = 42L;
   private String bclToFastQPath;
   private String hiseqHeader = "FCID,Lane,SampleID,SampleReferenceGenome,Index,Descr,Control,Recipe,Operator,SampleProject";
-  private ArrayList<String> hiseqHeaderLookup;
+  private ArrayList<String> hiseqHeaderLookup = new ArrayList<>();
   private String arguments;
   private String baseRunDir;
   private String baseOutputDir;
