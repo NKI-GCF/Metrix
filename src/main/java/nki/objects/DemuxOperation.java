@@ -251,6 +251,10 @@ public final class DemuxOperation extends PostProcess {
                 Object splitValue;
                 // Split by selected value.
                 splitValue = lineIdx == -1 ? 1 : line[lineIdx];
+                if(splitValue.equals("Sample_Project")){
+                    LoggerWrapper.log.log(Level.FINER, "Found Sample_Project.");
+                    continue;
+                }
                 LoggerWrapper.log.log(Level.FINER, "Split value : {0} ", splitValue);
                 if(sampleSheets.get(splitValue) == null){
                     ssContents = new ArrayList<>();
