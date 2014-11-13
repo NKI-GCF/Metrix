@@ -197,7 +197,11 @@ public final class DemuxOperation extends PostProcess {
       miseqLookup.put("Operator", -1);
       miseqLookup.put("SampleProject", 7);
      
-      return miseqLookup.getOrDefault(header, -1); // Default return '-1' (Splits demux by Lane)
+      if(miseqLookup.get(header) != null){
+        return miseqLookup.get(header);
+      }else{
+        return -1;
+      }
   }
   
   public ArrayList<File> getSamplesheetLocations(){
