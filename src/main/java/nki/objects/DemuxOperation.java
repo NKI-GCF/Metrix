@@ -194,7 +194,7 @@ public final class DemuxOperation extends PostProcess {
     BufferedReader br = new BufferedReader(new FileReader(this.getSampleSheetPath()));
     String line = null;
     while ((line = br.readLine()) != null) {
-       nextLine = line.split(",");
+       nextLine = line.split(",", -1);
        fullSamplesheet.add(nextLine);
     }
   
@@ -245,8 +245,7 @@ public final class DemuxOperation extends PostProcess {
           }
           
           if(addToSet){
-            System.out.println(line);
-            if(line.length < 7){
+            if(line.length < 8){
                 LoggerWrapper.log.log(Level.FINER, "Line {0} does not have enough columns to be a valid samplesheet.", line);
                 int cnt = 1;
                 for(String i: line){
