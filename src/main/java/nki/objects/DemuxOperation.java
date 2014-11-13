@@ -196,7 +196,9 @@ public final class DemuxOperation extends PostProcess {
       miseqLookup.put("Recipe", -1);
       miseqLookup.put("Operator", -1);
       miseqLookup.put("SampleProject", 7);
-     
+
+      LoggerWrapper.log.log(Level.INFO, "Translating set HiSeq header {0} to match MiSeq samplesheet and found it in column {1}.", new Object[]{header, miseqLookup.get(header)});
+      
       if(miseqLookup.get(header) != null){
         return miseqLookup.get(header);
       }else{
@@ -280,6 +282,7 @@ public final class DemuxOperation extends PostProcess {
                 Object splitValue;
                 // Split by selected value.
                 splitValue = lineIdx == -1 ? 1 : line[lineIdx];
+                LoggerWrapper.log.log(Level.FINER, "Working with column value {0}",splitValue);
                 
                 if(!line[0].equals("Sample_ID")){
                     if(sampleSheets.get(splitValue) == null){
