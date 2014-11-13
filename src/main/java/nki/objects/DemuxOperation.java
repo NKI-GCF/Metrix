@@ -240,7 +240,6 @@ public final class DemuxOperation extends PostProcess {
             continue;
           }
           if(foundData){
-              LoggerWrapper.log.log(Level.FINER, "Found [Data] - adding to set.");
               addToSet = true;
           }
           
@@ -251,10 +250,7 @@ public final class DemuxOperation extends PostProcess {
                 Object splitValue;
                 // Split by selected value.
                 splitValue = lineIdx == -1 ? 1 : line[lineIdx];
-                LoggerWrapper.log.log(Level.FINER, "Split value : {0} ", splitValue);
-                if(splitValue.equals("Sample_Project")){
-                    LoggerWrapper.log.log(Level.FINER, "Found header.");
-                }else{
+                if(!splitValue.equals("Sample_Project")){
                     if(sampleSheets.get(splitValue) == null){
                         ssContents = new ArrayList<>();
                         // Add default HiSeq header for demultiplexable samplesheets.
@@ -263,7 +259,7 @@ public final class DemuxOperation extends PostProcess {
                         ssContents = sampleSheets.get(splitValue);
                     }
 
-                    ssContents.add(",1,"+line[1].replace(" ", "_")+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
+                    ssContents.add(",1,"+line[1].replaceAll("[ :\\.;!@#$%&*\\^\\(\\)]", "_")+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
                     sampleSheets.put(splitValue, ssContents);
                 }
             }
