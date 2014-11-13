@@ -251,21 +251,21 @@ public final class DemuxOperation extends PostProcess {
                 Object splitValue;
                 // Split by selected value.
                 splitValue = lineIdx == -1 ? 1 : line[lineIdx];
+                LoggerWrapper.log.log(Level.FINER, "Split value : {0} ", splitValue);
                 if(splitValue.equals("Sample_Project")){
                     LoggerWrapper.log.log(Level.FINER, "Found Sample_Project.");
-                    continue;
-                }
-                LoggerWrapper.log.log(Level.FINER, "Split value : {0} ", splitValue);
-                if(sampleSheets.get(splitValue) == null){
-                    ssContents = new ArrayList<>();
-                    // Add default HiSeq header for demultiplexable samplesheets.
-                    ssContents.add(hiseqHeader);
                 }else{
-                    ssContents = sampleSheets.get(splitValue);
-                }
+                    if(sampleSheets.get(splitValue) == null){
+                        ssContents = new ArrayList<>();
+                        // Add default HiSeq header for demultiplexable samplesheets.
+                        ssContents.add(hiseqHeader);
+                    }else{
+                        ssContents = sampleSheets.get(splitValue);
+                    }
 
-                ssContents.add(",1,"+line[1]+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
-                sampleSheets.put(splitValue, ssContents);
+                    ssContents.add(",1,"+line[1]+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
+                    sampleSheets.put(splitValue, ssContents);
+                }
             }
           }
       }
