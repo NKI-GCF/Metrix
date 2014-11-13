@@ -234,11 +234,13 @@ public final class DemuxOperation extends PostProcess {
       ArrayList<String> ssContents;
       
       for(String[] line : fullSamplesheet){
+          LoggerWrapper.log.log(Level.FINER, "Processing: {0}", line);
           if(line[0].equals("[Data]")){
             foundData = true;
             continue;
           }
           if(foundData){
+              LoggerWrapper.log.log(Level.FINER, "Found [Data] - adding to set.");
               addToSet = true;
               continue;
           }
@@ -252,17 +254,17 @@ public final class DemuxOperation extends PostProcess {
             Object splitValue;
             // Split by selected value.
             splitValue = lineIdx == -1 ? 1 : line[lineIdx];
-
+            LoggerWrapper.log.log(Level.FINER, "Split value : {0} ", splitValue);
             if(sampleSheets.get(splitValue) == null){
                 ssContents = new ArrayList<>();
                 // Add default HiSeq header for demultiplexable samplesheets.
                 ssContents.add(hiseqHeader);
             }else{
-                ssContents = sampleSheets.get(line[lineIdx]);
+                ssContents = sampleSheets.get(splitValue);
             }
             
             ssContents.add(",1,"+line[1]+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
-            sampleSheets.put(line[lineIdx], ssContents);
+            sampleSheets.put(splitValue, ssContents);
           }
       }
       
