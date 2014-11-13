@@ -248,6 +248,10 @@ public final class DemuxOperation extends PostProcess {
             if(line.length < 8){
                 LoggerWrapper.log.log(Level.FINER, "Line {0} does not have enough columns to be a valid samplesheet.", line);
                 LoggerWrapper.log.log(Level.FINER, "Line length: {0}",line.length);
+                int cnt = 1;
+                for(String i: line){
+                    LoggerWrapper.log.log(Level.FINER, "Col {0} - {1}", new Object[]{cnt, i});
+                }
             }else{
                 Object splitValue;
                 // Split by selected value.
