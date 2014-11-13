@@ -234,15 +234,6 @@ public final class DemuxOperation extends PostProcess {
       ArrayList<String> ssContents;
       
       for(String[] line : fullSamplesheet){
-          Object splitValue;
-          // Split by lane
-          if(lineIdx == -1){
-              splitValue = 1;
-          }else{
-              // Normally split by project (idx: 6)
-              splitValue = line[lineIdx];
-          }
-          
           if(line[0].equals("[Data]")){
             foundData = true;
             continue;
@@ -253,6 +244,15 @@ public final class DemuxOperation extends PostProcess {
           }
           
           if(addToSet){
+            if(line.length != 8){
+                LoggerWrapper.log.log(Level.FINER, "Line {0} does not have enough columns to be a valid samplesheet.", line);
+                return;
+            }
+            
+            Object splitValue;
+            // Split by selected value.
+            splitValue = lineIdx == -1 ? 1 : line[lineIdx];
+
             if(sampleSheets.get(splitValue) == null){
                 ssContents = new ArrayList<>();
                 // Add default HiSeq header for demultiplexable samplesheets.

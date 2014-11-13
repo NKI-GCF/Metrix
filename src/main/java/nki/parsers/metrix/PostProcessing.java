@@ -383,7 +383,7 @@ public class PostProcessing {
     if(!dmx.getLoggingPath().equals("")){
         loggingFile = new File(dmx.getLoggingPath());
     }else{
-        loggingFile = new File(dmx.getBaseOutputDir() + "/postprocessing.log");
+        loggingFile = new File(dmx.getBaseOutputDir() +"/"+samplesheet.getName().replace(".csv", "")+ ".postprocessing.log");
     }
     
     // Does Data output folder exist?
@@ -452,7 +452,7 @@ public class PostProcessing {
         pbMake.directory(dmxBaseOut);
 
         // Instantiate the ProcessBuilder for make
-        pbMake.redirectOutput(new File(dmx.getBaseOutputDir() + "/make.log"));
+        pbMake.redirectOutput(new File(dmx.getBaseOutputDir() +"/"+samplesheet.getName().replace(".csv", "") +".make.log"));
         pbMake.redirectErrorStream(true);
 
         try {
