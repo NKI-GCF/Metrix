@@ -261,7 +261,6 @@ public final class DemuxOperation extends PostProcess {
           lineIdx = -1;
       }else{
           lineIdx = lookupHiSeqHeaderForMiSeq(getSplitBy());
-          LoggerWrapper.log.log(Level.FINER, "Line IDX FOR : {0} == {1}", new Object[]{getSplitBy(), lineIdx});
       }
       
       ArrayList<String> ssContents;
