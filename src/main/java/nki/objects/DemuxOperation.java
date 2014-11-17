@@ -355,7 +355,7 @@ public final class DemuxOperation extends PostProcess {
       ArrayList<String> ssContents;
       // Foreach samplesheet key generated new samplesheet with contents.
       for(Object key : sampleSheets.keySet()){
-           LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: " + key);
+           LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: {0}", key);
            ssContents = sampleSheets.get(key);
            try{
                 String filename = "";

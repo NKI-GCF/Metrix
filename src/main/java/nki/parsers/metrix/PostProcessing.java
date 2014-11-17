@@ -380,14 +380,15 @@ public class PostProcessing {
     
     // The output file. All console activity is written to this file.
     final File loggingFile;
+    String sampleSheetNameNormal = samplesheet.getName().replace(".csv", "");
     if(!dmx.getLoggingPath().equals("")){
         loggingFile = new File(dmx.getLoggingPath());
     }else{
-        loggingFile = new File(dmx.getBaseOutputDir() +"/"+samplesheet.getName().replace(".csv", "")+ ".postprocessing.log");
+        loggingFile = new File(dmx.getBaseOutputDir() +"/"+sampleSheetNameNormal+ ".postprocessing.log");
     }
     
     // Does Data output folder exist?
-    File dmxBaseOut = new File(dmx.getBaseOutputDir() + "/Demux/" + samplesheet.getName() + "/");
+    File dmxBaseOut = new File(dmx.getBaseOutputDir() + "/Demux/" + sampleSheetNameNormal + "/");
     
     if(!dmxBaseOut.exists()){
         if(dmxBaseOut.mkdirs()){
@@ -398,8 +399,9 @@ public class PostProcessing {
     }
     
     ArrayList<String> cmd = new ArrayList<>();
+    // Add script path to command
     cmd.add(dmx.getBclToFastQPath());
-    // Add input dir
+    // Define other base arguments and build
     cmd.add("--input-dir");
     cmd.add(dmx.getBaseWorkingDir());
     cmd.add("--output-dir");
@@ -723,16 +725,16 @@ public class PostProcessing {
   }
 
   private int executeApplication(Application app) {
+    ArrayList<String> cmd = new ArrayList<>();
     LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting script: {0}", app.getTitle());
     // The script / application to execute
-    final File scriptPath = new File(app.getScriptPath());
-
+    cmd.addAll(Arrays.asList(app.getScriptPath().split(" ", -1)));
+    
     // The output file. All application activity is written to this file.
     final File outputFile = new File(app.getOutputPath());
     // The supplied arguments for the script
-    final String arguments = app.getArguments();
-
-    ProcessBuilder pb = new ProcessBuilder(scriptPath.toString(), arguments);
+    cmd.addAll(Arrays.asList(app.getArguments().split(" ", -1)));
+    ProcessBuilder pb = new ProcessBuilder(cmd);
     
     if(app.getWorkingDirectory() != null){
         pb.directory(new File(app.getWorkingDirectory()));
