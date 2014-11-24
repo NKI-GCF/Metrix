@@ -241,30 +241,31 @@ public class PostProcessing {
             blockList.add(processBlock);
 
             NodeList foChildren = node.getChildNodes();
-
-            // Iterate over defined children and create do Operation node processing.
-            for (int x = 0; x < foChildren.getLength(); x++) {
-              Node fo = foChildren.item(x);
-              if (fo.getNodeName().equals("#text") || fo.getNodeName().equals("#comment")) {
-                continue;
-              }
-              switch (nodeName) {
-                case "FileOperation":
-                  fo = mapTemplate(fo);
-                  FileOperation foObject = new FileOperation(node, fo);
-                  processList.add(foObject);
-                  break;
-                case "Application":
-                  fo = mapTemplate(fo);
-                  Application appObject = new Application(node, fo);
-                  processList.add(appObject);
-                  break;
-                case "DemuxOperation":
-                  node = mapTemplate(node);
-                  DemuxOperation dmxObject = new DemuxOperation(node);
-                  processList.add(dmxObject);
-                  break;                    
-              }
+            // DemuxOperation is a singular process and does not contain any childnodes by default.
+            if(nodeName.equals("DemuxOperation")){
+                node = mapTemplate(node);
+                DemuxOperation dmxObject = new DemuxOperation(node);
+                processList.add(dmxObject);
+            }else{
+                // Iterate over defined children and create do Operation node processing.
+                for (int x = 0; x < foChildren.getLength(); x++) {
+                  Node fo = foChildren.item(x);
+                  if (fo.getNodeName().equals("#text") || fo.getNodeName().equals("#comment")) {
+                    continue;
+                  }
+                  switch (nodeName) {
+                    case "FileOperation":
+                      fo = mapTemplate(fo);
+                      FileOperation foObject = new FileOperation(node, fo);
+                      processList.add(foObject);
+                      break;
+                    case "Application":
+                      fo = mapTemplate(fo);
+                      Application appObject = new Application(node, fo);
+                      processList.add(appObject);
+                      break;
+                  }
+                }
             }
           }
         }
@@ -347,7 +348,7 @@ public class PostProcessing {
   }
 
    private int executeDemuxOperation(DemuxOperation dmx) {
-    // Default exitstatus -255 for return without processing.
+    // Default exitstatus 0 for return without encountering any errors during processing.
     int exitStatus = -255;
     
     LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting script: {0}", dmx.getTitle());
@@ -356,7 +357,8 @@ public class PostProcessing {
         LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Cannot find the Bcl conversion script. Argument is not set in postprocessing.");
         return exitStatus;
     }
-
+    
+    exitStatus = 0;
     // Split SampleSheet based on projects.
     try{
         dmx.generateSampleSheets();
@@ -375,12 +377,13 @@ public class PostProcessing {
   }
   
   private int processSamplesheet(DemuxOperation dmx, File samplesheet){
-    int exitStatus = -255;
-    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting demultiplexing for: {0}", dmx.getBaseRunDir());
+    int exitStatus = 0;
+    String sampleSheetNameNormal = samplesheet.getName().replace(".csv", "");
+    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting demultiplexing for: {0}", sampleSheetNameNormal);
     
     // The output file. All console activity is written to this file.
     final File loggingFile;
-    String sampleSheetNameNormal = samplesheet.getName().replace(".csv", "");
+    
     if(!dmx.getLoggingPath().equals("")){
         loggingFile = new File(dmx.getLoggingPath());
     }else{
@@ -418,7 +421,6 @@ public class PostProcessing {
     }
     
     ProcessBuilder pb = new ProcessBuilder(cmd);
-
     LoggerWrapper.log.log(Level.INFO, "Executing : {0}", pb.command());
     
     if(dmx.getBaseWorkingDir() != null){
