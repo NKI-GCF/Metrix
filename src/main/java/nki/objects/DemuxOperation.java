@@ -188,7 +188,7 @@ public final class DemuxOperation extends PostProcess {
   }
   
   private String getIdxBaseMask(int newBaseMaskLength){
-      String pattern = "y\\d{1,3},I(\\d+).*";
+      String pattern = "I(\\d+)";
       // Global run basemask is used as match string.
       Pattern r = Pattern.compile(pattern);
       Matcher m = r.matcher(this.getBaseMask());
