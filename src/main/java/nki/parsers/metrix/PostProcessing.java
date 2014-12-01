@@ -412,7 +412,7 @@ public class PostProcessing {
     cmd.add("--sample-sheet");
     cmd.add(samplesheet.getAbsolutePath());
     cmd.add("--use-bases-mask");
-    cmd.add(dmx.getBaseMask());
+    cmd.add(dmx.ssBaseMaskMap.get(samplesheet.getAbsolutePath()));
     cmd.add("--force");
         
     if(dmx.getArguments() != null){

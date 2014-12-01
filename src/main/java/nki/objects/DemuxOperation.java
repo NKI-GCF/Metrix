@@ -18,6 +18,8 @@ import nki.util.LoggerWrapper;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class DemuxOperation extends PostProcess {
 
@@ -38,6 +40,8 @@ public final class DemuxOperation extends PostProcess {
   private List<String[]> fullSamplesheet = new ArrayList<>();
   private HashMap<Object, ArrayList<String>> sampleSheets = new HashMap<>(); // Store samplesheets by splitBy type.
   private HashMap<String, Integer> miseqLookup = new HashMap<>();
+  private HashMap<String, String> baseMaskMap = new HashMap<>();
+  public HashMap<String, String> ssBaseMaskMap = new HashMap<>();
   
   public DemuxOperation(Node parentNode) {
     NamedNodeMap parentAttr = parentNode.getAttributes();
@@ -181,6 +185,24 @@ public final class DemuxOperation extends PostProcess {
       }else{
           return this.splitBy;
       }
+  }
+  
+  private String getIdxBaseMask(int newBaseMaskLength){
+      String pattern = "y\\d{1,3},I(\\d+).*";
+      // Global run basemask is used as match string.
+      Pattern r = Pattern.compile(pattern);
+      Matcher m = r.matcher(this.getBaseMask());
+      String replace = "I"+newBaseMaskLength;
+      
+      String res = m.replaceAll(replace);
+      
+      if(res.equals(this.getBaseMask())){
+          LoggerWrapper.log.log(Level.WARNING, "No basemask match was made for: {0} using pattern: {1}", new Object[]{this.getBaseMask(), pattern});
+          return this.getBaseMask();
+      }
+
+      LoggerWrapper.log.log(Level.INFO, "Basemask was set to: "+ res);
+      return res;
   }
   
   private int lookupHiSeqHeaderForMiSeq(String header){
@@ -329,6 +351,12 @@ public final class DemuxOperation extends PostProcess {
             int idx = 0;
             for(String s : line) {
                 builder.append(s);
+                // Processing the index sequence column
+                if(idx == 4){
+                    LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask for potential adjustments (Using length: {0})", s.length());
+                    // Check and possibly store new basemask in baseMaskMap
+                    baseMaskMap.put(line[lineIdx], getIdxBaseMask(s.length()));
+                }
                 if(idx < lineSize-1 ){
                      builder.append(",");
                 }
@@ -336,7 +364,6 @@ public final class DemuxOperation extends PostProcess {
             }
             ssContents.add(builder.toString());
           }
-
           sampleSheets.put(line[lineIdx], ssContents);
       }
 
@@ -366,6 +393,7 @@ public final class DemuxOperation extends PostProcess {
                 }
                 File samplesheetOut = new File(filename);
                 samplesheetLocations.add(samplesheetOut);
+                ssBaseMaskMap.put(samplesheetOut.getAbsolutePath(), (String) baseMaskMap.get((String) key));
                 
                 PrintWriter out = new PrintWriter(new FileWriter(samplesheetOut));
                 
