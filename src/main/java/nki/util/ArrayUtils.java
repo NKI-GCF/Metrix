@@ -92,8 +92,10 @@ public class ArrayUtils {
       Arrays.sort(prival);
 
       int n = (int) Math.round(prival.length * lowerPercent / 100);
-
-      if(prival.length >= n){
+      LoggerWrapper.log.log(Level.FINE, "The prival list = ", prival.length);
+      LoggerWrapper.log.log(Level.FINE, "Calced N = ",n);
+      
+      if(prival.length > n){
         return prival[n];
       }else{
         return 0;
