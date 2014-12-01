@@ -11,6 +11,8 @@ import java.io.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import nki.util.LoggerWrapper;
 
 public class QualityScores implements Serializable {
 
@@ -154,6 +156,7 @@ public class QualityScores implements Serializable {
           }
         }
         cycleDist.put(cycle, m);
+        LoggerWrapper.log.log(Level.INFO, "Lane {0} Cycle {1} Metric {2} ", new Object[]{lane, cycle, m.tileScores.size()});
       }
     }
     return cycleDist;

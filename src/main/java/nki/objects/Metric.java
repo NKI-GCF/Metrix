@@ -17,7 +17,7 @@ public class Metric implements Serializable {
   public static final long serialVersionUID = 42L;
   private Double metric = 0.0d;
   private int tiles = 0;
-  private List<Double> tileScores = new ArrayList<>();
+  protected List<Double> tileScores = new ArrayList<>();
 
   public void setMetric(Double metricScore) {
     this.metric = metricScore;

@@ -81,8 +81,6 @@ public class ArrayUtils {
           throw new IllegalArgumentException("The data array either is null or does not contain any data.");
       }
       
-      LoggerWrapper.log.log(Level.FINE, "The List = ", values.toString());
-     
       double[] prival = new double[values.size()];
       for (int i = 0; i < values.size(); i++) {
         prival[i] = values.get(i);
@@ -92,8 +90,6 @@ public class ArrayUtils {
       Arrays.sort(prival);
 
       int n = (int) Math.round(prival.length * lowerPercent / 100);
-      LoggerWrapper.log.log(Level.FINE, "The prival list = ", prival.length);
-      LoggerWrapper.log.log(Level.FINE, "Calced N = ",n);
       
       if(prival.length > n){
         return prival[n];
