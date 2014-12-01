@@ -353,9 +353,14 @@ public final class DemuxOperation extends PostProcess {
                 builder.append(s);
                 // Processing the index sequence column
                 if(idx == 4){
-                    LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask for potential adjustments (Using length: {0})", s.length());
                     // Check and possibly store new basemask in baseMaskMap
-                    baseMaskMap.put(line[lineIdx], getIdxBaseMask(s.length()));
+                    if(s.length() > 0){
+                        LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask for potential adjustments (Using length: {0})", s.length());
+                        baseMaskMap.put(line[lineIdx], getIdxBaseMask(s.length()));
+                    }else{
+                        LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask. Length is 0. Using original basemask.");
+                        baseMaskMap.put(line[lineIdx], this.getBaseMask());
+                    }
                 }
                 if(idx < lineSize-1 ){
                      builder.append(",");
