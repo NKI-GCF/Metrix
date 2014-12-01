@@ -8,6 +8,8 @@
 package nki.util;
 
 import java.util.*;
+import java.util.logging.Level;
+import nki.util.LoggerWrapper;
 
 public class ArrayUtils {
   public static double sum(List<Double> a) {
@@ -75,10 +77,12 @@ public class ArrayUtils {
   }
 
   public static double quartile(List<Double> values, double lowerPercent) {
-      if (values == null || values.size() == 0) {
+      if (values == null || values.isEmpty()) {
           throw new IllegalArgumentException("The data array either is null or does not contain any data.");
       }
-
+      
+      LoggerWrapper.log.log(Level.FINE, "The List = ", values.toString());
+     
       double[] prival = new double[values.size()];
       for (int i = 0; i < values.size(); i++) {
         prival[i] = values.get(i);
@@ -89,7 +93,11 @@ public class ArrayUtils {
 
       int n = (int) Math.round(prival.length * lowerPercent / 100);
 
-      return prival[n];
+      if(prival.length >= n){
+        return prival[n];
+      }else{
+        return 0;
+      }
   }
 
   public double getVariance(List<Double> data) {
