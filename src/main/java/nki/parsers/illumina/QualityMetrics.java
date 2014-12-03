@@ -67,6 +67,16 @@ public class QualityMetrics extends GenericIlluminaParser {
       qScores.setVersion(this.getVersion());
       qScores.setRecordLength(this.getRecordLength());
 
+      // Has QScore Binning been applied?
+      byte qsBinning = leis.readByte();
+      if(qsBinning == 1){
+          // QScoreBinning has been applied. Skip next 22 bytes where Qbins are described.
+          metrixLogger.log.log(Level.FINEST, "QScoreBinning has been applied.");
+          leis.readByteArray(22);
+      }else{
+          metrixLogger.log.log(Level.FINEST, "No QScoreBinning has been applied.");
+      }
+      
       boolean qcFlag;
       QualityMap qMap;
       while (true) {

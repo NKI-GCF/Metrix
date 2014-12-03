@@ -8,6 +8,7 @@
 package nki.io;
 
 import java.io.*;
+import java.util.ArrayList;
 
 public class LittleEndianInputStream extends FilterInputStream {
 
@@ -15,6 +16,15 @@ public class LittleEndianInputStream extends FilterInputStream {
     super(in);
   }
 
+  public ArrayList<Byte> readByteArray(int n) throws IOException {
+      ArrayList<Byte> arr = new ArrayList<>();
+      for (int i = 0; i < n; i++) {
+        arr.add((byte) in.read());
+      }
+      
+      return arr;
+  }
+  
   public boolean readBoolean() throws IOException {
     int bool = in.read();
     if (bool == -1) throw new EOFException();
