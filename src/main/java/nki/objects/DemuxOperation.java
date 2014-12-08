@@ -313,8 +313,9 @@ public final class DemuxOperation extends PostProcess {
                     }else{
                         ssContents = sampleSheets.get(splitValue);
                     }
-
+                    
                     ssContents.add(",1,"+line[1].replaceAll("[ ,:\\.;!@#$%&*\\^\\(\\)]", "_")+",,"+line[5]+","+line[7]+",,,Metrix,"+line[6]);
+                    baseMaskMap.put((String) splitValue, getIdxBaseMask(line[5].length()));
                     sampleSheets.put(splitValue, ssContents);
                 }
             }
