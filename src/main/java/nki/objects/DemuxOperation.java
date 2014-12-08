@@ -196,12 +196,8 @@ public final class DemuxOperation extends PostProcess {
       
       String res = m.replaceAll(replace);
       
-      if(newBaseMaskLength == 0){
-          return this.getBaseMask();
-      }
-      
-      if(res.equals(this.getBaseMask())){
-          LoggerWrapper.log.log(Level.WARNING, "No basemask match was made for: {0} using pattern: {1}", new Object[]{this.getBaseMask(), pattern});
+      if(res.equals(this.getBaseMask()) || replace.length() == 1){
+          LoggerWrapper.log.log(Level.INFO, "No basemask match was made for: {0} using pattern: {1}", new Object[]{this.getBaseMask(), pattern});
           return this.getBaseMask();
       }
 
