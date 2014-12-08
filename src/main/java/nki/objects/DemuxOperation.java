@@ -196,6 +196,10 @@ public final class DemuxOperation extends PostProcess {
       
       String res = m.replaceAll(replace);
       
+      if(newBaseMaskLength == 0){
+          return this.getBaseMask();
+      }
+      
       if(res.equals(this.getBaseMask())){
           LoggerWrapper.log.log(Level.WARNING, "No basemask match was made for: {0} using pattern: {1}", new Object[]{this.getBaseMask(), pattern});
           return this.getBaseMask();
@@ -241,7 +245,7 @@ public final class DemuxOperation extends PostProcess {
     }
     
     LoggerWrapper.log.log(Level.INFO, "Splitting samplesheets using the {0} column.", this.getSplitBy());
-    
+    LoggerWrapper.log.log(Level.INFO, "Global basemask: {0}", this.getBaseMask());
     // Read full CSV.
     BufferedReader br = new BufferedReader(new FileReader(this.getSampleSheetPath()));
     String line = null;
