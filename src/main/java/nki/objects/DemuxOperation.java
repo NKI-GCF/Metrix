@@ -354,11 +354,16 @@ public final class DemuxOperation extends PostProcess {
                 // Processing the index sequence column
                 if(idx == 4){
                     // Check and possibly store new basemask in baseMaskMap
-                    if(s.length() > 0){
-                        LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask for potential adjustments (Using length: {0})", s.length());
-                        baseMaskMap.put(line[lineIdx], getIdxBaseMask(s.length()));
+                    if(s != null){
+                        if(s.length() > 0){
+                            LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask for potential adjustments (Using length: {0})", s.length());
+                            baseMaskMap.put(line[lineIdx], getIdxBaseMask(s.length()));
+                        }else{
+                            LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask. Length is 0. Using original basemask.");
+                            baseMaskMap.put(line[lineIdx], this.getBaseMask());
+                        }
                     }else{
-                        LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask. Length is 0. Using original basemask.");
+                        LoggerWrapper.log.log(Level.FINE, "Index sequence has not been set in the used samplesheet. Using original basemask.");
                         baseMaskMap.put(line[lineIdx], this.getBaseMask());
                     }
                 }
