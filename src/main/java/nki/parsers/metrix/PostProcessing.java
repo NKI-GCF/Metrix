@@ -414,7 +414,9 @@ public class PostProcessing {
     cmd.add("--use-bases-mask");
     cmd.add(dmx.ssBaseMaskMap.get(samplesheet.getAbsolutePath()));
     cmd.add("--force");
-        
+    
+    LoggerWrapper.log.log(Level.FINEST, "Script: {0}\nInput: {1}\nOutput: {2}\nSamplesheet: {3}\nBaseMask: {4}", new Object[]{dmx.getBclToFastQPath(), dmx.getBaseWorkingDir(), dmxBaseOut.toString(), samplesheet.getAbsolutePath(), dmx.ssBaseMaskMap.get(samplesheet.getAbsolutePath())});
+    
     if(dmx.getArguments() != null){
         String[] spl = dmx.getArguments().split(" ");
         cmd.addAll(Arrays.asList(spl));
