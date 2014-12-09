@@ -28,7 +28,7 @@ public class Summary implements Serializable {
   private String lastUpdated = "0";    // Last update time
   private long lastUpdatedEpoch = 0;
   private String phase;        // Phase of run :: Imaging / Basecalling / RTAComplete
-  private String runType = "Single Read";      // Run Type: Single / Paired End / Nextera
+  private String runType = "Single Read";      // Run Type: Single Read/ Paired End / Nextera
   private int indexLength;      // Length of index read
   private int tileCount;        // Number of Tiles
   private int state = 5;    // State 0: Hanging / State 1: Running / State 2: Complete / State 3: Unknown / State 4: Flowcell needs turning

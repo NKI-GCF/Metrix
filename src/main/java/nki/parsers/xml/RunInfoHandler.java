@@ -97,18 +97,24 @@ public class RunInfoHandler {
     sum.setTotalCycles(totalCycles);
 
     if (readNodes.getLength() == 1) {
-      sum.setRunType("Single End");
+      sum.setRunType("Single Read");
       sum.setIsIndexed(false);
     }
-
-    if (readNodes.getLength() == 2) {    // Run Type = Single End Run
-      sum.setRunType("Single End");
+    
+    // Paired end no indexing.
+    if(readNodes.getLength() == 2 && readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
+        sum.setRunType("Paired End");
+        sum.setIsIndexed(false);
+    }
+    
+    if (readNodes.getLength() == 2) {    // Run Type = Single Read Run
+      sum.setRunType("Single Read");
       sum.setIsIndexed(true);
     }
 
     if (readNodes.getLength() == 3) {    // Run Type = Paired End Run
       sum.setRunType("Paired End");
-      sum.setIsIndexed(false);
+      sum.setIsIndexed(true);
     }
 
     if (readNodes.getLength() == 4) {    // Run Type = Nextera Run
