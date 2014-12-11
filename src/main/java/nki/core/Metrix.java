@@ -190,7 +190,7 @@ public class Metrix {
     MetrixContainer mc = new MetrixContainer(runName);
     mc.outputSummaryLog();
 
-    JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
-    log.info(allOut.toString());
+    //JSONObject allOut = new MetrixContainerDecorator(mc).toJSON();
+    //System.out.println(allOut.toString());
   }
 }

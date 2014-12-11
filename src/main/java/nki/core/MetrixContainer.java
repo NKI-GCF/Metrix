@@ -226,7 +226,7 @@ public class MetrixContainer {
       }
     }
     else {
-      log.info("Can only generate Quality and Intensity metrics after cycle 25. Current cycle is: " + sum.getCurrentCycle());
+      System.out.println("Can only generate Quality and Intensity metrics after cycle 25. Current cycle is: " + sum.getCurrentCycle());
     }
 
     if (sum.getCurrentCycle() > 52) {
@@ -452,73 +452,73 @@ public class MetrixContainer {
   public void outputSummaryLog() {
     Reads rds = sum.getReads();
 
-    log.info("== Combined Read Q-Scores ==");
+    System.out.println("== Combined Read Q-Scores ==");
     if (qScoreDist != null) {
-      log.info("- %>=Q20 = " + df.format(qScoreDist.aboveQ(20)) + "%");
-      log.info("- %>=Q30 = " + df.format(qScoreDist.aboveQ(30)) + "%\n");
+      System.out.println("- %>=Q20 = " + df.format(qScoreDist.aboveQ(20)) + "%");
+      System.out.println("- %>=Q30 = " + df.format(qScoreDist.aboveQ(30)) + "%\n");
     }
     else {
-      log.info("- %>=Q20 = N/A");
-      log.info("- %>=Q30 = N/A");
+      System.out.println("- %>=Q20 = N/A");
+      System.out.println("- %>=Q30 = N/A");
     }
 
-    log.info("== Q-Score distribution per lane %>Q20/%>Q30 ==");
+    System.out.println("== Q-Score distribution per lane %>Q20/%>Q30 ==");
     if (qScoreDist != null) {
       for (Integer laneNum : qScoreLaneDist.keySet()) {
         QScoreDist dist = qScoreLaneDist.get(laneNum);
-        log.info(laneNum + "\t" + df.format(dist.aboveQ(20)) + "%/" + df.format(dist.aboveQ(30)) + "%");
+        System.out.println(laneNum + "\t" + df.format(dist.aboveQ(20)) + "%/" + df.format(dist.aboveQ(30)) + "%");
       }
     }
     else {
       log.error("Q-Score distribution per lane not available.");
     }
 
-    log.info("== Phasing / Prephasing Scores ==");
+    System.out.println("== Phasing / Prephasing Scores ==");
     if (phasingMap != null) {
-      log.info("Lane\tRead\tScore");
+      System.out.println("Lane\tRead\tScore");
       for (String line : phasingMap.toTab(prephasingMap, rds).split("\n")) {
-        log.info(line);
+        System.out.println(line);
       }
     }
     else {
       log.error("Phasing/prephasing scores not available.");
     }
 
-    log.info("== Cluster Density / Cluster Density Passing Filter (k/mm2) ==");
+    System.out.println("== Cluster Density / Cluster Density Passing Filter (k/mm2) ==");
     if (clusterDensity != null) {
-      log.info(clusterDensity.toTab(clusterDensityPassingFilter));
+      System.out.println(clusterDensity.toTab(clusterDensityPassingFilter));
     }
     else {
       log.error("Cluster Density Metrics not available.");
     }
 
-    log.info("== Index Metrics ==");
+    System.out.println("== Index Metrics ==");
     if (indices != null) {
-      log.info(indices.toTab());
+      System.out.println(indices.toTab());
     }
     else {
       log.error("No Index Metrics information available.");
     }
 
-    log.info("== Error Metrics ==");
+    System.out.println("== Error Metrics ==");
     if (eDist != null) {
-      log.info(eDist.toTab("rate"));
+      System.out.println(eDist.toTab("rate"));
     }
     else {
       log.error("Error Metrics not available.");
     }
 
-    log.info("== Run Progress of " + sum.getRunId() + "(" + sum.getRunType() + " - " + sum.getTotalCycles() + "bp)==");
+    System.out.println("== Run Progress of " + sum.getRunId() + "(" + sum.getRunType() + " - " + sum.getTotalCycles() + "bp)==");
     if (sum.getCurrentCycle() == sum.getTotalCycles()) {
-      log.info("Run has finished: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
+      System.out.println("Run has finished: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
     }
     else if (sum.getRunType().equals("Paired End")) {
       if (sum.getCurrentCycle() == rds.getPairedTurnCycle()) {
-        log.info("Run needs turning. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
+        System.out.println("Run needs turning. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
       }
     }
     else {
-      log.info("Run has not finished yet. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
+      System.out.println("Run has not finished yet. Currently at: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles() + ".");
     }
   }
 }
