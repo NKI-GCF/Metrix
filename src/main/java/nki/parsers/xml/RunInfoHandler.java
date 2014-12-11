@@ -98,22 +98,22 @@ public class RunInfoHandler {
 
     System.out.println("RunName : " + runID);
     System.out.println("Number of reads :" + readNodes.getLength());
-    System.out.println(readNodes.item(0).getAttributes().getNamedItem("IsIndexedRead"));
-    System.out.println(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead"));
+
     
     if (readNodes.getLength() == 1) {
       sum.setRunType("Single Read");
       sum.setIsIndexed(false);
     }else if(readNodes.getLength() == 2){
-        if (readNodes.item(1).getAttributes().getLength() >= 3) {
-            if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
-                sum.setRunType("Paired End");
-                sum.setIsIndexed(false);
-            }else{
-                sum.setRunType("Single Read");
-                sum.setIsIndexed(true);           
-            }
+        System.out.println("Attr "+ readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent());
+        if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
+            System.out.println("Paired end non indexed!");
+            sum.setRunType("Paired End");
+            sum.setIsIndexed(false);
+        }else{
+               sum.setRunType("Single Read");
+            sum.setIsIndexed(true);           
         }
+        
     }else if(readNodes.getLength() == 3) {    // Run Type = Paired End Run
       sum.setRunType("Paired End");
       sum.setIsIndexed(true);
