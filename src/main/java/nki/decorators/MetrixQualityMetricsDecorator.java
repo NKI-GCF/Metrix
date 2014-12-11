@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import nki.core.MetrixLogic;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import nki.objects.Metric;
@@ -11,6 +13,7 @@ import nki.objects.MutableLong;
 import nki.objects.QScoreDist;
 import nki.objects.QualityScores;
 import nki.objects.Summary;
+import nki.util.LoggerWrapper;
 
 /**
  * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
@@ -103,15 +106,21 @@ public class MetrixQualityMetricsDecorator {
       JSONObject qCycle = new JSONObject();
 
       Metric locMetric = qScoreDistByCycle.get(cycle);
-
-      if (locMetric != null && !locMetric.getTileScores().isEmpty()) {
-        qCycle.put("qMedian", Double.valueOf(df.format(locMetric.calcMedian())));
-        qCycle.put("qMax", Double.valueOf(df.format(locMetric.calcMax())));
-        qCycle.put("qMin", Double.valueOf(df.format(locMetric.calcMin())));
-        qCycle.put("qQ1", Double.valueOf(df.format(locMetric.calcQ1())));
-        qCycle.put("qQ3", Double.valueOf(df.format(locMetric.calcQ3())));
-        qCycle.put("qSD", Double.valueOf(df.format(locMetric.calcSD())));
-        cycleQualities.add(qCycle);
+      try{
+        if (locMetric != null && !locMetric.getTileScores().isEmpty()) {
+          qCycle.put("qMedian", Double.valueOf(df.format(locMetric.calcMedian())));
+          qCycle.put("qMax", Double.valueOf(df.format(locMetric.calcMax())));
+          qCycle.put("qMin", Double.valueOf(df.format(locMetric.calcMin())));
+          qCycle.put("qQ1", Double.valueOf(df.format(locMetric.calcQ1())));
+          qCycle.put("qQ3", Double.valueOf(df.format(locMetric.calcQ3())));
+          qCycle.put("qSD", Double.valueOf(df.format(locMetric.calcSD())));
+          cycleQualities.add(qCycle);
+        }
+      }catch(NumberFormatException NFE){
+          LoggerWrapper.log.log(Level.FINE, "Number format exception {0}", NFE);
+          qCycle.put("qQ1", 0);
+          qCycle.put("qQ3", 0);
+          qCycle.put("qSD", 0);
       }
     }
     json.put("perCycleQualityScores", cycleQualities);
