@@ -119,8 +119,18 @@ public class RunInfoHandler {
                     sum.setIsIndexed(true);           
                 }
             }else{
-                sum.setRunType("Paired End");
-                sum.setIsIndexed(false);
+                if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead") != null){
+                    if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
+                        sum.setRunType("Paired End");
+                        sum.setIsIndexed(false);
+                     }else{
+                        sum.setRunType("Single Read");
+                        sum.setIsIndexed(true);           
+                    }                    
+                }else{
+                    sum.setRunType("Paired End");
+                    sum.setIsIndexed(false);
+                }
             }
         }
     }else if(readNodes.getLength() == 3) {    // Run Type = Paired End Run
