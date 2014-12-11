@@ -96,32 +96,25 @@ public class RunInfoHandler {
 
     sum.setTotalCycles(totalCycles);
 
+    System.out.println("Number of reads :" + readNodes.getLength());
+    
     if (readNodes.getLength() == 1) {
       sum.setRunType("Single Read");
       sum.setIsIndexed(false);
-    }
-    
-    if(readNodes.getLength() == 2){
-        if(readNodes.item(readNodes.getLength()-1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
-            sum.setRunType("Paired End");
-            sum.setIsIndexed(false);
-        }else{
-            sum.setRunType("Single Read");
-            sum.setIsIndexed(true);           
+    }else if(readNodes.getLength() == 2){
+        if (readNodes.item(1).getAttributes().getLength() >= 3) {
+            if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
+                sum.setRunType("Paired End");
+                sum.setIsIndexed(false);
+            }else{
+                sum.setRunType("Single Read");
+                sum.setIsIndexed(true);           
+            }
         }
-    }
-    
-    if (readNodes.getLength() == 2) {    // Run Type = Single Read Run
-      sum.setRunType("Single Read");
-      sum.setIsIndexed(true);
-    }
-
-    if (readNodes.getLength() == 3) {    // Run Type = Paired End Run
+    }else if(readNodes.getLength() == 3) {    // Run Type = Paired End Run
       sum.setRunType("Paired End");
       sum.setIsIndexed(true);
-    }
-
-    if (readNodes.getLength() == 4) {    // Run Type = Nextera Run
+    }else if(readNodes.getLength() == 4) {    // Run Type = Nextera Run
       sum.setRunType("Nextera");
       sum.setIsIndexed(true);
     }
