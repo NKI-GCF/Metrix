@@ -101,10 +101,14 @@ public class RunInfoHandler {
       sum.setIsIndexed(false);
     }
     
-    // Paired end no indexing.
-    if(readNodes.getLength() == 2 && readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
-        sum.setRunType("Paired End");
-        sum.setIsIndexed(false);
+    if(readNodes.getLength() == 2){
+        if(readNodes.item(readNodes.getLength()-1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
+            sum.setRunType("Paired End");
+            sum.setIsIndexed(false);
+        }else{
+            sum.setRunType("Single Read");
+            sum.setIsIndexed(true);           
+        }
     }
     
     if (readNodes.getLength() == 2) {    // Run Type = Single Read Run
