@@ -96,6 +96,7 @@ public class RunInfoHandler {
 
     sum.setTotalCycles(totalCycles);
 
+    System.out.println("RunName : " + runID);
     System.out.println("Number of reads :" + readNodes.getLength());
     System.out.println(readNodes.item(0).getAttributes().getNamedItem("IsIndexedRead"));
     System.out.println(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead"));
