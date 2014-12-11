@@ -106,11 +106,11 @@ public class RunInfoHandler {
     }else if(readNodes.getLength() == 2){
         System.out.println("Attr "+ readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent());
         if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
-            System.out.println("Paired end non indexed!");
+            System.out.println("Paired end non indexed! " + readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent() + " \t" +runID);
             sum.setRunType("Paired End");
             sum.setIsIndexed(false);
         }else{
-               sum.setRunType("Single Read");
+            sum.setRunType("Single Read");
             sum.setIsIndexed(true);           
         }
         
