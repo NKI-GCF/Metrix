@@ -12,6 +12,7 @@ import java.io.EOFException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import nki.core.MetrixLogic;
 
 import nki.objects.QualityScores;
 import nki.objects.QualityMap;
@@ -23,7 +24,7 @@ public class QualityMetrics extends GenericIlluminaParser {
 
   // Instantiate Logger
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
-
+  
   public QualityMetrics(String source, int state) {
     super(QualityMetrics.class, source, state);
   }
@@ -57,7 +58,7 @@ public class QualityMetrics extends GenericIlluminaParser {
       setRecordLength(leis.readByte());
     }
     catch (IOException Ex) {
-      metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
+      LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
     }
 
     try {
@@ -72,11 +73,13 @@ public class QualityMetrics extends GenericIlluminaParser {
         byte qsBinning = leis.readByte();
         if(qsBinning == 1){
               // QScoreBinning has been applied. Skip next 22 bytes where Qbins are described.
-            metrixLogger.log.log(Level.FINEST, "QScoreBinning has been applied.");
+            LoggerWrapper.log.log(Level.FINE, "QScoreBinning has been applied.");
             leis.readByteArray(22);
         }else{
-              metrixLogger.log.log(Level.FINEST, "No QScoreBinning has been applied.");
+            LoggerWrapper.log.log(Level.FINE, "No QScoreBinning has been applied.");
         }
+      }else{
+            LoggerWrapper.log.log(Level.FINE, "Version different: " + this.getVersion());
       }
       
       boolean qcFlag;
