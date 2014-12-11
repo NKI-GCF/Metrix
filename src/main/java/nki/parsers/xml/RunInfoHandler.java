@@ -95,25 +95,27 @@ public class RunInfoHandler {
     }
 
     sum.setTotalCycles(totalCycles);
-
-    System.out.println("RunName : " + runID);
-    System.out.println("Number of reads :" + readNodes.getLength());
-
-    
+   
     if (readNodes.getLength() == 1) {
       sum.setRunType("Single Read");
       sum.setIsIndexed(false);
     }else if(readNodes.getLength() == 2){
-        System.out.println("Attr "+ readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent());
-        if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
-            System.out.println("Paired end non indexed! " + readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent() + " \t" +runID);
-            sum.setRunType("Paired End");
-            sum.setIsIndexed(false);
+        if(readNodes.item(1).hasChildNodes()){
+            // Support legacy RunInfo formatting.
+            if(readNodes.item(1).getChildNodes().item(0).getNodeName() == "Index"){
+                sum.setRunType("Single Read");
+                sum.setIsIndexed(true);
+            }
         }else{
-            sum.setRunType("Single Read");
-            sum.setIsIndexed(true);           
+            if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
+                 System.out.println("Paired end non indexed! " + readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent() + " \t" +runID);
+                 sum.setRunType("Paired End");
+                 sum.setIsIndexed(false);
+             }else{
+                 sum.setRunType("Single Read");
+                 sum.setIsIndexed(true);           
+             }            
         }
-        
     }else if(readNodes.getLength() == 3) {    // Run Type = Paired End Run
       sum.setRunType("Paired End");
       sum.setIsIndexed(true);
