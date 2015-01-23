@@ -200,7 +200,7 @@ public class MetrixContainer {
       prephasingMap = null;
     }
 
-    if (sum.getCurrentCycle() > 25 || this.force) {
+    if (sum.getCurrentCycle() > 25) {
       log.debug("Processing Quality Metrics");
       if (!qm.getFileMissing()) {
         //TODO - reads previously required
@@ -306,10 +306,10 @@ public class MetrixContainer {
         if ((!sum.hasQScores() || 
              timeCheck ||
              force) && !this.remote){
-           log.debug("Processing Quality Metrics");
+           LoggerWrapper.log.fine("Processing Quality Metrics");
            QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
            //if (!qm.getFileMissing()) {
-           if(!sum.hasQScoreDist() && !qm.getFileMissing()){
+           if((!sum.hasQScoreDist() && !qm.getFileMissing()) || this.force){
              QualityScores qsOut = qm.digestData();
              //sum.setQScores(qsOut);
              // Calculate and set distributions
