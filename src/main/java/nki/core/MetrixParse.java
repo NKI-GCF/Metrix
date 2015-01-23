@@ -94,7 +94,7 @@ public class MetrixParse {
                 if (srvResp instanceof String) {
                     String s = (String) srvResp;
                     System.out.println(s);
-                }                
+                }
                 
                 /*
                  *	Exceptions

@@ -64,6 +64,8 @@ public class PostProcessing {
     this.sum = s;  // Set summary
   }
 
+  
+  
   public void run() {
     LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Initializing post processing for {0}", sum.getRunId());
     /*
@@ -130,7 +132,7 @@ public class PostProcessing {
       documentBuilder = documentBuilderFactory.newDocumentBuilder();
       doc = documentBuilder.parse(xmlFile);
       doc.getDocumentElement().normalize();
-      LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully loaded post processing xml: {0}", xmlFile);
+      LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully loaded post processing xml: {0}", new File(xmlFile).getAbsolutePath());
     }
     catch (IOException Ex) {
       LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException. {0}", Ex.toString());

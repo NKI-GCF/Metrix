@@ -200,7 +200,7 @@ public class MetrixContainer {
       prephasingMap = null;
     }
 
-    if (sum.getCurrentCycle() > 25) {
+    if (sum.getCurrentCycle() > 25 || this.force) {
       log.debug("Processing Quality Metrics");
       if (!qm.getFileMissing()) {
         //TODO - reads previously required

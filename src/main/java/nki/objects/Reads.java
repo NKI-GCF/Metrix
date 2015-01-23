@@ -57,7 +57,9 @@ public class Reads implements Serializable {
     int readOneLength = Integer.parseInt((readMap.get(1)).get(0));
     int readTwoLength = 0;
     if (readMap.size() > 1) {
-      readTwoLength = Integer.parseInt((readMap.get(2)).get(0));
+      if(readMap.get(2).get(0) != null){
+        readTwoLength = Integer.parseInt((readMap.get(2)).get(0));
+      }
     }
     return (readOneLength + readTwoLength);
   }

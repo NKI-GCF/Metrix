@@ -60,7 +60,7 @@ public class MetrixPostProcess {
     //	1  result 	: Parse and print
     //	>2 results 	: Print and prompt user for selection
 
-    System.out.println("Metrix Illumina Sequencing Run Summary.\n");
+    System.out.println("Metrix Illumina Sequencing Run Demultiplexing.\n");
 
     if (args.length == 0) {
       System.out.print("Enter atleast 3 characters of your run name of interest: ");
