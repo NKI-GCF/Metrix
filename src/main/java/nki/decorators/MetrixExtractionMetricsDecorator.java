@@ -14,6 +14,8 @@ import nki.objects.MutableInt;
 import nki.parsers.illumina.ExtractionMetrics;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -27,8 +29,9 @@ import org.w3c.dom.Element;
  */
 public class MetrixExtractionMetricsDecorator {
   private ExtractionMetrics extractionMetrics;
-  private IntensityDist riDist;
-  private FWHMDist fwhmDist;
+  private final IntensityDist riDist;
+  private final FWHMDist fwhmDist;
+  protected static final Logger log = LoggerFactory.getLogger(MetrixExtractionMetricsDecorator.class);
 
   public MetrixExtractionMetricsDecorator(ExtractionMetrics extractionMetrics) {
     this.extractionMetrics = extractionMetrics;
@@ -159,7 +162,7 @@ public class MetrixExtractionMetricsDecorator {
       root.appendChild(sumXml);
     }
     catch (Exception ex) {
-      ex.printStackTrace();
+      log.error("Building XML document", ex);
     }
 
     return root;
@@ -181,7 +184,7 @@ public class MetrixExtractionMetricsDecorator {
       HashMap<Integer, HashMap<String, MutableInt>> cycleContent;
       cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
       // Cycle Iterator
-      Iterator cit = (Iterator) cycleContent.entrySet().iterator();
+      Iterator cit = cycleContent.entrySet().iterator();
 
       while (cit.hasNext()) {
         Element cycleEle = xmlDoc.createElement("Cycle");
@@ -192,7 +195,7 @@ public class MetrixExtractionMetricsDecorator {
         // Nested Intensities HashMap
         HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
 
-        Iterator iit = (Iterator) cycleInt.entrySet().iterator();
+        Iterator iit = cycleInt.entrySet().iterator();
 
         Element intEle = xmlDoc.createElement("RawIntensities");
         while (iit.hasNext()) {
@@ -201,7 +204,7 @@ public class MetrixExtractionMetricsDecorator {
           MutableInt intValue = (MutableInt) intensityPairs.getValue();
 
           if (intValue instanceof MutableInt) {
-            MutableInt in = (MutableInt) intValue;
+            MutableInt in = intValue;
             intEle.setAttribute(constName, Integer.toString(in.get()));
           }
 

@@ -11,18 +11,19 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nki.objects.IntensityScores;
 import nki.objects.IntensityMap;
 import nki.constants.Constants;
-import nki.util.LoggerWrapper;
 
 public class CorrectedIntensityMetrics extends GenericIlluminaParser {
   private IntensityScores iScores;
 
   // Instantiate Logger
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(CorrectedIntensityMetrics.class);
 
   public CorrectedIntensityMetrics(String source, int state) {
     super(CorrectedIntensityMetrics.class, source, state);
@@ -63,7 +64,7 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
       iScores.setSource(this.getSource());
     }
     catch (IOException Ex) {
-      metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
+      log.error("Error in parsing version number and recordLength.", Ex);
     }
 
     try {
@@ -143,8 +144,7 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
       // Lazy EOF - Ignore checking.
     }
     catch (IOException ex) {
-      ex.printStackTrace();
-      LoggerWrapper.log.severe("IO Error - CorrectedIntensityMetrics digest");
+      log.error("CorrectedIntensityMetrics digest", ex);
     }
 
     // Return the qualityScores object.

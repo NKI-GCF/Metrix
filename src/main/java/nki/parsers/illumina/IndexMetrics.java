@@ -8,18 +8,17 @@
 package nki.parsers.illumina;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nki.objects.Indices;
-import nki.util.LoggerWrapper;
 
 public class IndexMetrics extends GenericIlluminaParser {
   private Indices indices;
 
   // Instantiate Logger
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(IndexMetrics.class);
 
   public IndexMetrics(String source, int state) {
     super(IndexMetrics.class, source, state);
@@ -54,7 +53,7 @@ public class IndexMetrics extends GenericIlluminaParser {
       setVersion(leis.readByte()); // Set Version
     }
     catch (IOException Ex) {
-      LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", Ex.toString());
+      log.error("Error in parsing version number and recordlength.", Ex);
     }
 
     boolean readBool = true;

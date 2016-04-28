@@ -11,19 +11,21 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.*;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nki.objects.ClusterDensity;
+import nki.objects.DemuxOperation;
 import nki.objects.PhasingCollection;
 import nki.objects.Reads;
-import nki.util.LoggerWrapper;
 
 public class TileMetrics extends GenericIlluminaParser {
   private final static int CLUSTER_DENSITY = 100;
   private final static int CLUSTER_DENSITY_PF = 101;
 
   // Instantiate Logger
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(DemuxOperation.class);
 
   // Lane --> ClusterDensities
   private ClusterDensity cdMap = new ClusterDensity();
@@ -84,7 +86,7 @@ public class TileMetrics extends GenericIlluminaParser {
 
   public void digestData() {
     if (fileMissing) {
-      metrixLogger.log.log(Level.SEVERE, "Unable to parse Tile Metrics");
+      log.error("Unable to parse Tile Metrics");
     }
     else {
       try {
@@ -92,7 +94,7 @@ public class TileMetrics extends GenericIlluminaParser {
         setRecordLength(leis.readByte());
       }
       catch (IOException Ex) {
-        metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
+        log.error("Error in parsing version number and recordLength: {0}", Ex.toString());
       }
 
       boolean eofCheck = true;
@@ -120,7 +122,8 @@ public class TileMetrics extends GenericIlluminaParser {
           //
           List<Integer> codeMap = digits(metricCode);
 
-          // Next in loop because were not looking at phasing or prephasing.
+          // Next in loop because were not looking at phasing or
+          // prephasing.
           if (metricCode == (102 | 103)) {
             continue;
           }

@@ -17,8 +17,9 @@ import nki.io.DataStore;
 import nki.objects.Command;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
-import nki.util.LoggerWrapper;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class CommandProcessor {
 
@@ -31,7 +32,7 @@ public final class CommandProcessor {
   private final ObjectOutputStream oos;
   private ObjectInputStream ois;
   private DataStore ds;
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(CommandProcessor.class);
 
   public CommandProcessor(Command command, ObjectOutputStream oos, DataStore ds) throws CommandValidityException, InvalidCredentialsException, EmptyResultSetCollection, IOException, UnimplementedCommandException {
     // Process command.
@@ -55,21 +56,21 @@ public final class CommandProcessor {
       catch (UnimplementedCommandException UCE) {
         // Create command and send back error.
         oos.writeObject(UCE);
-        LoggerWrapper.log.log(Level.WARNING, "Unimplemented Command Exception: {0}", UCE.toString());
+        log.warn("Unimplemented Command Exception.", UCE);
       }
       catch (MissingCommandDetailException MCDE) {
         // Send back error over network in command.
         oos.writeObject(MCDE);
-        LoggerWrapper.log.log(Level.WARNING, "Missing Command Detail Exception: {0}", MCDE.toString());
+        log.warn("Missing Command Detail Exception.", MCDE);
       }
       catch (EmptyResultSetCollection ERSC) {
         // Send back error over network in command.
         oos.writeObject(ERSC);
-        LoggerWrapper.log.log(Level.WARNING, "Empty Result Set Collection Exception: {0}", ERSC.toString());
+        log.warn("Empty Result Set Collection Exception.", ERSC);
       }
       catch (Exception Ex) {
         oos.writeObject(Ex);
-        LoggerWrapper.log.log(Level.SEVERE, "Uncaught exception in CommandProcessor: {0}", Ex);
+        log.error("Uncaught exception in CommandProcessor.", Ex);
       }
     }
     else {
@@ -103,7 +104,7 @@ public final class CommandProcessor {
      * initialization.
      */
     if (recCom.getRetType().equals(Constants.COM_INITIALIZE)) {
-      metrixLogger.log.log(Level.INFO, "Initialization command received. ");
+      log.info("Initialization command received. ");
       sc = DataStore.getSummaryCollections();
       MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
       mscd.initializeMetrix();
@@ -126,9 +127,9 @@ public final class CommandProcessor {
       }
       else if (recCom.getRetType().equals(Constants.COM_SEARCH)) {
         if (recCom.getRunIdSearch() != null) {
-          metrixLogger.log.log(Level.INFO, "Searching runID database using: {0}", recCom.getRunIdSearch());
+          log.info("Searching runID database using: " + recCom.getRunIdSearch());
           sc = DataStore.getSummaryCollectionBySearch(recCom.getRunIdSearch());
-          metrixLogger.log.log(Level.INFO, "Found {0} run(s).", sc.getCollectionCount());
+          log.info("Found " + sc.getCollectionCount() + " run(s).");
           if (sc.getCollectionCount() == 1) {
             oos.writeObject(sc.getSummaryCollection().get(0));
           }
@@ -143,41 +144,41 @@ public final class CommandProcessor {
       }
       else if (recCom.getRetType().equals(Constants.COM_PARSE)) {
         if (recCom.getRunIdSearch() != null) {
-          metrixLogger.log.log(Level.INFO, "Force parsing: {0}", recCom.getRunIdSearch());
+          log.info("Force parsing: " + recCom.getRunIdSearch());
           sc = DataStore.getSummaryCollectionBySearch(recCom.getRunIdSearch());
-          metrixLogger.log.log(Level.INFO, "Found {0} run(s).", sc.getCollectionCount());
+          log.info("Found " + sc.getCollectionCount() + " run(s).");
           JSONObject json = new JSONObject();
           if (sc.getCollectionCount() == 1) {
             MetrixContainer mc = new MetrixContainer(sc.getSummaryCollection().get(0), false, true);
             if (mc.hasUpdated) {
-              metrixLogger.log.log(Level.FINER, "Success.");
+              log.info("Success.");
               MetrixContainerDecorator mcd = new MetrixContainerDecorator(mc, true);
               json.put("result", "success");
               json.put("message", "Run " + mc.getSummary().getRunId() + " has been successfully updated. " + mc.getSummary().getRunId() + " - " + mc.getSummary().getCurrentCycle() + " - " + mc.getSummary().getTotalCycles());
               json.put("data", mcd.toJSON());
             }
             else {
-              metrixLogger.log.log(Level.FINER, "Update failed. Eventhough the parsing was forced, no results were returned.");
+              log.debug("Update failed. Eventhough the parsing was forced, no results were returned.");
               json.put("result", "failed");
               json.put("message", "No update required for " + mc.getSummary().getRunId() + ".");
             }
           }
           else if (sc.getCollectionCount() == 0) {
-            metrixLogger.log.log(Level.FINER, "Failed. No results.");
+            log.debug("Failed. No results.");
             json.put("result", "Failed");
             json.put("message", "Found no results for searchterm: " + recCom.getRunIdSearch());
           }
           else {
-            metrixLogger.log.log(Level.FINER, "Failed more than 1 result.");
+            log.debug("Failed more than 1 result.");
             json.put("result", "Failed");
             json.put("message", "Found: " + sc.getCollectionCount() + " results for searchterm: " + recCom.getRunIdSearch());
           }
           // Do logging levels.
-          metrixLogger.log.log(Level.FINE, "Sending command " + json.get("result").toString() + " to client.");
-          metrixLogger.log.log(Level.FINER, "Command message " + json.get("message").toString());
+          log.debug("Sending command " + json.get("result").toString() + " to client.");
+          log.debug("Command message " + json.get("message").toString());
 
           if (json.containsKey("data")) {
-            metrixLogger.log.log(Level.FINEST, "Command data: " + json.get("data").toString());
+            log.debug("Command data: " + json.get("data").toString());
           }
           // Send answer to client.
           oos.writeObject(json.toString());
@@ -202,7 +203,7 @@ public final class CommandProcessor {
      */
     String retType = recCom.getRetType();
     if (!retType.equals(Constants.COM_SEARCH) && !retType.equals(Constants.COM_PARSE)) {
-      metrixLogger.log.log(Level.FINER, "Creating MSCD.");
+      log.debug("Creating MSCD.");
       MetrixSummaryCollectionDecorator mscd = new MetrixSummaryCollectionDecorator(sc);
       mscd.setExpectedType(recCom.getType()); // SIMPLE or DETAIL
 

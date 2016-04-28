@@ -27,10 +27,14 @@ import nki.exceptions.InvalidCredentialsException;
 
 import java.io.*;
 import java.util.Properties;
-import java.util.logging.Level;
-import nki.util.LoggerWrapper;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetrixLive {
+
+  protected static final Logger log = LoggerFactory.getLogger(MetrixLive.class);
+
   public static void main(String[] args) throws IOException, ClassNotFoundException {
     // Use external properties file, outside of jar location.
     Properties configFile = new Properties();
@@ -42,9 +46,9 @@ public class MetrixLive {
     // Set a value for command
     sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
     sendCommand.setRunId("");
-    sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of
-                                                    // the available Constants
-                                                    // here
+    sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use
+    // of the available
+    // Constants here
 
     try (InputStream fin = new FileInputStream(new File(absFile))) {
       configFile.load(fin);
@@ -145,7 +149,7 @@ public class MetrixLive {
       }
     }
     catch (EOFException | NoConnectionPendingException | AsynchronousCloseException ex) {
-      LoggerWrapper.log.log(Level.INFO, "[CLIENT] Connection closed. ({0})", ex.toString());
+      log.info("[CLIENT] Connection closed. ({0})", ex);
     }
   }
 }

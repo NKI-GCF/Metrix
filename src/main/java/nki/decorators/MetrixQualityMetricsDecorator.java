@@ -4,16 +4,16 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
-import nki.core.MetrixLogic;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nki.objects.Metric;
 import nki.objects.MutableLong;
 import nki.objects.QScoreDist;
 import nki.objects.QualityScores;
 import nki.objects.Summary;
-import nki.util.LoggerWrapper;
 
 /**
  * Decorator to output objects contained within a MetrixContainer to TSV, CSV
@@ -29,6 +29,7 @@ public class MetrixQualityMetricsDecorator {
   private Map<Integer, QScoreDist> qScoreDistByLane;
   private Map<Integer, Metric> qScoreDistByCycle;
   private DecimalFormat df = new DecimalFormat("##.##", new DecimalFormatSymbols(Locale.US));
+  protected static final Logger log = LoggerFactory.getLogger(MetrixQualityMetricsDecorator.class);
 
   public MetrixQualityMetricsDecorator(QualityScores qualityScores) {
     this.qualityScores = qualityScores;
@@ -118,7 +119,7 @@ public class MetrixQualityMetricsDecorator {
         }
       }
       catch (NumberFormatException NFE) {
-        LoggerWrapper.log.log(Level.FINE, "Number format exception {0}", NFE);
+        log.info("Number format exception", NFE);
         qCycle.put("qQ1", 0);
         qCycle.put("qQ3", 0);
         qCycle.put("qSD", 0);

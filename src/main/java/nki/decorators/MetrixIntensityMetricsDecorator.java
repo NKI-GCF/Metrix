@@ -8,6 +8,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nki.constants.Constants;
 import nki.objects.IntensityDist;
 import nki.objects.IntensityScores;
@@ -31,6 +34,7 @@ public class MetrixIntensityMetricsDecorator {
   private IntensityScores intensityScores;
   private IntensityDist iDistAvg;
   private IntensityDist iDistAvgCC;
+  protected static final Logger log = LoggerFactory.getLogger(MetrixIntensityMetricsDecorator.class);
 
   public MetrixIntensityMetricsDecorator(IntensityScores intensityScores) {
     this.intensityScores = intensityScores;
@@ -133,7 +137,7 @@ public class MetrixIntensityMetricsDecorator {
       root.appendChild(sumXml);
     }
     catch (Exception ex) {
-      ex.printStackTrace();
+      log.error("Building XML document.", ex);
     }
 
     return root;

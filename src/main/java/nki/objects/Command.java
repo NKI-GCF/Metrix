@@ -27,12 +27,15 @@ package nki.objects;
 
 import java.io.*;
 import java.util.Date;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nki.constants.Constants;
-import nki.util.LoggerWrapper;
 
 public final class Command implements Serializable {
+
+  protected static final Logger log = LoggerFactory.getLogger(Command.class);
 
   public static final long serialVersionUID = 42L;
   private String type = Constants.COM_TYPE_SIMPLE;
@@ -54,7 +57,8 @@ public final class Command implements Serializable {
   };
 
   public Command() {
-    this.setDateTime(); // Set date time for instantiation of command object.
+    this.setDateTime(); // Set date time for instantiation of command
+    // object.
   }
 
   // Instantiate with variables
@@ -141,12 +145,12 @@ public final class Command implements Serializable {
 
   public boolean checkParams() {
     if (format == null || type == null) {
-      LoggerWrapper.log.log(Level.SEVERE, "Format or Type is null.");
+      log.error("Format or Type is null.");
       return false;
     }
 
     if (!checkState(state)) {
-      LoggerWrapper.log.log(Level.INFO, "State invalid " + state);
+      log.info("State invalid " + state);
       return false;
     }
 
@@ -216,7 +220,7 @@ public final class Command implements Serializable {
     }
     else {
       // Default to search by run.
-      LoggerWrapper.log.finer("Defaulting to COM_RET_TYPE_BYRUN.");
+      log.debug("Defaulting to COM_RET_TYPE_BYRUN.");
       this.retType = Constants.COM_RET_TYPE_BYRUN;
     }
   }

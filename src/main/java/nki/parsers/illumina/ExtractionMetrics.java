@@ -15,21 +15,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nki.constants.Constants;
 import nki.objects.IntensityMap;
 import nki.objects.IntensityScores;
 import nki.objects.FWHMMap;
 import nki.objects.FWHMScores;
 
-import nki.util.LoggerWrapper;
-
 public class ExtractionMetrics extends GenericIlluminaParser {
   List<Integer> cycles = new ArrayList<>();
   private IntensityScores iScores;
   private FWHMScores fScores;
   // Instantiate Logger
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(ExtractionMetrics.class);
 
   public ExtractionMetrics(String source, int state) {
     super(ExtractionMetrics.class, source, state);
@@ -63,7 +64,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
     iScores = new IntensityScores();
     fScores = new FWHMScores();
     if (fileMissing) {
-      metrixLogger.log.finest("ExtractionMetrics file is missing for digest.");
+      log.debug("ExtractionMetrics file is missing for digest.");
       return;
     }
 
@@ -79,7 +80,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
       fScores.setSource(this.getSource());
     }
     catch (IOException Ex) {
-      metrixLogger.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
+      log.error("Error in parsing version number and recordLength.", Ex);
     }
 
     try {
@@ -159,8 +160,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
       // Lazy EOF - Ignore checking.
     }
     catch (IOException exMain) {
-      exMain.printStackTrace();
-      metrixLogger.log.log(Level.SEVERE, "Error in main parsing of metrics data: {0}", exMain.toString());
+      log.error("Error in main parsing of metrics data.", exMain);
     }
 
     return;
@@ -177,8 +177,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
       }
     }
     catch (IOException ex) {
-      ex.printStackTrace();
-      metrixLogger.log.log(Level.SEVERE, "IOException in Unique Cycles {0}", ex.toString());
+      log.error("Exception in Unique Cycles", ex);
     }
 
     List<Integer> newList = new ArrayList<>(new HashSet<>(cycles));

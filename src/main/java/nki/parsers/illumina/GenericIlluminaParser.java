@@ -8,12 +8,13 @@
 package nki.parsers.illumina;
 
 import nki.io.LittleEndianInputStream;
-import nki.util.LoggerWrapper;
 
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.*;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GenericIlluminaParser {
   protected String source = "";
@@ -24,7 +25,7 @@ public class GenericIlluminaParser {
   protected int sleepTime = 3000;
   protected boolean fileMissing = false;
   private long lastModTime = 0;
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(GenericIlluminaParser.class);
 
   public GenericIlluminaParser(Class<?> c, String source, int state) {
     try {
@@ -37,15 +38,12 @@ public class GenericIlluminaParser {
       setLastModifiedSource();
     }
     catch (FileNotFoundException fnfe) {
-      // fnfe.printStackTrace();
       // Set fileMissing = true. --> Parse again later.
       setFileMissing(true);
-      metrixLogger.log.log(Level.WARNING, "{0} file not available for {1}", new Object[] {
-          c.getSimpleName(), source
-      });
+      log.warn(c.getSimpleName() + " file not available for " + source, fnfe);
     }
     catch (InterruptedException ie) {
-      ie.printStackTrace();
+      log.error("Illumina parsing error", ie);
     }
   }
 
@@ -102,8 +100,7 @@ public class GenericIlluminaParser {
         this.leis.close();
       }
       catch (IOException ioe) {
-        ioe.printStackTrace();
-        metrixLogger.log.log(Level.WARNING, "Error in closing the source stream: {0}", ioe.toString());
+        log.warn("Error in closing the source stream.", ioe);
       }
     }
   }

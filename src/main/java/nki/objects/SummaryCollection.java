@@ -11,8 +11,9 @@ import java.io.*;
 import java.util.*;
 
 import nki.constants.Constants;
-import nki.util.LoggerWrapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.*;
@@ -25,7 +26,7 @@ public class SummaryCollection implements Serializable {
   private static final long serialVersionUID = 42L;
 
   // Instantiate Logger
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(SummaryCollection.class);
 
   // Object Collection
   private List<Summary> summaryCollection = new ArrayList<>();
@@ -82,7 +83,7 @@ public class SummaryCollection implements Serializable {
       }
     }
     catch (Exception ex) {
-      ex.printStackTrace();
+      log.error("Building XML document", ex);
     }
 
     setCollectionFormat(Constants.COM_FORMAT_XML);
@@ -208,10 +209,10 @@ public class SummaryCollection implements Serializable {
       trans.transform(source, result);
     }
     catch (TransformerConfigurationException TCE) {
-      metrixLogger.log.severe("TransformerConfigurationException: " + TCE.toString());
+      log.warn("Get summary collection", TCE);
     }
     catch (TransformerException TE) {
-      metrixLogger.log.severe("TransformerException: " + TE.toString());
+      log.warn("Get summary collection", TE);
     }
 
     return writer.toString();

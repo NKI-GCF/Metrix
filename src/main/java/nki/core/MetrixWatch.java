@@ -16,12 +16,14 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.regex.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nki.constants.Constants;
 import nki.io.DataStore;
 import nki.objects.Summary;
-import nki.util.LoggerWrapper;
 
 public class MetrixWatch extends Thread {
 
@@ -39,7 +41,7 @@ public class MetrixWatch extends Thread {
   private long waitTime = 600000; // Update every 10 minutes. (ms)
   private long forceTime = 1200000; // If no update for 20 minutes, force
                                     // parsing. (ms)
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(MetrixWatch.class);
 
   private HashMap<String, Summary> results = new HashMap<String, Summary>();
   private MetrixLogic ml = new MetrixLogic();
@@ -64,16 +66,17 @@ public class MetrixWatch extends Thread {
   /**
    * Executes the runnable Watcher service
    */
+  @Override
   public void run() {
-    metrixLogger.log.info("MetrixWatch Service started...");
+    log.info("MetrixWatch Service started...");
     File folder = new File(runDirString);
     if (folder.isDirectory()) {
       try {
-        metrixLogger.log.info("Registering Illumina Run Directory (" + runDirString + ")");
+        log.info("Registering Illumina Run Directory (" + runDirString + ")");
         register(Paths.get(runDirString), false);
       }
       catch (IOException Ex) {
-        metrixLogger.log.severe("IOException traversing watch directory. " + Ex.toString());
+        log.error("IOException traversing watch directory. ", Ex);
       }
     }
 
@@ -82,7 +85,7 @@ public class MetrixWatch extends Thread {
     this.trace = true;
 
     if (listOfFiles != null) {
-      metrixLogger.log.fine(listOfFiles.length + " files found in Illumina run directory. Scanning for directories...");
+      log.debug(listOfFiles.length + " files found in Illumina run directory. Scanning for directories...");
       for (int i = 0; i < listOfFiles.length; i++) {
         if (!checkRegisterIllumina(listOfFiles[i], false)) {
           continue;
@@ -91,8 +94,8 @@ public class MetrixWatch extends Thread {
       processEvents();
     }
     else {
-      metrixLogger.log.info("No files available in argumented Illumina run directory. ");
-      metrixLogger.log.info("Waiting for new directories...");
+      log.info("No files available in argumented Illumina run directory. ");
+      log.info("Waiting for new directories...");
     }
   }
 
@@ -118,7 +121,7 @@ public class MetrixWatch extends Thread {
       file = fileArg.getCanonicalPath();
     }
     catch (IOException Ex) {
-      metrixLogger.log.warning("Argumented filepath cannot be resolved. " + Ex.toString());
+      log.warn("Argumented filepath cannot be resolved.", Ex);
       return false;
     }
     File fileRI = new File(file + "/RunInfo.xml");
@@ -128,7 +131,7 @@ public class MetrixWatch extends Thread {
       File fileComplete = new File(file + "/RTAComplete.txt");
 
       if (fileComplete.isFile()) { // Run has finished
-        metrixLogger.log.info("Illumina Run finished: " + file);
+        log.info("Illumina Run finished: " + file);
         // Only perform inital init if run exists in DB, else create.
         DataStore ds = null;
         try {
@@ -137,21 +140,21 @@ public class MetrixWatch extends Thread {
             // Run is finished, available in database. But has completed over
             // three weeks ago.
             ml.quickLoad = true;
-            metrixLogger.log.fine("Old run - Quick loading a finished run. Available in database.");
+            log.debug("Old run - Quick loading a finished run. Available in database.");
           }
           else if (ds.checkSummaryByRunId(ds.conn, file)) {
             // Run is finished, available in database.
             ml.quickLoad = true;
-            metrixLogger.log.fine("Quick loading a finished run. Available in database.");
+            log.debug("Quick loading a finished run. Available in database.");
           }
           else {
             // Run has finished but not available in database.
             ml.quickLoad = false;
-            metrixLogger.log.warning("Run has finished. Not available in database. Parsing...");
+            log.warn("Run has finished. Not available in database. Parsing...");
           }
-          LoggerWrapper.log.finest("Closing connection.");
+          log.debug("Closing connection.");
           ds.conn.close();
-          LoggerWrapper.log.finer("Started processing of finished run.");
+          log.debug("Started processing of finished run.");
           ml.processMetrics(Paths.get(file), Constants.STATE_FINISHED, dataStore); // Parse
                                                                                    // available
                                                                                    // info
@@ -160,10 +163,10 @@ public class MetrixWatch extends Thread {
                                                                                    // state
         }
         catch (Exception Ex) {
-          metrixLogger.log.severe("Exception while checking finished run in database. " + Ex);
+          log.error("Exception while checking finished run in database. " + Ex);
         } finally {
           ds = null;
-          metrixLogger.log.finest("Clearing datastore connection for run finished check.");
+          log.debug("Clearing datastore connection for run finished check.");
         }
 
         // Run has completed.
@@ -189,42 +192,42 @@ public class MetrixWatch extends Thread {
       if (difference > Constants.ACTIVE_TIMEOUT) { // If no updates for 24
                                                    // hours. (86400000
                                                    // milliseconds)
-        LoggerWrapper.log.log(Level.INFO, "Illumina run stopped: {0}", file);
+        log.info("Illumina run stopped: " + file);
         if (!ml.checkPaired(file, dataStore)) { // Check if run is paired and at
                                                 // turn cycle.
           // Call MetrixLogic for parsing stopped runs
           DataStore ds = null;
-          try {
+          try{
             ds = new DataStore();
             // Run is older than three weeks and is available in database.
             if (difference > 1814400000 && ds.checkSummaryByRunId(ds.conn, file)) {
               ml.quickLoad = true;
-              metrixLogger.log.fine("Quick loading a stopped run. Age is older than 3 weeks.");
+              log.debug("Quick loading a stopped run. Age is older than 3 weeks.");
               // Run is less than three weeks old and is available in database.
             }
             else if (difference < 1814400000 && ds.checkSummaryByRunId(ds.conn, file)) {
               ml.quickLoad = false;
-              metrixLogger.log.fine("Parsing a recent run which has stopped. Age is less than 3 weeks.");
+              log.debug("Parsing a recent run which has stopped. Age is less than 3 weeks.");
               // Run is older than three weeks but hasn't been found in
               // database.
             }
             else if (!ds.checkSummaryByRunId(ds.conn, file)) {
               ml.quickLoad = false;
-              metrixLogger.log.fine("Parsing a run which has stopped but not found in database.");
+              log.debug("Parsing a run which has stopped but not found in database.");
             }
             else {
-              metrixLogger.log.severe("Parsing a run which has stopped. Alternative processing.");
+              log.error("Parsing a run which has stopped. Alternative processing.");
             }
-            metrixLogger.log.finer("Closing connection.");
+            log.debug("Closing connection.");
             ds.conn.close();
-            metrixLogger.log.finer("Started processing of stopped run.");
+            log.debug("Started processing of stopped run.");
             ml.processMetrics(Paths.get(file), Constants.STATE_HANG, dataStore);
           }
           catch (Exception Ex) {
-            metrixLogger.log.severe("Exception while checking stopped run in database. " + Ex);
+            log.error("Exception while checking stopped run in database.", Ex);
           } finally {
             ds = null;
-            metrixLogger.log.finest("Datastore for stopped run check dismantled.");
+            log.debug("Datastore for stopped run check dismantled.");
           }
         }
         else {
@@ -233,19 +236,19 @@ public class MetrixWatch extends Thread {
             register(Paths.get(file + "/InterOp/"), false);
           }
           catch (IOException Ex) {
-            metrixLogger.log.severe("IOException traversing watch directory. " + Ex.toString());
+            log.error("Traversing watch directory.", Ex);
           }
         }
       }
       else {
         try {
-          metrixLogger.log.info("[NEW] Illumina run detected: " + file);
+          log.info("[NEW] Illumina run detected: " + file);
           // Register rundir
           register(Paths.get(file + "/InterOp/"), false);
           register(Paths.get(file), newRun);
         }
         catch (IOException Ex) {
-          metrixLogger.log.severe("IOException traversing watch directory. " + Ex.toString());
+          log.error("Traversing watch directory.", Ex);
         }
       }
     }
@@ -260,31 +263,31 @@ public class MetrixWatch extends Thread {
       // FAIL : If it fails after 120 minutes. Remove and ignore.
       // SUCCESS : Run will be registered and backlog parsed for the missing
       // time.
-      metrixLogger.log.info("Checking whether directory has been created less than 24 hours ago.");
-      metrixLogger.log.fine("Checking age of run directory.");
+      log.info("Checking whether directory has been created less than 24 hours ago.");
+      log.debug("Checking age of run directory.");
       // Check if file has been created the last 24 hours.
       long ageDiff = (System.currentTimeMillis() - fileArg.lastModified());
       if (ageDiff < 86400000) {
-        metrixLogger.log.fine("Created less than 24 hours ago.");
+        log.debug("Created less than 24 hours ago.");
         // Create single thread executor.
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        metrixLogger.log.finer("Delaying rescan for 120 minutes.");
+        log.debug("Delaying rescan for 120 minutes.");
         final File taskFile = fileArg;
         final Runnable task = new Runnable() {
           @Override
           public void run() {
-            metrixLogger.log.log(Level.FINE, "Executing delayed task for {0}", taskFile.getName());
+            log.debug("Executing delayed task for " + taskFile.getName());
             checkRegisterIllumina(taskFile, true);
           }
         };
         executor.schedule(task, 120, TimeUnit.MINUTES);
         // Shutdown executor.
-        LoggerWrapper.log.fine("Gracefully shutting down executor service for delayed task.");
+        log.debug("Gracefully shutting down executor service for delayed task.");
         executor.shutdown();
       }
       else {
-        metrixLogger.log.info("Directory " + file + " does not match standard format. RunInfo.xml is missing.");
-        metrixLogger.log.fine("Directory is older than 24 hours. Not creating a delayed task.");
+        log.info("Directory " + file + " does not match standard format. RunInfo.xml is missing.");
+        log.debug("Directory is older than 24 hours. Not creating a delayed task.");
       }
     }
 
@@ -301,7 +304,7 @@ public class MetrixWatch extends Thread {
     if (trace) {
       Path prev = keys.get(key);
       if (prev == null) {
-        metrixLogger.log.info("Registered new watch directory: " + dir);
+        log.info("Registered new watch directory: " + dir);
         if (newRun) {
           ml.quickLoad = false;
           ml.processMetrics(dir, Constants.STATE_INIT, dataStore);
@@ -309,7 +312,7 @@ public class MetrixWatch extends Thread {
       }
       else {
         if (!dir.equals(prev)) {
-          metrixLogger.log.info("Previously registered directory modified: " + dir);
+          log.info("Previously registered directory modified: " + dir);
         }
       }
     }
@@ -383,14 +386,14 @@ public class MetrixWatch extends Thread {
         if (kind == ENTRY_CREATE) {
           File send = new File(child.toString());
           try {
-            metrixLogger.log.finest("New run detected... Waiting 30 seconds to allow sequencer for file creation.");
+            log.debug("New run detected... Waiting 30 seconds to allow sequencer for file creation.");
             Thread.sleep(60000);
           }
           catch (InterruptedException IEX) {
-            metrixLogger.log.severe("Sleeping of thread while creating a new run failed!");
+            log.error("Sleeping of thread while creating a new run failed!");
           }
           if (checkRegisterIllumina(send, true)) {
-            metrixLogger.log.info("New run with path: " + send + " registered");
+            log.info("New run with path: " + send + " registered");
           }
           else {
             continue;
@@ -407,7 +410,7 @@ public class MetrixWatch extends Thread {
             // Parse summary object
             if (ml.processMetrics(procFold, Constants.STATE_RUNNING, dataStore)) {
               // Successfuly processed, continue watching.
-              metrixLogger.log.info("Parsed " + procFold + " successfully. ");
+              log.info("Parsed " + procFold + " successfully. ");
             }
             // ELSE Processing failed
 
@@ -423,13 +426,13 @@ public class MetrixWatch extends Thread {
 
       watchKey.reset(); // Reset the watchkey to put it back for monitoring.
 
-    } // End while loop
+    }  // End while loop
 
     try {
       watcher.close();
     }
     catch (IOException ex) {
-      metrixLogger.log.severe("Error closing the watcher. " + ex.toString());
+      log.error("Error closing the watcher.", ex);
     }
   }
 
@@ -468,7 +471,7 @@ public class MetrixWatch extends Thread {
 
       // Run has been marked finished.
       if (finishedMap.contains(watchDir.toString())) {
-        LoggerWrapper.log.log(Level.FINER, "Key is in finished map - {0} - Removing entries.", watchDir.toString());
+        log.debug("Key is in finished map; Removing entries in " + watchDir.toString());
         if (watchDirKey.isValid()) {
           watchDirKey.cancel();
         }
@@ -499,14 +502,14 @@ public class MetrixWatch extends Thread {
 
       try {
         DataStore _ds = new DataStore();
-        sum = (Summary) _ds.getSummaryByRunName(nonInterOp);
+        sum = _ds.getSummaryByRunName(nonInterOp);
         if (sum.getRunId() != null) {
-          metrixLogger.log.info("Backlog parsing " + sum.getRunId());
+          log.info("Backlog parsing " + sum.getRunId());
         }
         _ds.closeAll();
       }
       catch (Exception Ex) {
-        metrixLogger.log.severe("Error in retrieving summary for forced check. " + Ex.toString());
+        log.error("Error in retrieving summary for forced check. ", Ex);
       }
       if (sum.getRunId() != null) {
         if (sum.getState() == Constants.STATE_FINISHED || sum.getState() == Constants.STATE_HANG) {
@@ -517,12 +520,12 @@ public class MetrixWatch extends Thread {
 
         if ((currentTime - mapTime) > forceTime) {
           if (ml.processMetrics(Paths.get(nonInterOp), sum.getState(), dataStore)) {
-            waitMap.put((WatchKey) watchDirKey, System.currentTimeMillis());
-            metrixLogger.log.info("Forcefully parsed " + nonInterOp);
+            waitMap.put(watchDirKey, System.currentTimeMillis());
+            log.info("Forcefully parsed " + nonInterOp);
           }
         }
         else {
-          metrixLogger.log.info("No update needed yet for " + nonInterOp);
+          log.info("No update needed yet for " + nonInterOp);
         }
       }
     }

@@ -11,11 +11,12 @@ import java.nio.file.*;
 import java.io.*;
 import java.util.*;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
-import nki.util.LoggerWrapper;
 import nki.parsers.illumina.*;
 import nki.io.DataStore;
 import nki.constants.Constants;
@@ -32,8 +33,7 @@ import nki.parsers.metrix.PostProcessing;
 
 public class MetrixLogic {
 
-  // Instantiate Logger
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(MetrixLogic.class);
 
   // Call inits
   private Summary summary = null;
@@ -117,13 +117,13 @@ public class MetrixLogic {
         }
       }
       catch (SAXException SAX) {
-        metrixLogger.log.severe("Error parsing XML with SAX. " + SAX.toString());
+        log.error("Error parsing XML with SAX.", SAX);
       }
       catch (IOException Ex) {
-        metrixLogger.log.severe("IOException Error. " + Ex.toString());
+        log.error("IOException Error.", Ex);
       }
       catch (ParserConfigurationException PXE) {
-        metrixLogger.log.severe("Parser Configuration Exception. " + PXE.toString());
+        log.error("Parser Configuration Exception. ", PXE);
       } finally {
         xmd.closeAll();
       }
@@ -155,7 +155,7 @@ public class MetrixLogic {
                                                // waiting for turning.
             summary.setState(Constants.STATE_HANG);
             saveEntry(path);
-            metrixLogger.log.info("Run " + summary.getRunId() + " has failed to complete within the allotted time frame.");
+            log.info("Run " + summary.getRunId() + " has failed to complete within the allotted time frame.");
             return false;
           }
         }
@@ -190,7 +190,7 @@ public class MetrixLogic {
           // the turning of the flowcell.
           if (!summary.getHasNotifyTurned()) {
             summary.setState(Constants.STATE_TURN);
-            metrixLogger.log.info("Flowcell of run: " + summary.getRunId() + " has to be turned. Current cycle: " + currentCycle);
+            log.info("Flowcell of run: " + summary.getRunId() + " has to be turned. Current cycle: " + currentCycle);
             summary.setHasNotifyTurned(true);
           }
         }
@@ -210,21 +210,21 @@ public class MetrixLogic {
 
         saveEntry(path); // Store summary entry in SQL database
 
-        metrixLogger.log.info("Finished processing: " + runDir.getFileName());
+        log.info("Finished processing: " + runDir.getFileName());
 
         success = true;
       }
       catch (NullPointerException NPE) {
-        NPE.printStackTrace();
+        log.error("Error parsing XML.", NPE);
       }
       catch (SAXException SAX) {
-        metrixLogger.log.severe("Error parsing XML with SAX. " + SAX.toString());
+        log.error("Error parsing XML with SAX.", SAX);
       }
       catch (IOException Ex) {
-        metrixLogger.log.severe("IOException Error. " + Ex.toString());
+        log.error("IOException Error.", Ex);
       }
       catch (ParserConfigurationException PXE) {
-        metrixLogger.log.severe("Parser Configuration Exception. " + PXE.toString());
+        log.error("Parser Configuration Exception. ", PXE);
       } finally {
         em.closeSourceStream();
         qm.closeSourceStream();
@@ -233,15 +233,15 @@ public class MetrixLogic {
 
     }
     else {
-      metrixLogger.log.info("Quick loading finished run : " + path);
+      log.info("Quick loading finished run : " + path);
     }
 
     return success;
   }
 
   private void checkSummary(String path) {
-    // Check if run path is present in the database already. If so, retrieve;
-    // else instantiate new summary object;
+    // Check if run path is present in the database already. If so,
+    // retrieve; else instantiate new summary object;
     boolean scrape = false;
     if (summary == null) {
       scrape = true;
@@ -265,7 +265,7 @@ public class MetrixLogic {
         }
       }
       catch (Exception SEx) { // SQL Exception - Generic catch
-        metrixLogger.log.severe("Error checking for summary by runId in database. " + SEx.toString());
+        log.error("Error checking for summary by runId in database.", SEx);
       }
     }
   }
@@ -279,9 +279,9 @@ public class MetrixLogic {
       DataStore tmpDS = new DataStore();
       // Final processing run before finishing.
       processMetrics(Paths.get(path), -1, tmpDS);
-      metrixLogger.log.info("Performing final parse of data to create distributions.");
+      log.info("Performing final parse of data to create distributions.");
       MetrixContainer mc = new MetrixContainer(summary, false, true);
-      metrixLogger.log.info("Finished parsing " + summary.getRunId());
+      log.info("Finished parsing " + summary.getRunId());
       mc = null;
       tmpDS.closeAll();
       if (tmpDS != null) {
@@ -290,10 +290,9 @@ public class MetrixLogic {
       summary.setHasFinished(true); // Run has finished
     }
     catch (IOException IE) {
-      metrixLogger.log.severe("Error setting up database connection. " + IE.toString());
-      metrixLogger.log.severe("Error stacktrace: " + IE);
+      log.error("Error setting up database connection.", IE);
     }
-    metrixLogger.log.info("Run " + summary.getRunId() + " has finished.");
+    log.info("Run " + summary.getRunId() + " has finished.");
     saveEntry(path);
 
     // Check if run requires post processing and execute it
@@ -311,7 +310,7 @@ public class MetrixLogic {
           _ds.appendedWrite(summary, path);
         }
         catch (Exception Ex) {
-          metrixLogger.log.severe("Exception in write statement lastID = " + lastId + " Error: " + Ex.toString());
+          log.error("Exception in write statement lastID = " + lastId, Ex);
         }
       }
       else {
@@ -320,7 +319,7 @@ public class MetrixLogic {
           _ds.updateSummaryByRunName(summary, path);
         }
         catch (Exception SEx) {
-          metrixLogger.log.severe("Exception in update statement " + SEx.toString());
+          log.error("Exception in update statement.", SEx);
         }
       }
       _ds.closeAll();
@@ -329,7 +328,7 @@ public class MetrixLogic {
       }
     }
     catch (Exception Ex) {
-      metrixLogger.log.severe("Run ID Checking error." + Ex.toString());
+      log.error("Run ID Checking error.", Ex);
     }
   }
 
@@ -355,7 +354,7 @@ public class MetrixLogic {
       // turning of the flowcell.
       int cCycle = summary.getCurrentCycle();
       summary.setState(Constants.STATE_TURN);
-      metrixLogger.log.info("Flowcell of run: " + summary.getRunId() + " has to be turned. Current cycle: " + cCycle);
+      log.info("Flowcell of run: " + summary.getRunId() + " has to be turned. Current cycle: " + cCycle);
       summary.setHasNotifyTurned(true);
       check = true;
     }
@@ -365,17 +364,18 @@ public class MetrixLogic {
   public boolean checkTimeout(String file) {
     File lastModCheck = new File(file + "/InterOp/");
     if (summary.getState() == Constants.STATE_FINISHED) {
-      metrixLogger.log.info("Run has finished. No need for update.");
+      log.info("Run has finished. No need for update.");
       return false;
     }
     if (!lastModCheck.isDirectory()) {
-      metrixLogger.log.warning("Directory " + file + " does not exist.");
+      log.warn("Directory " + file + " does not exist.");
       return false;
     }
 
     File[] files = lastModCheck.listFiles();
 
     Arrays.sort(files, new Comparator<File>() {
+      @Override
       public int compare(File f1, File f2) {
         return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
       }
@@ -391,7 +391,7 @@ public class MetrixLogic {
                                                                                     // hours.
                                                                                     // (86400000
                                                                                     // milliseconds)
-      metrixLogger.log.info("Run (" + summary.getRunId() + ") has timed out. No data received for over 24 hours. Halting watch.");
+      log.info("Run (" + summary.getRunId() + ") has timed out. No data received for over 24 hours. Halting watch.");
       state = Constants.STATE_HANG;
       return true;
     }
@@ -409,7 +409,7 @@ public class MetrixLogic {
       fin.close();
     }
     catch (IOException Ex) {
-      LoggerWrapper.log.log(Level.SEVERE, "IOException when loading config: {0}", Ex.toString());
+      log.error("IOException when loading config.", Ex);
     }
   }
 
@@ -419,7 +419,7 @@ public class MetrixLogic {
     String execPP = configFile.getProperty("EXEC_POSTPROCESSING", "FALSE");
     if (sum != null) {
       if (execPP.equalsIgnoreCase("TRUE")) {
-        metrixLogger.log.log(Level.INFO, "Calling post processing module for: {0}", sum.getRunId());
+        log.info("Calling post processing module for: " + sum.getRunId());
         PostProcessing pp = new PostProcessing(sum);
         pp.run();
 
@@ -427,7 +427,7 @@ public class MetrixLogic {
 
       }
       else {
-        metrixLogger.log.info("No postprocessing performed for: " + sum.getRunId());
+        log.info("No postprocessing performed for: " + sum.getRunId());
         return false;
       }
     }

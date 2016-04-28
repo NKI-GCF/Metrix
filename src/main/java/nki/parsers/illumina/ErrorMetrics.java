@@ -11,13 +11,15 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nki.objects.ErrorCollection;
 import nki.objects.ErrorMap;
-import nki.util.LoggerWrapper;
 
 public class ErrorMetrics extends GenericIlluminaParser {
+  protected static final Logger log = LoggerFactory.getLogger(ErrorMetrics.class);
   private ErrorCollection eScores;
 
   public ErrorMetrics(String source, int state) {
@@ -54,7 +56,7 @@ public class ErrorMetrics extends GenericIlluminaParser {
       eScores.setRecordLength(leis.readByte());
     }
     catch (IOException Ex) {
-      LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
+      log.error("Error in parsing version number and recordLength.", Ex);
     }
 
     try {
@@ -106,7 +108,7 @@ public class ErrorMetrics extends GenericIlluminaParser {
       // Reached end of file
     }
     catch (IOException Ex) {
-      LoggerWrapper.log.severe("IO Error in parsing the Error Metrics file.");
+      log.error("Parsing the Error Metrics file.", Ex);
     }
     return eScores;
   }

@@ -8,8 +8,6 @@
 package nki.util;
 
 import java.util.*;
-import java.util.logging.Level;
-import nki.util.LoggerWrapper;
 
 public class ArrayUtils {
   public static double sum(List<Double> a) {

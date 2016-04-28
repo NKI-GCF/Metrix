@@ -11,6 +11,10 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nki.constants.Constants;
 import nki.exceptions.EmptyResultSetCollection;
 import nki.exceptions.InvalidCredentialsException;
@@ -19,6 +23,8 @@ import nki.exceptions.UnimplementedCommandException;
 import nki.objects.Command;
 
 public class MetrixInitialize {
+  protected static final Logger log = LoggerFactory.getLogger(MetrixInitialize.class);
+
   public static void main(String[] args) {
     Properties configFile;
 
@@ -103,7 +109,7 @@ public class MetrixInitialize {
 
     }
     catch (Exception Ex) {
-      Ex.printStackTrace();
+      log.error("Error intializing.", Ex);
     }
   }
 }

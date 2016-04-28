@@ -11,17 +11,19 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import nki.util.LoggerWrapper;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class DemuxOperation extends PostProcess {
+  protected static final Logger log = LoggerFactory.getLogger(DemuxOperation.class);
 
   public static final long serialVersionUID = 42L;
   private String bclToFastQPath;
@@ -204,13 +206,11 @@ public final class DemuxOperation extends PostProcess {
     String res = m.replaceAll(replace);
 
     if (res.equals(this.getBaseMask()) || replace.length() == 1) {
-      LoggerWrapper.log.log(Level.INFO, "No basemask match was made for: {0} using pattern: {1}", new Object[] {
-          this.getBaseMask(), pattern
-      });
+      log.info("No basemask match was made for: " + this.getBaseMask() + " using pattern: " + pattern);
       return this.getBaseMask();
     }
 
-    LoggerWrapper.log.log(Level.INFO, "Basemask was set to: " + res);
+    log.info("Basemask was set to: " + res);
     return res;
   }
 
@@ -228,9 +228,7 @@ public final class DemuxOperation extends PostProcess {
     miseqLookup.put("Operator", -1);
     miseqLookup.put("SampleProject", 6);
 
-    LoggerWrapper.log.log(Level.INFO, "Translating set HiSeq header {0} to match MiSeq samplesheet and found it in column {1}.", new Object[] {
-        header, miseqLookup.get(header)
-    });
+    log.info("Translating set HiSeq header " + header + " to match MiSeq samplesheet and found it in column " + miseqLookup.get(header) + ".");
 
     if (miseqLookup.get(header) != null) {
       return miseqLookup.get(header);
@@ -245,15 +243,15 @@ public final class DemuxOperation extends PostProcess {
   }
 
   public boolean generateSampleSheets() throws FileNotFoundException, IOException {
-    LoggerWrapper.log.log(Level.INFO, "Initializing Samplesheet processing for demultiplexing...");
+    log.info("Initializing Samplesheet processing for demultiplexing...");
     String[] nextLine;
 
     if (!this.getSampleSheetPath().exists()) {
       throw new FileNotFoundException();
     }
 
-    LoggerWrapper.log.log(Level.INFO, "Splitting samplesheets using the {0} column.", this.getSplitBy());
-    LoggerWrapper.log.log(Level.INFO, "Global basemask: {0}", this.getBaseMask());
+    log.info("Splitting samplesheets using the " + this.getSplitBy() + " column.");
+    log.info("Global basemask: " + this.getBaseMask());
     // Read full CSV.
     BufferedReader br = new BufferedReader(new FileReader(this.getSampleSheetPath()));
     String line = null;
@@ -277,7 +275,7 @@ public final class DemuxOperation extends PostProcess {
       // Skip header line.
       break;
     default:
-      LoggerWrapper.log.log(Level.FINE, "Unknown type - '{0}'", firstLineWord);
+      log.debug("Unknown type - '" + firstLineWord + "'");
       return false;
     }
 
@@ -311,13 +309,13 @@ public final class DemuxOperation extends PostProcess {
 
       if (addToSet) {
         if (line.length < 8) {
-          LoggerWrapper.log.log(Level.FINER, "Line {0} does not have enough columns to be a valid samplesheet.", line);
+          log.debug("Line " + line + " does not have enough columns to be a valid samplesheet.");
         }
         else {
           Object splitValue;
           // Split by selected value.
           splitValue = lineIdx == -1 ? 1 : line[lineIdx];
-          LoggerWrapper.log.log(Level.FINER, "Working with column value {0}", splitValue);
+          log.info("Working with column value " + splitValue);
 
           if (!line[0].equals("Sample_ID")) {
             if (sampleSheets.get(splitValue) == null) {
@@ -341,7 +339,7 @@ public final class DemuxOperation extends PostProcess {
   }
 
   public void transformHiSeq() {
-    LoggerWrapper.log.log(Level.FINE, "Starting HiSeq Transformation and splitting into multiple samplesheets.");
+    log.info("Starting HiSeq Transformation and splitting into multiple samplesheets.");
     // Default to project based splitting (SampleProject)
     int lineIdx = hiseqHeaderLookup.indexOf(getSplitBy());
 
@@ -373,16 +371,16 @@ public final class DemuxOperation extends PostProcess {
             // Check and possibly store new basemask in baseMaskMap
             if (s != null) {
               if (s.length() > 0) {
-                LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask for potential adjustments (Using length: {0})", s.length());
+                log.info("Comparing length of index sequence against previously set basemask for potential adjustments (Using length: " + s.length() + ")");
                 baseMaskMap.put(line[lineIdx], getIdxBaseMask(s.length()));
               }
               else {
-                LoggerWrapper.log.log(Level.FINE, "Comparing length of index sequence against previously set basemask. Length is 0. Using original basemask.");
+                log.info("Comparing length of index sequence against previously set basemask. Length is 0. Using original basemask.");
                 baseMaskMap.put(line[lineIdx], this.getBaseMask());
               }
             }
             else {
-              LoggerWrapper.log.log(Level.FINE, "Index sequence has not been set in the used samplesheet. Using original basemask.");
+              log.info("Index sequence has not been set in the used samplesheet. Using original basemask.");
               baseMaskMap.put(line[lineIdx], this.getBaseMask());
             }
           }
@@ -404,14 +402,14 @@ public final class DemuxOperation extends PostProcess {
 
     // Check if SampleSheets Directory exists if not, create it.
     if (!ssBaseDirectory.exists()) {
-      LoggerWrapper.log.log(Level.FINE, "SampleSheets folder does not exist, creating...");
+      log.info("SampleSheets folder does not exist, creating...");
       ssBaseDirectory.mkdirs();
     }
 
     ArrayList<String> ssContents;
     // Foreach samplesheet key generated new samplesheet with contents.
     for (Object key : sampleSheets.keySet()) {
-      LoggerWrapper.log.log(Level.FINE, "Creating samplesheet for: {0}", key);
+      log.debug("Creating samplesheet for: " + key);
       ssContents = sampleSheets.get(key);
       try {
         String filename = "";
@@ -448,7 +446,7 @@ public final class DemuxOperation extends PostProcess {
         out.close();
       }
       catch (IOException ioe) {
-        LoggerWrapper.log.log(Level.WARNING, "Error while create and or writing to samplesheet. {0}", ioe);
+        log.warn("Error while create and or writing to samplesheet.", ioe);
       }
     }
 

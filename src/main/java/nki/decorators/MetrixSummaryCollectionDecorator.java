@@ -1,16 +1,17 @@
 package nki.decorators;
 
 import java.util.ListIterator;
-import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nki.constants.Constants;
 import nki.core.MetrixContainer;
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
-import nki.util.LoggerWrapper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -24,6 +25,7 @@ import org.w3c.dom.Element;
 public class MetrixSummaryCollectionDecorator {
   private SummaryCollection sc;
   private String expectedType = Constants.COM_TYPE_SIMPLE;
+  protected static final Logger log = LoggerFactory.getLogger(MetrixSummaryCollectionDecorator.class);
 
   public MetrixSummaryCollectionDecorator(SummaryCollection sc) {
     this.sc = sc;
@@ -39,15 +41,15 @@ public class MetrixSummaryCollectionDecorator {
   }
 
   public void initializeMetrix() {
-    LoggerWrapper.log.log(Level.INFO, "Starting full initialization of Metrix... ");
+    log.info("Starting full initialization of Metrix... ");
     for (ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();) {
       Summary sum = iter.next();
-      LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
+      log.info("Processing " + sum.getRunId());
       MetrixContainer mc = new MetrixContainer(sum, false);
       mc = null; // Cleanup MC.
-      LoggerWrapper.log.log(Level.INFO, "Done processing ...");
+      log.info("Done processing ...");
     }
-    LoggerWrapper.log.log(Level.INFO, "Finished full initialization.");
+    log.info("Finished full initialization.");
   }
 
   public JSONObject toJSON() {
@@ -58,7 +60,7 @@ public class MetrixSummaryCollectionDecorator {
     // for(Summary sum : sc.getSummaryCollection()){
     for (ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();) {
       Summary sum = iter.next();
-      LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
+      log.info("Processing " + sum.getRunId());
       JSONObject metrixJson = new JSONObject();
 
       if (this.expectedType.equals(Constants.COM_TYPE_SIMPLE)) {
@@ -101,10 +103,10 @@ public class MetrixSummaryCollectionDecorator {
         metrixJson.put("extractionMetrics", extractionMetrics);
         metrixJson.put("intensityMetrics", intensityMetrics);
 
-        LoggerWrapper.log.log(Level.FINEST, "Emptying MetrixContainer");
+        log.debug("Emptying MetrixContainer");
         procSum = null;
         iter.remove();
-        LoggerWrapper.log.log(Level.FINER, "Removed summary from list.");
+        log.debug("Removed summary from list.");
       }
       else {
         metrixJson.put("Unknown request type. ", new JSONObject());
@@ -151,7 +153,7 @@ public class MetrixSummaryCollectionDecorator {
 
       for (ListIterator<Summary> iter = sc.getSummaryCollection().listIterator(); iter.hasNext();) {
         Summary sum = iter.next();
-        LoggerWrapper.log.log(Level.INFO, "Processing {0}", sum.getRunId());
+        log.info("Processing " + sum.getRunId());
         MetrixContainer mc = new MetrixContainer(sum, false);
 
         Element sumXml = xmlDoc.createElement("Summary");
@@ -200,12 +202,12 @@ public class MetrixSummaryCollectionDecorator {
           root.appendChild(sumXml);
         }
         iter.remove();
-        LoggerWrapper.log.log(Level.FINER, "Removed from list.");
+        log.debug("Removed from list.");
       }
       return root;
     }
     catch (Exception ex) {
-      ex.printStackTrace();
+      log.error("Building XML document", ex);
     }
     return root;
   }

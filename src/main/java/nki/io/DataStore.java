@@ -19,11 +19,12 @@ import java.util.Properties;
 
 import nki.objects.Summary;
 import nki.objects.SummaryCollection;
-import nki.util.LoggerWrapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DataStore {
   static final String WRITE_OBJECT_SQL = "INSERT INTO metrix_objects(run_id, object_value, state) VALUES (?, ?, ?)";
@@ -36,7 +37,7 @@ public class DataStore {
   static final String CHECK_RUN_ID_FOR_RUNNAME = "SELECT run_id FROM metrix_objects WHERE run_id = ?";
   static final String READ_OBJECTS_SEARCH_RUNID = "SELECT object_value FROM metrix_objects WHERE LOWER(run_id) LIKE ?";
 
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(DataStore.class);
 
   private static Properties configFile = new Properties();
   public static Connection conn = null;
@@ -50,13 +51,12 @@ public class DataStore {
 
     fin.close();
     try {
-      LoggerWrapper.log.log(Level.FINEST, "Opening connection");
+      log.debug("Opening connection");
       conn = getConnection();
-      LoggerWrapper.log.log(Level.FINEST, "Opened connection");
+      log.debug("Opened connection");
     }
     catch (Exception ex) {
-      metrixLogger.log.severe("Error setting up database connection. " + ex.toString());
-      ex.printStackTrace();
+      log.error("Error setting up database connection.", ex);
       System.exit(0);
     }
   }
@@ -89,15 +89,15 @@ public class DataStore {
     if (db_type.equals("MSSQL")) {
       driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
       url = "jdbc:sqlserver://" + host + ":" + port + ";DatabaseName=" + db + ";user=" + user + ";Password=" + pass;
-      metrixLogger.log.finest("Connecting to database (MSSQL) with url: " + url + "\tDriver: " + driver);
+      log.debug("Connecting to database (MSSQL) with url: " + url + "\tDriver: " + driver);
     }
     else { // Server type is Mysql (default)
       driver = "com.mysql.jdbc.Driver";
       url = "jdbc:mysql://" + host + ":" + port + "/" + db + "?autoReconnect=true&characterEncoding=UTF-8&useUnicode=true";
-      metrixLogger.log.finest("Connecting to database (MYSQL) with url: " + url + "\tDriver: " + driver);
+      log.debug("Connecting to database (MYSQL) with url: " + url + "\tDriver: " + driver);
     }
 
-    metrixLogger.log.finest("Connecting to database using driver: " + driver + ". Using url: " + url);
+    log.debug("Connecting to database using driver: " + driver + ". Using url: " + url);
 
     Class.forName(driver);
     Connection conn = DriverManager.getConnection(url, user, pass);
@@ -128,14 +128,14 @@ public class DataStore {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
     return id;
   }
 
   public static Summary getSummaryById(long id) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_ID);
-    metrixLogger.log.fine("Fetching summary by ID --.");
+    log.debug("Fetching summary by ID --.");
     pstmt.setLong(1, id);
     ResultSet rs = pstmt.executeQuery();
     rs.next();
@@ -147,7 +147,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
 
     return sum;
@@ -155,7 +155,7 @@ public class DataStore {
 
   public static Summary getSummaryByRunName(String runName) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_RUNNAME);
-    metrixLogger.log.fine("Fetching summary by run name: " + runName);
+    log.debug("Fetching summary by run name: " + runName);
 
     pstmt.setString(1, runName);
 
@@ -177,7 +177,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
 
     return sum;
@@ -185,7 +185,7 @@ public class DataStore {
 
   public static SummaryCollection getSummaryCollectionByState(int state) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_STATE);
-    metrixLogger.log.fine("Fetching SC by state " + state + ".");
+    log.debug("Fetching SC by state " + state + ".");
 
     pstmt.setInt(1, state);
 
@@ -208,7 +208,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
 
     return sc;
@@ -216,7 +216,7 @@ public class DataStore {
 
   public static SummaryCollection getSummaryCollectionBySearch(String searchTerm) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECTS_SEARCH_RUNID);
-    metrixLogger.log.info("Fetching by search ID. " + searchTerm);
+    log.info("Fetching by search ID. " + searchTerm);
 
     pstmt.setString(1, '%' + searchTerm.toLowerCase() + '%'); // Do global
                                                               // search.
@@ -240,7 +240,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (Exception E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
 
     return sc;
@@ -248,7 +248,7 @@ public class DataStore {
 
   public Summary getSummaryBySearch(String searchTerm) throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECTS_SEARCH_RUNID);
-    metrixLogger.log.fine("Fetching by search ID. " + searchTerm);
+    log.debug("Fetching by search ID. " + searchTerm);
 
     pstmt.setString(1, '%' + searchTerm + '%'); // Do global search.
 
@@ -270,7 +270,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (Exception E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
 
     return sum;
@@ -278,7 +278,7 @@ public class DataStore {
 
   public static SummaryCollection getSummaryCollections() throws Exception {
     PreparedStatement pstmt = conn.prepareStatement(READ_OBJECT_SQL_ALL);
-    metrixLogger.log.fine("Fetching all summaries.");
+    log.debug("Fetching all summaries.");
 
     ResultSet rs = pstmt.executeQuery();
     SummaryCollection sc = new SummaryCollection();
@@ -299,7 +299,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
 
     return sc;
@@ -311,14 +311,14 @@ public class DataStore {
     pstmt.setObject(1, sum);
     pstmt.setInt(2, sum.getState());
     pstmt.setString(3, sum.getRunDirectory());
-    LoggerWrapper.log.log(Level.FINE, "Updating summary object " + runName);
+    log.debug("Updating summary object " + runName);
     pstmt.executeUpdate();
 
     try {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
   }
 
@@ -334,7 +334,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
   }
 
@@ -354,7 +354,7 @@ public class DataStore {
       rs2.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection.", E);
     }
 
     return maxID;
@@ -362,11 +362,11 @@ public class DataStore {
 
   public boolean checkSummaryByRunId(String run) throws Exception {
     if (conn == null) {
-      LoggerWrapper.log.fine("No connection. Connecting. ");
+      log.debug("No connection. Connecting. ");
       conn = getConnection();
     }
     PreparedStatement pstmt = conn.prepareStatement(CHECK_RUN_ID_FOR_RUNNAME);
-    metrixLogger.log.fine("Checking if run exists run by ID. " + run);
+    log.debug("Checking if run exists run by ID. " + run);
 
     pstmt.setString(1, run);
 
@@ -385,7 +385,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection. " + E.toString());
     }
 
     return ret;
@@ -393,7 +393,7 @@ public class DataStore {
 
   public boolean checkSummaryByRunId(Connection dsConn, String run) throws Exception {
     PreparedStatement pstmt = dsConn.prepareStatement(CHECK_RUN_ID_FOR_RUNNAME);
-    metrixLogger.log.fine("Checking if run exists run by ID. " + run);
+    log.debug("Checking if run exists run by ID. " + run);
 
     pstmt.setString(1, run);
 
@@ -412,7 +412,7 @@ public class DataStore {
       pstmt.close();
     }
     catch (SQLException E) {
-      metrixLogger.log.severe("Error in closing resource sets of SQL Connection. " + E.toString());
+      log.error("Error in closing resource sets of SQL Connection. ", E);
     }
     return ret;
   }
@@ -422,7 +422,7 @@ public class DataStore {
       conn.close();
     }
     catch (SQLException ex) {
-      metrixLogger.log.severe("Error closing SQL Connection! " + ex.toString());
+      log.error("Error closing SQL Connection!", ex);
     }
   }
 }

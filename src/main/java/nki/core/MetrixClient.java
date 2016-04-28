@@ -30,11 +30,15 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import nki.util.LoggerWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetrixClient {
+
+  protected static final Logger log = LoggerFactory.getLogger(MetrixClient.class);
+
   public static void main(String[] args) throws IOException, ClassNotFoundException {
-    LoggerWrapper.log.info("[CLIENT] Initiated");
+    log.info("[CLIENT] Initiated");
 
     // Use external properties file, outside of jar location.
     Properties configFile = new Properties();
@@ -171,7 +175,7 @@ public class MetrixClient {
       }
     }
     catch (EOFException | NoConnectionPendingException | AsynchronousCloseException ex) {
-      LoggerWrapper.log.log(Level.INFO, "[CLIENT] Connection closed. ({0})", ex.toString());
+      log.info("[CLIENT] Connection closed. ({0})", ex);
     }
   }
 }

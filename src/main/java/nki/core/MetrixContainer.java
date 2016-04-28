@@ -28,7 +28,6 @@ import nki.parsers.illumina.IndexMetrics;
 import nki.parsers.illumina.ErrorMetrics;
 import nki.parsers.illumina.ExtractionMetrics;
 import nki.parsers.xml.XmlDriver;
-import nki.util.LoggerWrapper;
 
 public class MetrixContainer {
   protected static final Logger log = LoggerFactory.getLogger(MetrixContainer.class);
@@ -92,7 +91,7 @@ public class MetrixContainer {
     }
     else {
       // Throw error
-      LoggerWrapper.log.severe("[WARNING] Obtained an empty summary.");
+      log.error("Obtained an empty summary.");
       // throw new IOException();
     }
   }
@@ -112,9 +111,7 @@ public class MetrixContainer {
       initSummary();
     }
     else {
-      // Throw error
-      LoggerWrapper.log.severe("[WARNING] Obtained an empty summary.");
-      // throw new IOException();
+      log.error("Obtained an empty summary.");
     }
   }
 
@@ -152,16 +149,13 @@ public class MetrixContainer {
       }
     }
     catch (SAXException se) {
-      se.printStackTrace();
-      log.error("Error parsing RunInfo.xml info: " + se.getMessage());
+      log.error("Error parsing RunInfo.xml info", se);
     }
     catch (IOException ioe) {
-      ioe.printStackTrace();
-      log.error("Input/output error in parsing RunInfo.xml info: " + ioe.getMessage());
+      log.error("Input/output error in parsing RunInfo.xml info", ioe);
     }
     catch (ParserConfigurationException pce) {
-      pce.printStackTrace();
-      log.error("Error in XML parser configuration: " + pce.getMessage());
+      log.error("Error in XML parser configuration", pce);
     }
 
     log.debug("Processing Extraction Metrics");
@@ -265,16 +259,13 @@ public class MetrixContainer {
       }
     }
     catch (SAXException se) {
-      se.printStackTrace();
-      log.error("Error parsing RunInfo.xml info: " + se.getMessage());
+      log.error("Error parsing RunInfo.xml info", se);
     }
     catch (IOException ioe) {
-      ioe.printStackTrace();
-      log.error("Input/output error in parsing RunInfo.xml info: " + ioe.getMessage());
+      log.error("Input/output error in parsing RunInfo.xml info", ioe);
     }
     catch (ParserConfigurationException pce) {
-      pce.printStackTrace();
-      log.error("Error in XML parser configuration: " + pce.getMessage());
+      log.error("Error in XML parser configuration", pce);
     }
     // Load TileMetrics
     // Process Cluster Density and phasing / prephasing
@@ -299,7 +290,7 @@ public class MetrixContainer {
     // Process QScore Dist
     log.debug("Checking Quality Metrics");
     if ((!sum.hasQScores() || timeCheck || force) && !this.remote) {
-      LoggerWrapper.log.fine("Processing Quality Metrics");
+      log.debug("Processing Quality Metrics");
       QualityMetrics qm = new QualityMetrics(qualityMetrics, 0);
       // if (!qm.getFileMissing()) {
       if ((!sum.hasQScoreDist() && !qm.getFileMissing()) || this.force) {
@@ -396,11 +387,10 @@ public class MetrixContainer {
         hasUpdated = true;
       }
       catch (IOException IOE) {
-        LoggerWrapper.log.log(Level.SEVERE, "IOException in update statement {0}", IOE.toString());
+        log.error("Update statement", IOE);
       }
       catch (Exception SEx) {
-        LoggerWrapper.log.log(Level.SEVERE, "Exception in update statement {0}", SEx.toString());
-        SEx.printStackTrace();
+        log.error("Exception in update statement", SEx);
       }
 
     }
