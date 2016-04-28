@@ -53,40 +53,40 @@ public class PostProcessing {
   private boolean isValid = true;
   private boolean hasFinished = false;
 
-  private Map<String, String> tm = new HashMap<>();  // Template mapping collection for placeholder substitutions.
+  private Map<String, String> tm = new HashMap<>(); // Template mapping
+                                                    // collection for
+                                                    // placeholder
+                                                    // substitutions.
   // Instantiate Logger
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
   // Properties config
   private static final Properties configFile = new Properties();
 
-
   public PostProcessing(Summary s) {
-    this.sum = s;  // Set summary
+    this.sum = s; // Set summary
   }
 
-  
-  
   public void run() {
     LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Initializing post processing for {0}", sum.getRunId());
     /*
-		 *  Pre PP loaders and checks
-		 */
+     * Pre PP loaders and checks
+     */
     loadProperties();
     initXml();
     validateXmlStructure();
-		
+
     /*
-     *  Load post processing configuration
+     * Load post processing configuration
      */
     loadTemplate();
 
     /*
-     *  Interpret processing
+     * Interpret processing
      */
     parseXmlStructure();
 
     /*
-     *  Execute post processing
+     * Execute post processing
      */
     if (isValid) {
       executeProcessing();
@@ -149,8 +149,8 @@ public class PostProcessing {
   }
 
   /*
-   * XML Structure validation method.
-   * Contents of postprocessing.mtx (XML) are verified against postprocessing.xsd
+   * XML Structure validation method. Contents of postprocessing.mtx (XML) are
+   * verified against postprocessing.xsd
    */
   private void validateXmlStructure() {
     LoggerWrapper.log.finer("[Metrix Post-Processor] Validating xml structure...");
@@ -158,7 +158,7 @@ public class PostProcessing {
     InputStream xsd = null;
     try {
       // The required files:
-      // - postprocessing.mtx	(properties file)
+      // - postprocessing.mtx (properties file)
       // - postprocessing.xsd (default location in root)
       xml = new FileInputStream(xmlFile);
       String ppFormatPath = configFile.getProperty("POSTPROCESSING_FORMAT", "./postprocessing.xsd");
@@ -175,11 +175,12 @@ public class PostProcessing {
       LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Failed to open required files. ({0})", IO.toString());
       isValid = false;
     }
-    catch (SAXException ex) {  // Validation failed
-      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] XML validation failed. ({0} || {1})", new Object[]{ex.toString(), ex.getLocalizedMessage()});
+    catch (SAXException ex) { // Validation failed
+      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] XML validation failed. ({0} || {1})", new Object[] {
+          ex.toString(), ex.getLocalizedMessage()
+      });
       isValid = false;
-    }
-    finally {
+    } finally {
       try {
         if (xml != null) {
           xml.close();
@@ -226,7 +227,8 @@ public class PostProcessing {
   }
 
   private void parseXmlStructure() {
-    // By de facto the XSD validation should have caught the root element name formatting
+    // By de facto the XSD validation should have caught the root element name
+    // formatting
     if (doc.getDocumentElement().getNodeName().equals("Metrix")) {
       NodeList nodeList = doc.getElementsByTagName("*");
 
@@ -243,31 +245,34 @@ public class PostProcessing {
             blockList.add(processBlock);
 
             NodeList foChildren = node.getChildNodes();
-            // DemuxOperation is a singular process and does not contain any childnodes by default.
-            if(nodeName.equals("DemuxOperation")){
-                node = mapTemplate(node);
-                DemuxOperation dmxObject = new DemuxOperation(node);
-                processList.add(dmxObject);
-            }else{
-                // Iterate over defined children and create do Operation node processing.
-                for (int x = 0; x < foChildren.getLength(); x++) {
-                  Node fo = foChildren.item(x);
-                  if (fo.getNodeName().equals("#text") || fo.getNodeName().equals("#comment")) {
-                    continue;
-                  }
-                  switch (nodeName) {
-                    case "FileOperation":
-                      fo = mapTemplate(fo);
-                      FileOperation foObject = new FileOperation(node, fo);
-                      processList.add(foObject);
-                      break;
-                    case "Application":
-                      fo = mapTemplate(fo);
-                      Application appObject = new Application(node, fo);
-                      processList.add(appObject);
-                      break;
-                  }
+            // DemuxOperation is a singular process and does not contain any
+            // childnodes by default.
+            if (nodeName.equals("DemuxOperation")) {
+              node = mapTemplate(node);
+              DemuxOperation dmxObject = new DemuxOperation(node);
+              processList.add(dmxObject);
+            }
+            else {
+              // Iterate over defined children and create do Operation node
+              // processing.
+              for (int x = 0; x < foChildren.getLength(); x++) {
+                Node fo = foChildren.item(x);
+                if (fo.getNodeName().equals("#text") || fo.getNodeName().equals("#comment")) {
+                  continue;
                 }
+                switch (nodeName) {
+                case "FileOperation":
+                  fo = mapTemplate(fo);
+                  FileOperation foObject = new FileOperation(node, fo);
+                  processList.add(foObject);
+                  break;
+                case "Application":
+                  fo = mapTemplate(fo);
+                  Application appObject = new Application(node, fo);
+                  processList.add(appObject);
+                  break;
+                }
+              }
             }
           }
         }
@@ -335,7 +340,8 @@ public class PostProcessing {
         else {
           LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] FileOperation {0} not populated correctly. Source and/or destination are empty.", fo.getTitle());
         }
-      }else if (pp instanceof DemuxOperation) {
+      }
+      else if (pp instanceof DemuxOperation) {
         DemuxOperation dmx = (DemuxOperation) pp;
         status += executeDemuxOperation(dmx);
       }
@@ -349,60 +355,65 @@ public class PostProcessing {
     }
   }
 
-   private int executeDemuxOperation(DemuxOperation dmx) {
-    // Default exitstatus 0 for return without encountering any errors during processing.
+  private int executeDemuxOperation(DemuxOperation dmx) {
+    // Default exitstatus 0 for return without encountering any errors during
+    // processing.
     int exitStatus = -255;
-    
+
     LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting script: {0}", dmx.getTitle());
     // The script / application to execute
-    if(dmx.getBclToFastQPath().equals("")){
-        LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Cannot find the Bcl conversion script. Argument is not set in postprocessing.");
-        return exitStatus;
+    if (dmx.getBclToFastQPath().equals("")) {
+      LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Cannot find the Bcl conversion script. Argument is not set in postprocessing.");
+      return exitStatus;
     }
-    
+
     exitStatus = 0;
     // Split SampleSheet based on projects.
-    try{
-        dmx.generateSampleSheets();
-    }catch(FileNotFoundException FNFE){
-        LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] Samplesheets could not be generated, the untransformed samplesheet is not present. {0}", dmx.getSampleSheetPath());
-    }catch(IOException ex){
-        LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException during samplesheet generation ", ex);
+    try {
+      dmx.generateSampleSheets();
+    }
+    catch (FileNotFoundException FNFE) {
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] Samplesheets could not be generated, the untransformed samplesheet is not present. {0}", dmx.getSampleSheetPath());
+    }
+    catch (IOException ex) {
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException during samplesheet generation ", ex);
     }
     // Demux each project.
-    for(File ss : dmx.getSamplesheetLocations()){
-        // Demultiplex every samplesheet generated by DemuxOperation
-        processSamplesheet(dmx, ss);
+    for (File ss : dmx.getSamplesheetLocations()) {
+      // Demultiplex every samplesheet generated by DemuxOperation
+      processSamplesheet(dmx, ss);
     }
-    
+
     return exitStatus;
   }
-  
-  private int processSamplesheet(DemuxOperation dmx, File samplesheet){
+
+  private int processSamplesheet(DemuxOperation dmx, File samplesheet) {
     int exitStatus = 0;
     String sampleSheetNameNormal = samplesheet.getName().replace(".csv", "");
     LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting demultiplexing for: {0}", sampleSheetNameNormal);
-    
+
     // The output file. All console activity is written to this file.
     final File loggingFile;
-    
-    if(!dmx.getLoggingPath().equals("")){
-        loggingFile = new File(dmx.getLoggingPath());
-    }else{
-        loggingFile = new File(dmx.getBaseOutputDir() +"/"+sampleSheetNameNormal+ ".postprocessing.log");
+
+    if (!dmx.getLoggingPath().equals("")) {
+      loggingFile = new File(dmx.getLoggingPath());
     }
-    
+    else {
+      loggingFile = new File(dmx.getBaseOutputDir() + "/" + sampleSheetNameNormal + ".postprocessing.log");
+    }
+
     // Does Data output folder exist?
     File dmxBaseOut = new File(dmx.getBaseOutputDir() + "/Demux/" + sampleSheetNameNormal + "/");
-    
-    if(!dmxBaseOut.exists()){
-        if(dmxBaseOut.mkdirs()){
-            LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Successfuly created folder {0}", dmxBaseOut);
-        }else{
-            LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Error creating directory! ");
-        }
+
+    if (!dmxBaseOut.exists()) {
+      if (dmxBaseOut.mkdirs()) {
+        LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Successfuly created folder {0}", dmxBaseOut);
+      }
+      else {
+        LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Error creating directory! ");
+      }
     }
-    
+
     ArrayList<String> cmd = new ArrayList<>();
     // Add script path to command
     cmd.add(dmx.getBclToFastQPath());
@@ -416,26 +427,28 @@ public class PostProcessing {
     cmd.add("--use-bases-mask");
     cmd.add(dmx.ssBaseMaskMap.get(samplesheet.getAbsolutePath()));
     cmd.add("--force");
-    
-    LoggerWrapper.log.log(Level.FINE, "Script: {0}\nInput: {1}\nOutput: {2}\nSamplesheet: {3}\nBaseMask: {4}", new Object[]{dmx.getBclToFastQPath(), dmx.getBaseWorkingDir(), dmxBaseOut.toString(), samplesheet.getAbsolutePath(), dmx.ssBaseMaskMap.get(samplesheet.getAbsolutePath())});
-    
-    if(dmx.getArguments() != null){
-        String[] spl = dmx.getArguments().split(" ");
-        cmd.addAll(Arrays.asList(spl));
+
+    LoggerWrapper.log.log(Level.FINE, "Script: {0}\nInput: {1}\nOutput: {2}\nSamplesheet: {3}\nBaseMask: {4}", new Object[] {
+        dmx.getBclToFastQPath(), dmx.getBaseWorkingDir(), dmxBaseOut.toString(), samplesheet.getAbsolutePath(), dmx.ssBaseMaskMap.get(samplesheet.getAbsolutePath())
+    });
+
+    if (dmx.getArguments() != null) {
+      String[] spl = dmx.getArguments().split(" ");
+      cmd.addAll(Arrays.asList(spl));
     }
-    
+
     ProcessBuilder pb = new ProcessBuilder(cmd);
     LoggerWrapper.log.log(Level.INFO, "Executing : {0}", pb.command());
-    
-    if(dmx.getBaseWorkingDir() != null){
-        LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Setting base working directory for postprocessing to: {0}", dmx.getBaseWorkingDir());
-        pb.directory(new File(dmx.getBaseWorkingDir())); // Data/Intensities/BaseCalls
+
+    if (dmx.getBaseWorkingDir() != null) {
+      LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Setting base working directory for postprocessing to: {0}", dmx.getBaseWorkingDir());
+      pb.directory(new File(dmx.getBaseWorkingDir())); // Data/Intensities/BaseCalls
     }
-   
+
     // Instantiate the ProcessBuilder
     pb.redirectOutput(loggingFile);
     pb.redirectErrorStream(true);
-    
+
     try {
       LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting process for: {0}", pb.command());
       Process p = pb.start();
@@ -443,50 +456,60 @@ public class PostProcessing {
       exitStatus = p.waitFor();
     }
     catch (IOException IO) {
-      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{dmx.getId(), IO.toString()});
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[] {
+          dmx.getId(), IO.toString()
+      });
     }
     catch (InterruptedException IE) {
-      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{dmx.getId(), IE.toString()});
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[] {
+          dmx.getId(), IE.toString()
+      });
     }
-    if(exitStatus == 0){
-        LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] ConfigureBclToFastQ configured successfully - Starting make...");
-        ArrayList<String> cmdMake = new ArrayList<>();
-        cmdMake.addAll(Arrays.asList(dmx.getMakePath().split(" ")));
-        
-        String[] makeArgs = dmx.getMakeArguments().split(" ");
-        cmdMake.addAll(Arrays.asList(makeArgs));
+    if (exitStatus == 0) {
+      LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] ConfigureBclToFastQ configured successfully - Starting make...");
+      ArrayList<String> cmdMake = new ArrayList<>();
+      cmdMake.addAll(Arrays.asList(dmx.getMakePath().split(" ")));
 
-        ProcessBuilder pbMake = new ProcessBuilder(cmdMake);
-        LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting Make for : {0}", pbMake.command());
-        pbMake.directory(dmxBaseOut);
+      String[] makeArgs = dmx.getMakeArguments().split(" ");
+      cmdMake.addAll(Arrays.asList(makeArgs));
 
-        // Instantiate the ProcessBuilder for make
-        pbMake.redirectOutput(new File(dmx.getBaseOutputDir() +"/"+samplesheet.getName().replace(".csv", "") +".make.log"));
-        pbMake.redirectErrorStream(true);
+      ProcessBuilder pbMake = new ProcessBuilder(cmdMake);
+      LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Starting Make for : {0}", pbMake.command());
+      pbMake.directory(dmxBaseOut);
 
-        try {
-          Process pMake = pbMake.start();
-          // Start the process and wait for it to finish.
-          exitStatus += pMake.waitFor(); 
-        }
-        catch (IOException IO) {
-          LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{dmx.getId(), IO.toString()});
-        }
-        catch (InterruptedException IE) {
-          LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{dmx.getId(), IE.toString()});
-        }    
+      // Instantiate the ProcessBuilder for make
+      pbMake.redirectOutput(new File(dmx.getBaseOutputDir() + "/" + samplesheet.getName().replace(".csv", "") + ".make.log"));
+      pbMake.redirectErrorStream(true);
 
-        if (exitStatus == 0) {
-          LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Application block ({0} :: {1} :: {2}) has finished successfully.  ", new Object[]{dmx.getOrder(), dmx.getSubOrder(), dmx.getId()});
-        }
-        else {
-          LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Application block ''{0}'' has exited with errors.", dmx.getId());
-        }
+      try {
+        Process pMake = pbMake.start();
+        // Start the process and wait for it to finish.
+        exitStatus += pMake.waitFor();
+      }
+      catch (IOException IO) {
+        LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[] {
+            dmx.getId(), IO.toString()
+        });
+      }
+      catch (InterruptedException IE) {
+        LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[] {
+            dmx.getId(), IE.toString()
+        });
+      }
+
+      if (exitStatus == 0) {
+        LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Application block ({0} :: {1} :: {2}) has finished successfully.  ", new Object[] {
+            dmx.getOrder(), dmx.getSubOrder(), dmx.getId()
+        });
+      }
+      else {
+        LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Application block ''{0}'' has exited with errors.", dmx.getId());
+      }
     }
-    
+
     return exitStatus;
   }
-   
+
   private int executeFileOperation(FileOperation fo) {
     LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting file operation: {0}", fo.getTitle());
     int exitStatus = -255;
@@ -512,8 +535,9 @@ public class PostProcessing {
       LoggerWrapper.log.log(Level.FINEST, "[Metrix Post-Processor] Source file: {0} is readable.", sourceFile.toString());
     }
 
-    // If destination is file (assuming that all destination files will have an extension)
-    // 	Check parent
+    // If destination is file (assuming that all destination files will have an
+    // extension)
+    // Check parent
     File targetDir;
     if ((destinationFile.toString()).lastIndexOf(".") > 0) {
       destinationFile.getParentFile().mkdirs();
@@ -549,10 +573,14 @@ public class PostProcessing {
       LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Creating file during copy: {0}", sourceFile.getName());
     }
     else if ((sourceDir != null) && (fo.hasGlobbing())) {
-      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Copying files with extension: {0} from: {1}to: {2}", new Object[]{fo.getGlobbing(), sourceFile.getAbsoluteFile(), destinationFile});
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Copying files with extension: {0} from: {1}to: {2}", new Object[] {
+          fo.getGlobbing(), sourceFile.getAbsoluteFile(), destinationFile
+      });
     }
     else if ((sourceDir != null) && !(fo.hasGlobbing())) {
-      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Copying directory: {0}\tto: {1}", new Object[]{sourceFile, destinationFile});
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Copying directory: {0}\tto: {1}", new Object[] {
+          sourceFile, destinationFile
+      });
     }
     else if (destinationIsDir && destinationFile.exists() && sourceFile.isFile()) {
       LoggerWrapper.log.info("[Metrix Post-Processor] Source is a file - destination is directory.");
@@ -567,8 +595,8 @@ public class PostProcessing {
     }
 
     /*
-    *  Is process a copy operation?
-    */
+     * Is process a copy operation?
+     */
     if (fo.isCopyOperation()) {
 
       // Is globbing used?
@@ -576,22 +604,20 @@ public class PostProcessing {
         LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Using globbing pattern: {0}", fo.getGlobbing());
         List<Path> foundFiles = findFilesGlobbing(Paths.get(fo.getSource()), fo.getGlobbing());
 
-        // Execute the basic copy  operation for files that have been found with a pattern.
+        // Execute the basic copy operation for files that have been found with
+        // a pattern.
         exitStatus = executeGlobbingCopy(fo, foundFiles);
         return exitStatus;
       }
 
       try {
-        CopyOption[] options = new CopyOption[]{};
-        CopyOption[] replOpt = new CopyOption[]{
-            COPY_ATTRIBUTES,
-            REPLACE_EXISTING,
-            java.nio.file.LinkOption.NOFOLLOW_LINKS
+        CopyOption[] options = new CopyOption[] {};
+        CopyOption[] replOpt = new CopyOption[] {
+            COPY_ATTRIBUTES, REPLACE_EXISTING, java.nio.file.LinkOption.NOFOLLOW_LINKS
         };
 
-        CopyOption[] stdOpt = new CopyOption[]{
-            COPY_ATTRIBUTES,
-            java.nio.file.LinkOption.NOFOLLOW_LINKS
+        CopyOption[] stdOpt = new CopyOption[] {
+            COPY_ATTRIBUTES, java.nio.file.LinkOption.NOFOLLOW_LINKS
         };
 
         // Overwrite in file operations?
@@ -599,21 +625,14 @@ public class PostProcessing {
 
         // Is the source path a file?
         if (sourceFile.isFile()) {
-          LoggerWrapper.log.log(Level.FINE, "Copying {0}to: {1}", new Object[]{sourceFile, destinationFile});
-          Files.copy(
-              sourceFile.toPath(),
-              destinationFile.toPath(),
-              options
-          );
+          LoggerWrapper.log.log(Level.FINE, "Copying {0}to: {1}", new Object[] {
+              sourceFile, destinationFile
+          });
+          Files.copy(sourceFile.toPath(), destinationFile.toPath(), options);
           exitStatus = 0;
         }
         else if (sourceFile.isDirectory()) { // Is the sourcepath a directory?
-          FileOperations fileops =
-              new FileOperations(
-                  sourceFile.toPath(),
-                  destinationFile.toPath(),
-                  options
-              );
+          FileOperations fileops = new FileOperations(sourceFile.toPath(), destinationFile.toPath(), options);
 
           try {
             fileops.recursiveCopy();
@@ -637,13 +656,15 @@ public class PostProcessing {
       }
 
       if (exitStatus == 0) {
-        LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully copied {0} to {1}", new Object[]{sourceFile, destinationFile});
+        LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Successfully copied {0} to {1}", new Object[] {
+            sourceFile, destinationFile
+        });
       }
     }
 
     /*
-    * Is process a symlink operation?
-    */
+     * Is process a symlink operation?
+     */
     if (fo.isSymlinkOperation()) {
       try {
         Files.createSymbolicLink(sourceFile.toPath(), destinationFile.toPath());
@@ -658,12 +679,14 @@ public class PostProcessing {
     }
 
     /*
-    * Process is another operation type
-    */
+     * Process is another operation type
+     */
     // Not yet implemented.
 
     if (exitStatus == 0) {
-      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] File Operation block ({0} :: {1} :: {2}) has finished successfully.", new Object[]{fo.getOrder(), fo.getSubOrder(), fo.getId()});
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] File Operation block ({0} :: {1} :: {2}) has finished successfully.", new Object[] {
+          fo.getOrder(), fo.getSubOrder(), fo.getId()
+      });
     }
     else {
       LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] File Operation block ''{0}'' has exited with errors.", fo.getId());
@@ -673,7 +696,9 @@ public class PostProcessing {
   }
 
   private List<Path> findFilesGlobbing(Path sourcePath, String pattern) {
-    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Finding files with globbing pattern: {0} in {1}", new Object[]{pattern, sourcePath});
+    LoggerWrapper.log.log(Level.FINE, "[Metrix Post-Processor] Finding files with globbing pattern: {0} in {1}", new Object[] {
+        pattern, sourcePath
+    });
     FileOperations fileops = new FileOperations(sourcePath, pattern);
 
     try {
@@ -691,18 +716,14 @@ public class PostProcessing {
     File destinationFile = new File(fo.getDestination());
     int exitStatus = 0;
 
-    CopyOption[] options = new CopyOption[]{};
-    CopyOption[] replOpt = new CopyOption[]{
-        COPY_ATTRIBUTES,
-        REPLACE_EXISTING,
-        java.nio.file.LinkOption.NOFOLLOW_LINKS
+    CopyOption[] options = new CopyOption[] {};
+    CopyOption[] replOpt = new CopyOption[] {
+        COPY_ATTRIBUTES, REPLACE_EXISTING, java.nio.file.LinkOption.NOFOLLOW_LINKS
     };
 
-    CopyOption[] stdOpt = new CopyOption[]{
-        COPY_ATTRIBUTES,
-        java.nio.file.LinkOption.NOFOLLOW_LINKS
+    CopyOption[] stdOpt = new CopyOption[] {
+        COPY_ATTRIBUTES, java.nio.file.LinkOption.NOFOLLOW_LINKS
     };
-
 
     if (!destinationFile.isDirectory()) {
       LoggerWrapper.log.fine("[Metrix Post-Processor] Destination path is not a directory.");
@@ -712,11 +733,7 @@ public class PostProcessing {
     for (Path sourcePath : fileList) {
       options = !fo.needOverwrite() ? stdOpt : replOpt;
       try {
-        Files.copy(
-            sourcePath,
-            (destinationFile.toPath()).resolve(sourcePath),
-            options
-        );
+        Files.copy(sourcePath, (destinationFile.toPath()).resolve(sourcePath), options);
         exitStatus += 0;
       }
       catch (IOException Ex) {
@@ -724,7 +741,9 @@ public class PostProcessing {
         exitStatus += -1;
       }
 
-      LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Copied: {0} to: {1}", new Object[]{sourcePath, destinationFile});
+      LoggerWrapper.log.log(Level.FINER, "[Metrix Post-Processor] Copied: {0} to: {1}", new Object[] {
+          sourcePath, destinationFile
+      });
     }
 
     return exitStatus; // All is good
@@ -735,21 +754,21 @@ public class PostProcessing {
     LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Starting script: {0}", app.getTitle());
     // The script / application to execute
     cmd.addAll(Arrays.asList(app.getScriptPath().split(" ", -1)));
-    
+
     // The output file. All application activity is written to this file.
     final File outputFile = new File(app.getOutputPath());
     // The supplied arguments for the script
     cmd.addAll(Arrays.asList(app.getArguments().split(" ", -1)));
     ProcessBuilder pb = new ProcessBuilder(cmd);
-    
-    if(app.getWorkingDirectory() != null){
-        pb.directory(new File(app.getWorkingDirectory()));
+
+    if (app.getWorkingDirectory() != null) {
+      pb.directory(new File(app.getWorkingDirectory()));
     }
-    
+
     // Instantiate the ProcessBuilder
     pb.redirectOutput(outputFile);
     pb.redirectErrorStream(true);
-    
+
     // Default exitstatus -255 for return without processing.
     int exitStatus = -255;
 
@@ -759,14 +778,20 @@ public class PostProcessing {
       exitStatus = p.waitFor();
     }
     catch (IOException IO) {
-      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[]{app.getId(), IO.toString()});
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] IOException while executing process ({0}): {1}", new Object[] {
+          app.getId(), IO.toString()
+      });
     }
     catch (InterruptedException IE) {
-      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[]{app.getId(), IE.toString()});
+      LoggerWrapper.log.log(Level.SEVERE, "[Metrix Post-Processor] InterruptedException for process ( {0}): {1}", new Object[] {
+          app.getId(), IE.toString()
+      });
     }
 
     if (exitStatus == 0) {
-      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Application block ({0} :: {1} :: {2}) has finished successfully.  ", new Object[]{app.getOrder(), app.getSubOrder(), app.getId()});
+      LoggerWrapper.log.log(Level.INFO, "[Metrix Post-Processor] Application block ({0} :: {1} :: {2}) has finished successfully.  ", new Object[] {
+          app.getOrder(), app.getSubOrder(), app.getId()
+      });
     }
     else {
       LoggerWrapper.log.log(Level.WARNING, "[Metrix Post-Processor] Application block ''{0}'' has exited with errors.", app.getId());
@@ -776,17 +801,9 @@ public class PostProcessing {
   }
 }
 
-/*	Possible placeholders for parameters or variables.
-	// Placeholder options
-	- {TotalCycles}
-	- {FlowcellID}
-	- {FlowcellSide}
-	- {SequencerRunNr}
-	- {SequencerName}
-	- {SequencerType}		
-	- {RunDate}
-	- {RunType}
-	- {RunDirectory}
-	- {RunID}
-	- {DemuxIndex}
-*/
+/*
+ * Possible placeholders for parameters or variables. // Placeholder options -
+ * {TotalCycles} - {FlowcellID} - {FlowcellSide} - {SequencerRunNr} -
+ * {SequencerName} - {SequencerType} - {RunDate} - {RunType} - {RunDirectory} -
+ * {RunID} - {DemuxIndex}
+ */

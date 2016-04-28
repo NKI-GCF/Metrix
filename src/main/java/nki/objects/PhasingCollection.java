@@ -73,7 +73,7 @@ public class PhasingCollection implements Serializable {
       distXml = xmlDoc.createElement("Prephasing");
     }
 
-    for (int lane : phasingPerLane.keySet()) {  // Lane
+    for (int lane : phasingPerLane.keySet()) { // Lane
       Element laneEle = xmlDoc.createElement("Lane");
       laneEle.setAttribute("Index", lane + "");
 
@@ -94,7 +94,7 @@ public class PhasingCollection implements Serializable {
     String out = "";
     DecimalFormat df = new DecimalFormat("#.###");
 
-    for (int lane : phasingPerLane.keySet()) {  // Lane
+    for (int lane : phasingPerLane.keySet()) { // Lane
       for (int readNum : phasingPerLane.get(lane).keySet()) {
         out += lane + "\t" + readNum + "\t" + df.format(getPhasing(lane, readNum).getPhasing()) + "\n";
       }
@@ -112,7 +112,7 @@ public class PhasingCollection implements Serializable {
       if (phasingPerLane.size() != ext.phasingPerLane.size()) {
         return "Incompatible list size.";
       }
-      for (int lane : phasingPerLane.keySet()) {  // Lane
+      for (int lane : phasingPerLane.keySet()) { // Lane
         for (int readNum : phasingPerLane.get(lane).keySet()) {
           String idx = "";
           if (rds.isIndexedRead(readNum)) {

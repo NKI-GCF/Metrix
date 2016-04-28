@@ -62,40 +62,41 @@ public class ArrayUtils {
   }
 
   public static double quartile(double[] values, double lowerPercent) {
-      if (values == null || values.length == 0) {
-          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
-      }
+    if (values == null || values.length == 0) {
+      throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+    }
 
-      // Rank order the values
-      double[] v = new double[values.length];
-      System.arraycopy(values, 0, v, 0, values.length);
-      Arrays.sort(v);
+    // Rank order the values
+    double[] v = new double[values.length];
+    System.arraycopy(values, 0, v, 0, values.length);
+    Arrays.sort(v);
 
-      int n = (int) Math.round(v.length * lowerPercent / 100);
+    int n = (int) Math.round(v.length * lowerPercent / 100);
 
-      return v[n];
+    return v[n];
   }
 
   public static double quartile(List<Double> values, double lowerPercent) {
-      if (values == null || values.isEmpty()) {
-          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
-      }
-      
-      double[] prival = new double[values.size()];
-      for (int i = 0; i < values.size(); i++) {
-        prival[i] = values.get(i);
-      }
+    if (values == null || values.isEmpty()) {
+      throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+    }
 
-      // Rank order the values
-      Arrays.sort(prival);
+    double[] prival = new double[values.size()];
+    for (int i = 0; i < values.size(); i++) {
+      prival[i] = values.get(i);
+    }
 
-      int n = (int) Math.round(prival.length * lowerPercent / 100);
-      
-      if(prival.length > n){
-        return prival[n];
-      }else{
-        return 0;
-      }
+    // Rank order the values
+    Arrays.sort(prival);
+
+    int n = (int) Math.round(prival.length * lowerPercent / 100);
+
+    if (prival.length > n) {
+      return prival[n];
+    }
+    else {
+      return 0;
+    }
   }
 
   public double getVariance(List<Double> data) {

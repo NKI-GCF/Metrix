@@ -18,7 +18,8 @@ public class FWHMDist implements Serializable {
   private final Map<Integer, Map<Integer, Map<String, MutableDouble>>> iDist = new TreeMap<>();
 
   public void setFWHM(int lane, int cycle, Map<String, MutableDouble> fMapM) {
-    // Map every cycle with all FWHM scores for each base and their respective value.
+    // Map every cycle with all FWHM scores for each base and their respective
+    // value.
     Map<Integer, Map<String, MutableDouble>> oMap = iDist.get(lane);
 
     if (oMap == null) {

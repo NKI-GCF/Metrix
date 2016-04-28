@@ -36,7 +36,8 @@ public class FWHMMap implements Serializable {
     return sMap.size();
   }
 
-  // Calculate the average FWHM for this cycle for each metric constant [A, C, G, T]
+  // Calculate the average FWHM for this cycle for each metric constant [A, C,
+  // G, T]
   public Map<String, MutableDouble> getCycleAverageFWHM() {
     Map<String, MutableDouble> avgOverTiles = new HashMap<>();
 
@@ -52,7 +53,7 @@ public class FWHMMap implements Serializable {
       Double fC = tileMapping.get(Constants.METRIC_VAR_FWHM_C);
       Double fG = tileMapping.get(Constants.METRIC_VAR_FWHM_G);
       Double fT = tileMapping.get(Constants.METRIC_VAR_FWHM_T);
-      
+
       avgOverTiles.get(Constants.METRIC_VAR_FWHM_A).add(fA);
       avgOverTiles.get(Constants.METRIC_VAR_FWHM_C).add(fC);
       avgOverTiles.get(Constants.METRIC_VAR_FWHM_G).add(fG);
@@ -69,12 +70,12 @@ public class FWHMMap implements Serializable {
 
   // Return the number of called bases foreach channel [NC, A, C, G, T]
   public void getNumberCalledBases() {
-    //public HashMap<String, float> getNumberCalledBases(){
+    // public HashMap<String, float> getNumberCalledBases(){
 
   }
 
   // Calculate average Signal To Noise Ratio for this cycle
-//	public float getAverageSTNRatio(){
+  // public float getAverageSTNRatio(){
   public void getAverageSTNRatio() {
 
   }

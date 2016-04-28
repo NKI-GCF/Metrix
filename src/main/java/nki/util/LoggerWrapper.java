@@ -76,7 +76,7 @@ public class LoggerWrapper {
       log.addHandler(myFileHandler);
 
       if (!asDaemon.equalsIgnoreCase("true")) {
-//				log.setUseParentHandlers(true);
+        // log.setUseParentHandlers(true);
         ConsoleHandler myConsoleHandler = new ConsoleHandler();
         myConsoleHandler.setFormatter(new SingleLineFormatter());
         myConsoleHandler.setLevel(propLvl);
@@ -94,27 +94,27 @@ public class LoggerWrapper {
 
   private static Level getLevel(String lvl) {
     switch (lvl) {
-      case "ALL":
-        return Level.ALL;
-      case "CONFIG":
-        return Level.CONFIG;
-      case "FINE":
-        return Level.FINE;
-      case "FINER":
-        return Level.FINER;
-      case "FINEST":
-        return Level.FINEST;
-      case "INFO":
-        return Level.INFO;
-      case "OFF":
-        return Level.OFF;
-      case "SEVERE":
-        return Level.SEVERE;
-      case "WARNING":
-        return Level.WARNING;
-      default:
-        // Default Level INFO
-        return Level.INFO;
+    case "ALL":
+      return Level.ALL;
+    case "CONFIG":
+      return Level.CONFIG;
+    case "FINE":
+      return Level.FINE;
+    case "FINER":
+      return Level.FINER;
+    case "FINEST":
+      return Level.FINEST;
+    case "INFO":
+      return Level.INFO;
+    case "OFF":
+      return Level.OFF;
+    case "SEVERE":
+      return Level.SEVERE;
+    case "WARNING":
+      return Level.WARNING;
+    default:
+      // Default Level INFO
+      return Level.INFO;
     }
   }
 }

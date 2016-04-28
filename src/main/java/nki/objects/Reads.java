@@ -57,7 +57,7 @@ public class Reads implements Serializable {
     int readOneLength = Integer.parseInt((readMap.get(1)).get(0));
     int readTwoLength = 0;
     if (readMap.size() > 1) {
-      if(readMap.get(2).get(0) != null){
+      if (readMap.get(2).get(0) != null) {
         readTwoLength = Integer.parseInt((readMap.get(2)).get(0));
       }
     }
@@ -84,17 +84,17 @@ public class Reads implements Serializable {
     String demuxIndex = "";
     int cnt = 0;
     for (List<String> l : readMap.values()) {
-      if(cnt++>0){
-          demuxIndex += ",";
+      if (cnt++ > 0) {
+        demuxIndex += ",";
       }
       if (l.get(1).equals("N")) {
-        demuxIndex += "y"+ l.get(0);  // Read is not an index
+        demuxIndex += "y" + l.get(0); // Read is not an index
       }
       else {
-        demuxIndex += "I"+ l.get(0); // Read is an index
+        demuxIndex += "I" + l.get(0); // Read is an index
       }
     }
- 
+
     return demuxIndex;
   }
 }

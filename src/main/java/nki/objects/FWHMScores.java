@@ -53,7 +53,7 @@ public class FWHMScores implements Serializable {
     if (cycleMap == null) {
       fScores.put(lanenr, content);
     }
-    else {  // Merge maps and replace existing entries
+    else { // Merge maps and replace existing entries
       Map<Integer, FWHMMap> tmpMap = new HashMap<>(content);
       tmpMap.keySet().removeAll(cycleMap.keySet());
       cycleMap.putAll(content);

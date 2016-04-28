@@ -21,44 +21,49 @@ public class Summary implements Serializable {
   private static final long serialVersionUID = 42L;
 
   // Run Properties
-  private int currentCycle;      // Current cycle in run
-  private int totalCycles;      // Total amount of cycles
-  private String flowcellID;      // Flowcell ID
-  private String side = "";        // Side of flowcell
-  private String lastUpdated = "0";    // Last update time
+  private int currentCycle; // Current cycle in run
+  private int totalCycles; // Total amount of cycles
+  private String flowcellID; // Flowcell ID
+  private String side = ""; // Side of flowcell
+  private String lastUpdated = "0"; // Last update time
   private long lastUpdatedEpoch = 0;
-  private String phase;        // Phase of run :: Imaging / Basecalling / RTAComplete
-  private String runType = "Single Read";      // Run Type: Single Read/ Paired End / Nextera
-  private int indexLength;      // Length of index read
-  private int tileCount;        // Number of Tiles
-  private int state = 5;    // State 0: Hanging / State 1: Running / State 2: Complete / State 3: Unknown / State 4: Flowcell needs turning
-  private int numReads;      // Total number of reads
-  private boolean isNextera = false;  // Is this a nextera run?
-  private boolean isIndexed = false;  // Is run indexed.
-  private boolean xmlInfo = false;  // Has xmlInfo been parsed?
-  private String runId;        // Full run identifier
-  private int date;        // Run date
-  private int laneCount;      // Number of lanes
-  private int surfaceCount;      // Number of surface sides
-  private int swathCount;      // Number of swaths
-  private int instrumentRunNumber;    // Nth number run on this instrument
-  private String instrument;      // Name of instrument
-  private String instrumentType = "";    // Type of instrument: HiSeq / MiSeq
+  private String phase; // Phase of run :: Imaging / Basecalling / RTAComplete
+  private String runType = "Single Read"; // Run Type: Single Read/ Paired End /
+                                          // Nextera
+  private int indexLength; // Length of index read
+  private int tileCount; // Number of Tiles
+  private int state = 5; // State 0: Hanging / State 1: Running / State 2:
+                         // Complete / State 3: Unknown / State 4: Flowcell
+                         // needs turning
+  private int numReads; // Total number of reads
+  private boolean isNextera = false; // Is this a nextera run?
+  private boolean isIndexed = false; // Is run indexed.
+  private boolean xmlInfo = false; // Has xmlInfo been parsed?
+  private String runId; // Full run identifier
+  private int date; // Run date
+  private int laneCount; // Number of lanes
+  private int surfaceCount; // Number of surface sides
+  private int swathCount; // Number of swaths
+  private int instrumentRunNumber; // Nth number run on this instrument
+  private String instrument; // Name of instrument
+  private String instrumentType = ""; // Type of instrument: HiSeq / MiSeq
   private String runNameOptional = "";
-  private Reads reads;        // Read information
+  private Reads reads; // Read information
   private boolean hasTurned = false;
-  private boolean hasFinished = false;  // Has the run finished?
+  private boolean hasFinished = false; // Has the run finished?
   private boolean hasNotifyTurned = false;
-  private String runDirectory = "";    // RunDirectory path
-  private int parseError = 0;  // Number of parsing errors
+  private String runDirectory = ""; // RunDirectory path
+  private int parseError = 0; // Number of parsing errors
 
   // Run Metrics
-  private ClusterDensity clusterDensity;    // Contains Cluster Density for all lanes
-  private ClusterDensity clusterDensityPF;      // Contains Cluster Density Passing Filter for all lanes
-  private PhasingCollection phasingMap;      // Phasing values per lane
-  private PhasingCollection prephasingMap;    // Prephasing values per lane
+  private ClusterDensity clusterDensity; // Contains Cluster Density for all
+                                         // lanes
+  private ClusterDensity clusterDensityPF; // Contains Cluster Density Passing
+                                           // Filter for all lanes
+  private PhasingCollection phasingMap; // Phasing values per lane
+  private PhasingCollection prephasingMap; // Prephasing values per lane
 
-  private QualityScores qScores;            // QualityScores per lane, per cycle, per tile
+  private QualityScores qScores; // QualityScores per lane, per cycle, per tile
 
   private IntensityScores iScores;
   private IntensityDist iDistAvg;
@@ -66,16 +71,17 @@ public class Summary implements Serializable {
   private IntensityDist iDistRaw;
 
   private FWHMDist fwhmDist;
-  
+
   /*
-   Quality Metrics distributions.
-  */
-  private QScoreDist qScoreDist;      // The stored distribution of num clusters / QScore
+   * Quality Metrics distributions.
+   */
+  private QScoreDist qScoreDist; // The stored distribution of num clusters /
+                                 // QScore
   private Map<Integer, QScoreDist> qScoreDistByLane;
-  private Map<Integer, Metric> qScoreDistByCycle;  
-  
+  private Map<Integer, Metric> qScoreDistByCycle;
+
   private ErrorDist eDist;
-  
+
   private Indices sampleInfo;
   private int firstCycleIntensity;
 
@@ -248,13 +254,13 @@ public class Summary implements Serializable {
     return clusterDensityPF;
   }
 
-//	public void setErrorRate(HashMap<Object, ErrorRate> er){
-//		this.errorRate = er;
-//	}
+  // public void setErrorRate(HashMap<Object, ErrorRate> er){
+  // this.errorRate = er;
+  // }
 
-//	public HashMap<Object, ErrorRate> getErrorRate(){
-//		return errorRate;
-//	}
+  // public HashMap<Object, ErrorRate> getErrorRate(){
+  // return errorRate;
+  // }
 
   public void setFirstCycleIntensity(int fci) {
     this.firstCycleIntensity = fci;
@@ -379,7 +385,7 @@ public class Summary implements Serializable {
   public Map<Integer, QScoreDist> getQScoreDistByLane() {
     return qScoreDistByLane;
   }
- 
+
   public void setQScoreDistByCycle(Map<Integer, Metric> qScoreDistByCycle) {
     this.qScoreDistByCycle = qScoreDistByCycle;
   }
@@ -387,7 +393,7 @@ public class Summary implements Serializable {
   public Map<Integer, Metric> getQScoreDistByCycle() {
     return qScoreDistByCycle;
   }
-  
+
   public void setQScores(QualityScores qScores) {
     this.qScores = qScores;
   }
@@ -396,14 +402,14 @@ public class Summary implements Serializable {
     return qScores;
   }
 
-  public void setErrorDist(ErrorDist eDist){
-      this.eDist = eDist;
+  public void setErrorDist(ErrorDist eDist) {
+    this.eDist = eDist;
   }
-  
-  public ErrorDist getErrorDist(){
-      return this.eDist;
+
+  public ErrorDist getErrorDist() {
+    return this.eDist;
   }
-  
+
   public void setIScores(IntensityScores iScores) {
     this.iScores = iScores;
   }
@@ -435,7 +441,7 @@ public class Summary implements Serializable {
   public IntensityDist getIntensityDistRaw() {
     return iDistRaw;
   }
-  
+
   public void setFWHMDist(FWHMDist fwhmDist) {
     this.fwhmDist = fwhmDist;
   }
@@ -443,7 +449,7 @@ public class Summary implements Serializable {
   public FWHMDist getFWHMDist() {
     return fwhmDist;
   }
-  
+
   public void setSampleInfo(Indices sampleInfo) {
     this.sampleInfo = sampleInfo;
   }
@@ -499,15 +505,15 @@ public class Summary implements Serializable {
   public boolean hasIntensityDistRaw() {
     return iDistRaw != null;
   }
-  
+
   public boolean hasSampleInfo() {
     return sampleInfo != null;
   }
 
-  public boolean hasErrorDist(){
-      return eDist != null;
+  public boolean hasErrorDist() {
+    return eDist != null;
   }
-  
+
   public void setParseError(int parseError) {
     this.parseError = parseError;
   }
@@ -532,4 +538,3 @@ public class Summary implements Serializable {
     return this.getRunType().equals("Paired End") && this.getState() != Constants.STATE_HANG && this.getCurrentCycle() == this.getTurnCycle();
   }
 }
-

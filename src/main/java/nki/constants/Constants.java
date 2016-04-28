@@ -51,7 +51,7 @@ public final class Constants {
   public static final String METRIC_EX_RAWINT_C = "RawIntC";
   public static final String METRIC_EX_RAWINT_G = "RawIntG";
   public static final String METRIC_EX_RAWINT_T = "RawIntT";
-  
+
   public static final String METRIC_VAR_ACICC_A = "AvgCorIntClusA";
   public static final String METRIC_VAR_ACICC_C = "AvgCorIntClusC";
   public static final String METRIC_VAR_ACICC_G = "AvgCorIntClusG";
@@ -61,20 +61,23 @@ public final class Constants {
   public static final String METRIC_VAR_FWHM_C = "AvgFWHMC";
   public static final String METRIC_VAR_FWHM_G = "AvgFWHMG";
   public static final String METRIC_VAR_FWHM_T = "AvgFWHMT";
-  
-  public static final String METRIC_VAR_NUM_BCS_NC = "BaseCallsNoCall";  // Float
-  public static final String METRIC_VAR_NUM_BCS_A = "BaseCallsA";      // UnsignedShort (uint16)
-  public static final String METRIC_VAR_NUM_BCS_C = "BaseCallsC";      // UnsignedShort (uint16)
-  public static final String METRIC_VAR_NUM_BCS_G = "BaseCallsG";      // UnsignedShort (uint16)
-  public static final String METRIC_VAR_NUM_BCS_T = "BaseCallsT";      // UnsignedShort (uint16)
-  public static final String METRIC_VAR_NUM_SIGNOISE = "SigNoiseRatio";    // Float
+
+  public static final String METRIC_VAR_NUM_BCS_NC = "BaseCallsNoCall"; // Float
+  public static final String METRIC_VAR_NUM_BCS_A = "BaseCallsA"; // UnsignedShort
+                                                                  // (uint16)
+  public static final String METRIC_VAR_NUM_BCS_C = "BaseCallsC"; // UnsignedShort
+                                                                  // (uint16)
+  public static final String METRIC_VAR_NUM_BCS_G = "BaseCallsG"; // UnsignedShort
+                                                                  // (uint16)
+  public static final String METRIC_VAR_NUM_BCS_T = "BaseCallsT"; // UnsignedShort
+                                                                  // (uint16)
+  public static final String METRIC_VAR_NUM_SIGNOISE = "SigNoiseRatio"; // Float
 
   // InterOp metric codes
   public static final int TILE_CLUSTER_DENSITY = 100;
   public static final int TILE_CLUSTER_DENSITY_PF = 101;
   public static final int TILE_NUM_CLUSTERS = 102;
   public static final int TILE_NUM_CLUSTERS_PF = 103;
-
 
   // Command data request metric specification
   public static final String METRIC_TYPE_QSCORE = "QSCORE";
@@ -83,10 +86,7 @@ public final class Constants {
   public static final String METRIC_TYPE_PREPHASING = "PREPHASING";
 
   public static final String[] METRIC_TYPE_REQUEST = {
-      METRIC_TYPE_QSCORE,
-      METRIC_TYPE_CD,
-      METRIC_TYPE_PHASING,
-      METRIC_TYPE_PREPHASING
+      METRIC_TYPE_QSCORE, METRIC_TYPE_CD, METRIC_TYPE_PHASING, METRIC_TYPE_PREPHASING
   };
 
   // Project and sample specification
@@ -97,28 +97,50 @@ public final class Constants {
   public static final String SAMPLE_NAME = "sampleName";
 
   // Command data request formats
-  public static final String COM_FORMAT_XML = "XML";    // Return data in XML format
-  public static final String COM_FORMAT_OBJ = "POJO";    // Return data as java object
-  public static final String COM_FORMAT_TAB = "TAB";    // Return data in tab separated format
-  public static final String COM_FORMAT_CSV = "CSV";    // Return data in comma separated format
-  public static final String COM_FORMAT_JSON = "JSON";    // Return data in JSON format
-  
+  public static final String COM_FORMAT_XML = "XML"; // Return data in XML
+                                                     // format
+  public static final String COM_FORMAT_OBJ = "POJO"; // Return data as java
+                                                      // object
+  public static final String COM_FORMAT_TAB = "TAB"; // Return data in tab
+                                                     // separated format
+  public static final String COM_FORMAT_CSV = "CSV"; // Return data in comma
+                                                     // separated format
+  public static final String COM_FORMAT_JSON = "JSON"; // Return data in JSON
+                                                       // format
+
   // Command data request detail
-  public static final String COM_TYPE_SIMPLE = "SIMPLE";    // Level of requested detail of return output.
+  public static final String COM_TYPE_SIMPLE = "SIMPLE"; // Level of requested
+                                                         // detail of return
+                                                         // output.
   public static final String COM_TYPE_DETAIL = "DETAIL";
- 
-  public static final String COM_RET_TYPE_BYSTATE = "BYSTATE";  // Retrieve runs by run state (use setState())
-  public static final String COM_RET_TYPE_BYRUN = "BYRUN";    // Retrieve single run by run identifier (use setRunId())
-  public static final String COM_INITIALIZE = "INITIALIZE";    // Parsed all available runs and initialize
-  public static final String COM_SEARCH = "SEARCH";    // Search in run_id string using runIdSearch in Command
-  public static final String COM_PARSE = "PARSE";    // Force a parse of a sequencing run and store.
-  
-  public static final long METRIC_UPDATE_TIME = 7200000;    // Update every 120 minutes
-  public static final long ACTIVE_TIMEOUT = 86400000;    // Time out age of InterOp files while run is active. Default: 24 hours.
+
+  public static final String COM_RET_TYPE_BYSTATE = "BYSTATE"; // Retrieve runs
+                                                               // by run state
+                                                               // (use
+                                                               // setState())
+  public static final String COM_RET_TYPE_BYRUN = "BYRUN"; // Retrieve single
+                                                           // run by run
+                                                           // identifier (use
+                                                           // setRunId())
+  public static final String COM_INITIALIZE = "INITIALIZE"; // Parsed all
+                                                            // available runs
+                                                            // and initialize
+  public static final String COM_SEARCH = "SEARCH"; // Search in run_id string
+                                                    // using runIdSearch in
+                                                    // Command
+  public static final String COM_PARSE = "PARSE"; // Force a parse of a
+                                                  // sequencing run and store.
+
+  public static final long METRIC_UPDATE_TIME = 7200000; // Update every 120
+                                                         // minutes
+  public static final long ACTIVE_TIMEOUT = 86400000; // Time out age of InterOp
+                                                      // files while run is
+                                                      // active. Default: 24
+                                                      // hours.
 
   private Constants() {
-    //this prevents even the native class from
-    //calling this ctor as well :
+    // this prevents even the native class from
+    // calling this ctor as well :
     throw new AssertionError();
   }
 }

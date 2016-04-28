@@ -30,7 +30,7 @@ public class SummaryCollection implements Serializable {
   // Object Collection
   private List<Summary> summaryCollection = new ArrayList<>();
   private Map<Integer, MutableInt> summaryStateMapping = new HashMap<>();
-  private String collectionFormat = Constants.COM_FORMAT_OBJ;      // Default
+  private String collectionFormat = Constants.COM_FORMAT_OBJ; // Default
 
   public void appendSummary(Summary sum) {
     summaryCollection.add(sum);
@@ -91,9 +91,9 @@ public class SummaryCollection implements Serializable {
     return xmlDoc;
   }
 
-	/*
-   *	XML Builders
-	 */
+  /*
+   * XML Builders
+   */
 
   private Element summaryAsSimple(Summary sumObj, Element sumXml, Document xmlDoc) {
     sumXml.appendChild(createElement(xmlDoc, "runId", sumObj.getRunId()));
@@ -147,7 +147,7 @@ public class SummaryCollection implements Serializable {
 
       // Intensities
       if (sumObj.hasIntensityDistCCAvg()) {
-    //    sumXml = sumObj.getIntensityDistCCAvg().toXML(sumXml, xmlDoc);
+        // sumXml = sumObj.getIntensityDistCCAvg().toXML(sumXml, xmlDoc);
       }
 
       // Prephasing
@@ -168,9 +168,9 @@ public class SummaryCollection implements Serializable {
     return sumXml;
   }
 
-	/*
-	 *  Helpers
-	 */
+  /*
+   * Helpers
+   */
   public String convertStateInt(int mapping) {
     if (summaryStateMapping.containsKey(mapping)) {
       return Integer.toString(summaryStateMapping.get(mapping).get());
@@ -188,9 +188,9 @@ public class SummaryCollection implements Serializable {
     return e;
   }
 
-/*
- *	Converters 
- */
+  /*
+   * Converters
+   */
 
   public String getSummaryCollectionXMLAsString(Command com) {
     // Call getSummaryCollectionAsXML

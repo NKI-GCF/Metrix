@@ -16,10 +16,11 @@ public class Threshold implements Serializable {
 
   public static final long serialVersionUID = 42L;
 
-  private String metricType;        // Constant value of requested metric threshold type
-  private Integer min = 0;      // Minimum value
-  private Integer max = 0;      // Maximum value
-  private Integer exact = 0;      // Exact value
+  private String metricType; // Constant value of requested metric threshold
+                             // type
+  private Integer min = 0; // Minimum value
+  private Integer max = 0; // Maximum value
+  private Integer exact = 0; // Exact value
 
   public void setMin(int min) {
     if (max != null && min > max) {

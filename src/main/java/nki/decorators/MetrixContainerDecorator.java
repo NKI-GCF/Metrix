@@ -5,7 +5,8 @@ import nki.core.MetrixContainer;
 import nki.objects.Summary;
 
 /**
- * Decorator for a MetrixContainer, comprising all JSON outputs of each individual decorator type.
+ * Decorator for a MetrixContainer, comprising all JSON outputs of each
+ * individual decorator type.
  *
  * @author Rob Davey
  * @date 07/04/14
@@ -14,7 +15,7 @@ import nki.objects.Summary;
 public class MetrixContainerDecorator {
   private MetrixContainer metrixContainer;
   private boolean remote = false;
-          
+
   public MetrixContainerDecorator(MetrixContainer metrixContainer) {
     this.metrixContainer = metrixContainer;
   }
@@ -24,7 +25,6 @@ public class MetrixContainerDecorator {
     this.remote = isRemote;
   }
 
-  
   public JSONObject summaryMetricsToJSON() {
     JSONObject metrixJson = new JSONObject();
     JSONObject summary = new MetrixSummaryDecorator(metrixContainer.getSummary()).toJSON();
@@ -76,28 +76,29 @@ public class MetrixContainerDecorator {
     JSONObject indexMetrics;
     JSONObject extractionMetrics;
     JSONObject intensityMetrics;
-    
-    Summary s = metrixContainer.getSummary();
-    
-    if(this.remote){
-        summary = new MetrixSummaryDecorator(s).toJSON();
-        tileMetrics = new MetrixTileMetricsDecorator(s.getClusterDensity(), s.getClusterDensityPF(), s.getPhasingMap(), s.getPrephasingMap(), s.getReads()).toJSON();
-        qualityMetrics = new MetrixQualityMetricsDecorator(s.getQScoreDist(), s.getQScoreDistByLane(), s.getQScoreDistByCycle()).toJSON();
-        errorMetrics = new MetrixErrorMetricsDecorator(s.getErrorDist()).toJSON();
-        indexMetrics = new MetrixIndexMetricsDecorator(s.getSampleInfo()).toJSON();
-        extractionMetrics = new MetrixExtractionMetricsDecorator(s.getIntensityDistRaw(), s.getFWHMDist()).toJSON();
-        //TODO generates muchness output
-        intensityMetrics = new MetrixIntensityMetricsDecorator(s.getIntensityDistAvg(), s.getIntensityDistCCAvg()).toJSON();
-    }else{
-        summary = new MetrixSummaryDecorator(metrixContainer.getSummary()).toJSON();
-        tileMetrics = new MetrixTileMetricsDecorator(metrixContainer.getTileMetrics(), metrixContainer.getSummary().getReads()).toJSON();
-        qualityMetrics = new MetrixQualityMetricsDecorator(metrixContainer.getQualityMetrics().getQualityScores()).toJSON();
-        errorMetrics = new MetrixErrorMetricsDecorator(metrixContainer.getErrorMetrics().getErrorScores()).toJSON();
-        indexMetrics = new MetrixIndexMetricsDecorator(metrixContainer.getIndexMetrics().getIndices()).toJSON();
-        extractionMetrics = new MetrixExtractionMetricsDecorator(metrixContainer.getExtractionMetrics()).toJSON();
 
-        //TODO generates muchness output
-        intensityMetrics = new MetrixIntensityMetricsDecorator(metrixContainer.getCorrectedIntensityMetrics().getIntensityScores()).toJSON();
+    Summary s = metrixContainer.getSummary();
+
+    if (this.remote) {
+      summary = new MetrixSummaryDecorator(s).toJSON();
+      tileMetrics = new MetrixTileMetricsDecorator(s.getClusterDensity(), s.getClusterDensityPF(), s.getPhasingMap(), s.getPrephasingMap(), s.getReads()).toJSON();
+      qualityMetrics = new MetrixQualityMetricsDecorator(s.getQScoreDist(), s.getQScoreDistByLane(), s.getQScoreDistByCycle()).toJSON();
+      errorMetrics = new MetrixErrorMetricsDecorator(s.getErrorDist()).toJSON();
+      indexMetrics = new MetrixIndexMetricsDecorator(s.getSampleInfo()).toJSON();
+      extractionMetrics = new MetrixExtractionMetricsDecorator(s.getIntensityDistRaw(), s.getFWHMDist()).toJSON();
+      // TODO generates muchness output
+      intensityMetrics = new MetrixIntensityMetricsDecorator(s.getIntensityDistAvg(), s.getIntensityDistCCAvg()).toJSON();
+    }
+    else {
+      summary = new MetrixSummaryDecorator(metrixContainer.getSummary()).toJSON();
+      tileMetrics = new MetrixTileMetricsDecorator(metrixContainer.getTileMetrics(), metrixContainer.getSummary().getReads()).toJSON();
+      qualityMetrics = new MetrixQualityMetricsDecorator(metrixContainer.getQualityMetrics().getQualityScores()).toJSON();
+      errorMetrics = new MetrixErrorMetricsDecorator(metrixContainer.getErrorMetrics().getErrorScores()).toJSON();
+      indexMetrics = new MetrixIndexMetricsDecorator(metrixContainer.getIndexMetrics().getIndices()).toJSON();
+      extractionMetrics = new MetrixExtractionMetricsDecorator(metrixContainer.getExtractionMetrics()).toJSON();
+
+      // TODO generates muchness output
+      intensityMetrics = new MetrixIntensityMetricsDecorator(metrixContainer.getCorrectedIntensityMetrics().getIntensityScores()).toJSON();
     }
 
     metrixJson.put("summary", summary);
@@ -107,7 +108,7 @@ public class MetrixContainerDecorator {
     metrixJson.put("indexMetrics", indexMetrics);
     metrixJson.put("extractionMetrics", extractionMetrics);
     metrixJson.put("intensityMetrics", intensityMetrics);
-    
+
     return metrixJson;
   }
 }

@@ -16,10 +16,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Decorator to output objects contained within a MetrixContainer to TSV, CSV, XML and JSON
- * The MetrixIntensityMetricsDecorator can be instantiated with a set of IntensityScores
- * or with a set of pre-calculated IntensityDistributions for the AverageCorrectedIntensity
- * distribution and the AverageCorrectedIntensityCalledClusters distribution.
+ * Decorator to output objects contained within a MetrixContainer to TSV, CSV,
+ * XML and JSON The MetrixIntensityMetricsDecorator can be instantiated with a
+ * set of IntensityScores or with a set of pre-calculated IntensityDistributions
+ * for the AverageCorrectedIntensity distribution and the
+ * AverageCorrectedIntensityCalledClusters distribution.
  *
  * @author Rob Davey
  * @date 07/04/14
@@ -30,43 +31,45 @@ public class MetrixIntensityMetricsDecorator {
   private IntensityScores intensityScores;
   private IntensityDist iDistAvg;
   private IntensityDist iDistAvgCC;
-  
+
   public MetrixIntensityMetricsDecorator(IntensityScores intensityScores) {
     this.intensityScores = intensityScores;
-    if(this.intensityScores != null){
-        iDistAvg = intensityScores.getAverageCorrectedIntensityDist();
-        iDistAvgCC = intensityScores.getCalledClustersAverageCorrectedIntensityDist();
+    if (this.intensityScores != null) {
+      iDistAvg = intensityScores.getAverageCorrectedIntensityDist();
+      iDistAvgCC = intensityScores.getCalledClustersAverageCorrectedIntensityDist();
     }
   }
-  
+
   public MetrixIntensityMetricsDecorator(IntensityDist iDistAvg, IntensityDist iDistAvgCC) {
-      this.iDistAvg = iDistAvg;
-      this.iDistAvgCC = iDistAvgCC;
+    this.iDistAvg = iDistAvg;
+    this.iDistAvgCC = iDistAvgCC;
   }
 
   /*
-   * Generate JSON for both distributions (AvgCorrectedInt and AvgCalledClusterCorrectedInt)
-   * and return a json object.
+   * Generate JSON for both distributions (AvgCorrectedInt and
+   * AvgCalledClusterCorrectedInt) and return a json object.
    */
   public JSONObject toJSON() {
     JSONObject jsonCombined = new JSONObject();
-    
-    if(iDistAvg != null){
-        jsonCombined.put("averageCorrected", generateJSON(iDistAvg));
-    }else{
-        jsonCombined.put("averageCorrected", "NoDistAvailable");
+
+    if (iDistAvg != null) {
+      jsonCombined.put("averageCorrected", generateJSON(iDistAvg));
     }
-    
-    if(iDistAvgCC != null){
-        jsonCombined.put("averageCorrectedCalledClusters", generateJSON(iDistAvgCC));
-    }else{
-        jsonCombined.put("averageCorrectedCalledClusters", "NoDistAvailable");
+    else {
+      jsonCombined.put("averageCorrected", "NoDistAvailable");
     }
-    
+
+    if (iDistAvgCC != null) {
+      jsonCombined.put("averageCorrectedCalledClusters", generateJSON(iDistAvgCC));
+    }
+    else {
+      jsonCombined.put("averageCorrectedCalledClusters", "NoDistAvailable");
+    }
+
     return jsonCombined;
   }
-  
-  private JSONArray generateJSON(IntensityDist id){
+
+  private JSONArray generateJSON(IntensityDist id) {
     JSONArray averages = new JSONArray();
 
     for (int lane : id.getIntensities().keySet()) {
@@ -103,7 +106,7 @@ public class MetrixIntensityMetricsDecorator {
       l.put("intG", cyclesG);
       averages.add(l);
     }
-      return averages;
+    return averages;
   }
 
   public Element toXML() {
@@ -117,14 +120,14 @@ public class MetrixIntensityMetricsDecorator {
 
       root = xmlDoc.createElement("IntensityDistributions");
       xmlDoc.appendChild(root);
-      
-      // Generate as XML and add: 
+
+      // Generate as XML and add:
       // - averageCorrectedIntensity
       // - averageCorrectIntensitiesCalledClusters
       Element sumXml = xmlDoc.createElement("averageCorrected");
       sumXml = generateXML(sumXml, xmlDoc, iDistAvg);
       root.appendChild(sumXml);
-      
+
       sumXml = xmlDoc.createElement("averageCorrectedCalledClusters");
       sumXml = generateXML(sumXml, xmlDoc, iDistAvgCC);
       root.appendChild(sumXml);
@@ -132,17 +135,17 @@ public class MetrixIntensityMetricsDecorator {
     catch (Exception ex) {
       ex.printStackTrace();
     }
-    
+
     return root;
   }
-    
+
   @SuppressWarnings("unchecked")
   public Element generateXML(Element sumXml, Document xmlDoc, IntensityDist id) {
     Iterator lit = id.getIntensities().entrySet().iterator();
     /*
-    * Key   = Lane	- Integer
-    * Value = CycleMap 	- HashMap<Integer, HashMap<String, Object>>
-    */
+     * Key = Lane - Integer Value = CycleMap - HashMap<Integer, HashMap<String,
+     * Object>>
+     */
     while (lit.hasNext()) {
       Element laneEle = xmlDoc.createElement("Lane");
       Map.Entry lanePairs = (Map.Entry) lit.next();
@@ -186,18 +189,18 @@ public class MetrixIntensityMetricsDecorator {
     return sumXml;
   }
 
-  public String toTab(){
-      String allTab = "Average Corrected Intensities: \n";
-      // Add the average Corrected Intensities
-      allTab += generateTab(iDistAvg);
-      
-      allTab += "\nAverage Corrected Intensities Called Clusters: \n";
-      // Add the average Corrected Called Cluster Intensities
-      allTab += generateTab(iDistAvgCC);
-      
-      return allTab;
+  public String toTab() {
+    String allTab = "Average Corrected Intensities: \n";
+    // Add the average Corrected Intensities
+    allTab += generateTab(iDistAvg);
+
+    allTab += "\nAverage Corrected Intensities Called Clusters: \n";
+    // Add the average Corrected Called Cluster Intensities
+    allTab += generateTab(iDistAvgCC);
+
+    return allTab;
   }
-  
+
   @SuppressWarnings("unchecked")
   public String generateTab(IntensityDist id) {
     String out = "";
@@ -216,6 +219,6 @@ public class MetrixIntensityMetricsDecorator {
       }
     }
     return out;
-  }  
-  
+  }
+
 }

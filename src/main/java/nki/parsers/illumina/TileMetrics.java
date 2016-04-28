@@ -70,25 +70,17 @@ public class TileMetrics extends GenericIlluminaParser {
     this.preMap = preMap;
   }
 
-	/*
-   *	Binary structure:
-	 *	byte 0: file version number (2)
-	 *	byte 1: length of each record
-	 *	bytes (N * 10 + 2) - (N *10 + 11): record:
-	 *	2 bytes: lane number (uint16)
-	 *	2 bytes: tile number (uint16)
-	 *	2 bytes: metric code (uint16)
-	 *	4 bytes: metric value (float)
-		Where N is the record index and possible metric codes are:
-		code 100: cluster density (k/mm2)
-		code 101: cluster density passing filters (k/mm2)
-		code 102: number of clusters
-		code 103: number of clusters passing filters
-		code (200 + (N  1) * 2): phasing for read N
-		code (201 + (N  1) * 2): prephasing for read N
-		code (300 + N  1): percent aligned for read N
-		code 400: control lane
-	 */
+  /*
+   * Binary structure: byte 0: file version number (2) byte 1: length of each
+   * record bytes (N * 10 + 2) - (N *10 + 11): record: 2 bytes: lane number
+   * (uint16) 2 bytes: tile number (uint16) 2 bytes: metric code (uint16) 4
+   * bytes: metric value (float) Where N is the record index and possible metric
+   * codes are: code 100: cluster density (k/mm2) code 101: cluster density
+   * passing filters (k/mm2) code 102: number of clusters code 103: number of
+   * clusters passing filters code (200 + (N 1) * 2): phasing for read N code
+   * (201 + (N 1) * 2): prephasing for read N code (300 + N 1): percent aligned
+   * for read N code 400: control lane
+   */
 
   public void digestData() {
     if (fileMissing) {
@@ -112,7 +104,7 @@ public class TileMetrics extends GenericIlluminaParser {
           int laneNr = leis.readUnsignedShort();
           int tileNr = leis.readUnsignedShort();
           int metricCode = leis.readUnsignedShort();
-          //float metricValue = leis.readFloat();
+          // float metricValue = leis.readFloat();
           double metricValue = leis.readFloat();
 
           // Cluster Density Parsing
@@ -138,16 +130,16 @@ public class TileMetrics extends GenericIlluminaParser {
           // Calc readnumber from metriccode
           int readNum = (int) Math.floor((metricCode - 200) / 2) + 1;
 
-          //		if(rds.isIndexedRead(readNum)){
-          //			continue;
-          //		}
+          // if(rds.isIndexedRead(readNum)){
+          // continue;
+          // }
 
-          //		if(metricValue == 0){
-          //			continue;
-          //		}
+          // if(metricValue == 0){
+          // continue;
+          // }
 
           // Phasing / Pre-phasing Parsing
-          if (codeMap.get(2) == 2) {  // Metric code starts with 2
+          if (codeMap.get(2) == 2) { // Metric code starts with 2
             // Phasing
             if (PHAPRE == 0) {
               pMap.setPhasing(laneNr, readNum, metricValue);
@@ -158,7 +150,7 @@ public class TileMetrics extends GenericIlluminaParser {
               preMap.setPhasing(laneNr, readNum, metricValue);
             }
           }
-          else {  // Skip the other codes
+          else { // Skip the other codes
             continue;
           }
           record++;

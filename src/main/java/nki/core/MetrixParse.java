@@ -1,5 +1,6 @@
 package nki.core;
 // Metrix - A server / client interface for Illumina Sequencing Metrics.
+
 // Copyright (C) 2014 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
@@ -47,8 +48,8 @@ public class MetrixParse {
     String searchTerm = "";
 
     if (args.length == 0) {
-        System.err.println("Invalid number of arguments.");
-        System.exit(1);
+      System.err.println("Invalid number of arguments.");
+      System.exit(1);
     }
     else if (args.length == 1) {
       searchTerm = args[0];
@@ -65,61 +66,63 @@ public class MetrixParse {
 
     int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
     String host = configFile.getProperty("HOST", "localhost");
-    
-    try{
-        SocketChannel sChannel = SocketChannel.open();
-        sChannel.configureBlocking(true);
 
-        if (sChannel.connect(new InetSocketAddress(host, port))) {
-            // Create OutputStream for sending objects.
-            ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
+    try {
+      SocketChannel sChannel = SocketChannel.open();
+      sChannel.configureBlocking(true);
 
-            // Cteate Inputstream for receiving objects.
-            ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
+      if (sChannel.connect(new InetSocketAddress(host, port))) {
+        // Create OutputStream for sending objects.
+        ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
 
-            Command cmd = new Command();
-            
-            cmd.setFormat(Constants.COM_FORMAT_OBJ);
-            cmd.setRunIdSearch(searchTerm);
-            cmd.setRetType(Constants.COM_PARSE);
-            
-            oos.writeObject(cmd);
-            oos.flush();
-            
-            Object srvResp = new Object();
-            
-            while(ois != null){
-                srvResp = ois.readObject();
-                // Process expected response
-                if (srvResp instanceof String) {
-                    String s = (String) srvResp;
-                    System.out.println(s);
-                }
-                
-                /*
-                 *	Exceptions
-                 */
-                if (srvResp instanceof EmptyResultSetCollection) {
-                  System.out.println(srvResp.toString());
-                }
+        // Cteate Inputstream for receiving objects.
+        ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
 
-                if (srvResp instanceof InvalidCredentialsException) {
-                  System.out.println(srvResp.toString());
-                }
+        Command cmd = new Command();
 
-                if (srvResp instanceof MissingCommandDetailException) {
-                  System.out.println(srvResp.toString());
-                }
+        cmd.setFormat(Constants.COM_FORMAT_OBJ);
+        cmd.setRunIdSearch(searchTerm);
+        cmd.setRetType(Constants.COM_PARSE);
 
-                if (srvResp instanceof UnimplementedCommandException) {
-                  System.out.println(srvResp.toString());
-                }            
-            }
+        oos.writeObject(cmd);
+        oos.flush();
+
+        Object srvResp = new Object();
+
+        while (ois != null) {
+          srvResp = ois.readObject();
+          // Process expected response
+          if (srvResp instanceof String) {
+            String s = (String) srvResp;
+            System.out.println(s);
+          }
+
+          /*
+           * Exceptions
+           */
+          if (srvResp instanceof EmptyResultSetCollection) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof InvalidCredentialsException) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof MissingCommandDetailException) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof UnimplementedCommandException) {
+            System.out.println(srvResp.toString());
+          }
         }
-    }catch(EOFException EOF){
-    
-    }catch(Exception Ex){
-        Ex.printStackTrace();
+      }
+    }
+    catch (EOFException EOF) {
+
+    }
+    catch (Exception Ex) {
+      Ex.printStackTrace();
     }
   }
 }

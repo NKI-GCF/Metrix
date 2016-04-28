@@ -32,20 +32,14 @@ public class ErrorMetrics extends GenericIlluminaParser {
   }
 
   /*
-   * Binary structure:
-   * 	byte 0: file version number (3)
-   *	byte 1: length of each record (uint8)
-    bytes (N * 30 + 2) - (N *30 + 11): record:
-   *	2 bytes: lane number (uint16)
-   *	2 bytes: tile number (uint16)
-   *	2 bytes: cycle number (uint16)
-   *	4 bytes: error rate (float)
-   *	4 bytes: number of perfect reads (uint32)
-   *	4 bytes: number of reads with 1 error (uint32)
-   *	4 bytes: number of reads with 2 errors (uint32)
-   *	4 bytes: number of reads with 3 errors (uint32)
-   *	4 bytes: number of reads with 4 errors (uint32)
-    Where N is the record index
+   * Binary structure: byte 0: file version number (3) byte 1: length of each
+   * record (uint8) bytes (N * 30 + 2) - (N *30 + 11): record: 2 bytes: lane
+   * number (uint16) 2 bytes: tile number (uint16) 2 bytes: cycle number
+   * (uint16) 4 bytes: error rate (float) 4 bytes: number of perfect reads
+   * (uint32) 4 bytes: number of reads with 1 error (uint32) 4 bytes: number of
+   * reads with 2 errors (uint32) 4 bytes: number of reads with 3 errors
+   * (uint32) 4 bytes: number of reads with 4 errors (uint32) Where N is the
+   * record index
    */
   public ErrorCollection digestData() {
     eScores = new ErrorCollection();
@@ -103,7 +97,9 @@ public class ErrorMetrics extends GenericIlluminaParser {
 
         cycleMap.put(cycleNr, eMap);
         eScores.setLane(cycleMap, laneNr);
-        //System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr + "\t" + errorRate + "\t" + numPerfectReads + "\t" + numReads1E + "\t" + numReads2E + "\t" + numReads3E + "\t" + numReads4E);
+        // System.out.println(laneNr + "\t" + cycleNr + "\t" + tileNr + "\t" +
+        // errorRate + "\t" + numPerfectReads + "\t" + numReads1E + "\t" +
+        // numReads2E + "\t" + numReads3E + "\t" + numReads4E);
       }
     }
     catch (EOFException EOFEx) {

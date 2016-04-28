@@ -42,36 +42,29 @@ public final class Command implements Serializable {
   private Date dateTime;
   private String runId = "";
   private String message;
-  private String retType = Constants.COM_RET_TYPE_BYRUN;  // Type of retrieval.
+  private String retType = Constants.COM_RET_TYPE_BYRUN; // Type of retrieval.
   private String runIdSearch;
-  
+
   public static final int[] STATES = {
-      Constants.STATE_RUNNING,
-      Constants.STATE_FINISHED,
-      Constants.STATE_HANG,
-      Constants.STATE_TURN,
-      Constants.STATE_INIT,
-      Constants.STATE_ALL_PSEUDO
+      Constants.STATE_RUNNING, Constants.STATE_FINISHED, Constants.STATE_HANG, Constants.STATE_TURN, Constants.STATE_INIT, Constants.STATE_ALL_PSEUDO
   };
 
   public static final String[] TYPES = {
-      Constants.COM_INITIALIZE,
-      Constants.COM_SEARCH,
-      Constants.COM_TYPE_SIMPLE,
-      Constants.COM_TYPE_DETAIL
+      Constants.COM_INITIALIZE, Constants.COM_SEARCH, Constants.COM_TYPE_SIMPLE, Constants.COM_TYPE_DETAIL
   };
 
   public Command() {
-    this.setDateTime();  // Set date time for instantiation of command object.
+    this.setDateTime(); // Set date time for instantiation of command object.
   }
 
   // Instantiate with variables
-  //public Command(String format, int state, String command, String mode, String type, String runId) {
+  // public Command(String format, int state, String command, String mode,
+  // String type, String runId) {
   public Command(String format, int state, String type, String runId) {
     this.setFormat(format);
     this.setType(type);
     this.setRunId(runId);
-    this.setDateTime();  // Set date time for instantiation of command object.
+    this.setDateTime(); // Set date time for instantiation of command object.
   }
 
   public void setDateTime() {
@@ -90,14 +83,14 @@ public final class Command implements Serializable {
     return message;
   }
 
-    public void setRunIdSearch(String runIdSearch) {
+  public void setRunIdSearch(String runIdSearch) {
     this.runIdSearch = runIdSearch;
   }
 
   public String getRunIdSearch() {
     return runIdSearch;
   }
-  
+
   public String getType() {
     return type;
   }
@@ -138,9 +131,10 @@ public final class Command implements Serializable {
     else if (form.equals(Constants.COM_FORMAT_TAB)) {
       this.format = Constants.COM_FORMAT_TAB;
     }
-    else if (form.equals(Constants.COM_FORMAT_JSON)){
-        this.format = Constants.COM_FORMAT_JSON;
-    }else{
+    else if (form.equals(Constants.COM_FORMAT_JSON)) {
+      this.format = Constants.COM_FORMAT_JSON;
+    }
+    else {
       this.format = Constants.COM_FORMAT_XML;
     }
   }
@@ -210,13 +204,17 @@ public final class Command implements Serializable {
   public void setRetType(String retType) {
     if (retType.equals(Constants.COM_RET_TYPE_BYSTATE)) {
       this.retType = Constants.COM_RET_TYPE_BYSTATE;
-    }else if(retType.equals(Constants.COM_SEARCH)){
-        this.retType = Constants.COM_SEARCH;
-    }else if(retType.equals(Constants.COM_PARSE)){
-        this.retType = Constants.COM_PARSE;
-    }else if(retType.equals(Constants.COM_INITIALIZE)){
-        this.retType = Constants.COM_INITIALIZE;
-    }else {
+    }
+    else if (retType.equals(Constants.COM_SEARCH)) {
+      this.retType = Constants.COM_SEARCH;
+    }
+    else if (retType.equals(Constants.COM_PARSE)) {
+      this.retType = Constants.COM_PARSE;
+    }
+    else if (retType.equals(Constants.COM_INITIALIZE)) {
+      this.retType = Constants.COM_INITIALIZE;
+    }
+    else {
       // Default to search by run.
       LoggerWrapper.log.finer("Defaulting to COM_RET_TYPE_BYRUN.");
       this.retType = Constants.COM_RET_TYPE_BYRUN;
@@ -224,4 +222,3 @@ public final class Command implements Serializable {
   }
 
 }
-

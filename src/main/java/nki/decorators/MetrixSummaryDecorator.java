@@ -6,7 +6,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
+ * Decorator to output objects contained within a MetrixContainer to TSV, CSV
+ * and JSON
  *
  * @author Rob Davey
  * @date 07/04/14
@@ -18,7 +19,7 @@ public class MetrixSummaryDecorator {
   public MetrixSummaryDecorator(Summary summary) {
     this.summary = summary;
   }
-  
+
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
 
@@ -27,7 +28,7 @@ public class MetrixSummaryDecorator {
     json.put("currentCycle", summary.getCurrentCycle());
     json.put("runDirectory", summary.getRunDirectory());
     json.put("instrument", summary.getInstrument());
-        
+
     if (summary.getReads() != null) {
       json.put("demultiplexIndex", summary.getReads().getDemultiplexIndex());
     }
@@ -40,26 +41,24 @@ public class MetrixSummaryDecorator {
 
     return json;
   }
-  
-    public Element toXML(Element sumXml, Document xmlDoc) {
-        sumXml.appendChild(createElement(xmlDoc, "runId", summary.getRunId()));
-        sumXml.appendChild(createElement(xmlDoc, "runType", summary.getRunType()));
-        sumXml.appendChild(createElement(xmlDoc, "flowcellId", summary.getFlowcellID()));
-        sumXml.appendChild(createElement(xmlDoc, "runSide", summary.getSide()));
-        sumXml.appendChild(createElement(xmlDoc, "runState", summary.getState() + ""));
-        sumXml.appendChild(createElement(xmlDoc, "runPhase", summary.getPhase()));
-        sumXml.appendChild(createElement(xmlDoc, "lastUpdated", summary.getLastUpdated() + ""));
-        sumXml.appendChild(createElement(xmlDoc, "runDate", summary.getRunDate() + ""));
-        sumXml.appendChild(createElement(xmlDoc, "currentCycle", summary.getCurrentCycle() + ""));
-        sumXml.appendChild(createElement(xmlDoc, "totalCycle", summary.getTotalCycles() + ""));
-        sumXml.appendChild(createElement(xmlDoc, "instrument", summary.getInstrument()));
-    
-        return sumXml;
+
+  public Element toXML(Element sumXml, Document xmlDoc) {
+    sumXml.appendChild(createElement(xmlDoc, "runId", summary.getRunId()));
+    sumXml.appendChild(createElement(xmlDoc, "runType", summary.getRunType()));
+    sumXml.appendChild(createElement(xmlDoc, "flowcellId", summary.getFlowcellID()));
+    sumXml.appendChild(createElement(xmlDoc, "runSide", summary.getSide()));
+    sumXml.appendChild(createElement(xmlDoc, "runState", summary.getState() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "runPhase", summary.getPhase()));
+    sumXml.appendChild(createElement(xmlDoc, "lastUpdated", summary.getLastUpdated() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "runDate", summary.getRunDate() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "currentCycle", summary.getCurrentCycle() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "totalCycle", summary.getTotalCycles() + ""));
+    sumXml.appendChild(createElement(xmlDoc, "instrument", summary.getInstrument()));
+
+    return sumXml;
   }
-    
-    
-    
-   private Element createElement(Document doc, String name, String text) {
+
+  private Element createElement(Document doc, String name, String text) {
     Element e = doc.createElement(name);
     if (text == null) {
       text = "";

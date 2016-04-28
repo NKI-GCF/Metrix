@@ -40,7 +40,7 @@ public class XmlDriver {
     documentBuilder = documentBuilderFactory.newDocumentBuilder();
     doc = documentBuilder.parse(xmlFile);
     doc.getDocumentElement().normalize();
-    
+
     setSummary(RunInfoHandler.parseAll(doc, summary));
     return summary.getXmlInfo();
   }

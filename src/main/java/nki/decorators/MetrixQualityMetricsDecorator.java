@@ -16,7 +16,8 @@ import nki.objects.Summary;
 import nki.util.LoggerWrapper;
 
 /**
- * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
+ * Decorator to output objects contained within a MetrixContainer to TSV, CSV
+ * and JSON
  *
  * @author Rob Davey
  * @date 07/04/14
@@ -35,35 +36,32 @@ public class MetrixQualityMetricsDecorator {
     this.qScoreDistByCycle = qualityScores.getQScoreDistributionByCycle();
   }
 
-  public MetrixQualityMetricsDecorator( QScoreDist qScoreDist, 
-                                        Map<Integer, QScoreDist> qScoreDistByLane, 
-                                        Map<Integer, Metric> qScoreDistByCycle
-  ){
-      this.qScoreDist = qScoreDist;
-      this.qScoreDistByLane = qScoreDistByLane;
-      this.qScoreDistByCycle = qScoreDistByCycle;
+  public MetrixQualityMetricsDecorator(QScoreDist qScoreDist, Map<Integer, QScoreDist> qScoreDistByLane, Map<Integer, Metric> qScoreDistByCycle) {
+    this.qScoreDist = qScoreDist;
+    this.qScoreDistByLane = qScoreDistByLane;
+    this.qScoreDistByCycle = qScoreDistByCycle;
   }
-  
-    public MetrixQualityMetricsDecorator( Summary sum ){
-      this.qScoreDist = sum.getQScoreDist();
-      //this.qScoreDistByLane = sum.getQScores().getQScoreDistributionByLane();
-      //this.qScoreDistByCycle = sum.getQScores().getQScoreDistributionByCycle();
-      this.qScoreDistByLane = sum.getQScoreDistByLane();
-      this.qScoreDistByCycle = sum.getQScoreDistByCycle();
+
+  public MetrixQualityMetricsDecorator(Summary sum) {
+    this.qScoreDist = sum.getQScoreDist();
+    // this.qScoreDistByLane = sum.getQScores().getQScoreDistributionByLane();
+    // this.qScoreDistByCycle = sum.getQScores().getQScoreDistributionByCycle();
+    this.qScoreDistByLane = sum.getQScoreDistByLane();
+    this.qScoreDistByCycle = sum.getQScoreDistByCycle();
   }
-  
+
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
     JSONObject combQs = new JSONObject();
-    if(this.qualityScores != null && this.qScoreDist == null){
-        qScoreDist = qualityScores.getQScoreDistribution();
+    if (this.qualityScores != null && this.qScoreDist == null) {
+      qScoreDist = qualityScores.getQScoreDistribution();
     }
 
-    if(qScoreDist == null){
-        json.put("NoContent", "No Distribution is available.");
-        return json;
+    if (qScoreDist == null) {
+      json.put("NoContent", "No Distribution is available.");
+      return json;
     }
-    
+
     if (qScoreDist.aboveQ(20) != -1d) {
       combQs.put(">Q20", qScoreDist.aboveQ(20));
     }
@@ -74,14 +72,15 @@ public class MetrixQualityMetricsDecorator {
     JSONArray combA = new JSONArray();
     Map<Integer, MutableLong> combDist = qScoreDist.getQualityScoreDist();
     for (Integer i : combDist.keySet()) {
-      combA.add(i-1,  Double.valueOf(df.format(combDist.get(i).get())));
+      combA.add(i - 1, Double.valueOf(df.format(combDist.get(i).get())));
     }
     combQs.put("raw", combA);
 
     json.put("combinedReadQualityScores", combQs);
 
     JSONArray laneQualities = new JSONArray();
-    //Map<Integer, QScoreDist> qScoreLaneDist = qualityScores.getQScoreDistributionByLane();
+    // Map<Integer, QScoreDist> qScoreLaneDist =
+    // qualityScores.getQScoreDistributionByLane();
     for (Integer lane : qScoreDistByLane.keySet()) {
       JSONObject lqLane = new JSONObject();
       QScoreDist dist = qScoreDistByLane.get(lane);
@@ -89,7 +88,7 @@ public class MetrixQualityMetricsDecorator {
       JSONArray a = new JSONArray();
       Map<Integer, MutableLong> sDist = dist.getQualityScoreDist();
       for (Integer i : sDist.keySet()) {
-        a.add(i-1,  Double.valueOf(df.format(sDist.get(i).get())));
+        a.add(i - 1, Double.valueOf(df.format(sDist.get(i).get())));
       }
       lqLane.put("raw", a);
       lqLane.put(">Q20", dist.aboveQ(20));
@@ -100,13 +99,14 @@ public class MetrixQualityMetricsDecorator {
     json.put("perLaneQualityScores", laneQualities);
 
     JSONArray cycleQualities = new JSONArray();
-    //Map<Integer, Metric> qScoreCycleDist = qualityScores.getQScoreDistributionByCycle();
+    // Map<Integer, Metric> qScoreCycleDist =
+    // qualityScores.getQScoreDistributionByCycle();
 
     for (Integer cycle : qScoreDistByCycle.keySet()) {
       JSONObject qCycle = new JSONObject();
 
       Metric locMetric = qScoreDistByCycle.get(cycle);
-      try{
+      try {
         if (locMetric != null && !locMetric.getTileScores().isEmpty()) {
           qCycle.put("qMedian", Double.valueOf(df.format(locMetric.calcMedian())));
           qCycle.put("qMax", Double.valueOf(df.format(locMetric.calcMax())));
@@ -116,11 +116,12 @@ public class MetrixQualityMetricsDecorator {
           qCycle.put("qSD", Double.valueOf(df.format(locMetric.calcSD())));
           cycleQualities.add(qCycle);
         }
-      }catch(NumberFormatException NFE){
-          LoggerWrapper.log.log(Level.FINE, "Number format exception {0}", NFE);
-          qCycle.put("qQ1", 0);
-          qCycle.put("qQ3", 0);
-          qCycle.put("qSD", 0);
+      }
+      catch (NumberFormatException NFE) {
+        LoggerWrapper.log.log(Level.FINE, "Number format exception {0}", NFE);
+        qCycle.put("qQ1", 0);
+        qCycle.put("qQ3", 0);
+        qCycle.put("qSD", 0);
       }
     }
     json.put("perCycleQualityScores", cycleQualities);

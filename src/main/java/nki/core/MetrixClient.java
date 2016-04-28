@@ -59,10 +59,10 @@ public class MetrixClient {
     String searchTerm = "";
     ArrayList<String> searchResults = new ArrayList<>();
     int arrIdx = 0;
-    
+
     if (args.length == 0) {
-        System.err.println("[ERROR] Invalid number of arguments.");
-        System.exit(1);
+      System.err.println("[ERROR] Invalid number of arguments.");
+      System.exit(1);
     }
     else if (args.length == 1) {
       searchTerm = args[0];
@@ -76,8 +76,7 @@ public class MetrixClient {
       System.err.println("[ERROR] Invalid number of arguments.");
       System.exit(1);
     }
-    
-    
+
     try {
       SocketChannel sChannel = SocketChannel.open();
       sChannel.configureBlocking(true);
@@ -106,9 +105,10 @@ public class MetrixClient {
 
           while (ois != null) {
             serverAnswer = ois.readObject();
-            if (serverAnswer instanceof Command) {  // Answer is a Command with info message.
+            if (serverAnswer instanceof Command) { // Answer is a Command with
+                                                   // info message.
               nki.objects.Command commandIn = (nki.objects.Command) serverAnswer;
-              if (commandIn.getMessage()!= null) {
+              if (commandIn.getMessage() != null) {
                 System.out.println("[SERVER] " + commandIn.getMessage());
               }
             }
@@ -119,20 +119,23 @@ public class MetrixClient {
             if (serverAnswer instanceof SummaryCollection) {
               SummaryCollection sc = (SummaryCollection) serverAnswer;
               for (Summary sum : sc.getSummaryCollection()) {
-                // The following is an example. You can use any 'get'-method described in the Summary object (nki/objects/Summary,java) to access the parsed information.
+                // The following is an example. You can use any 'get'-method
+                // described in the Summary object (nki/objects/Summary,java) to
+                // access the parsed information.
                 System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
 
               }
             }
 
-            if (serverAnswer instanceof String) {      // Server returned a XML String with results.
+            if (serverAnswer instanceof String) { // Server returned a XML
+                                                  // String with results.
               String srvResp = (String) serverAnswer;
               System.out.println(srvResp);
             }
 
             /*
-            * Update
-            */
+             * Update
+             */
 
             if (serverAnswer instanceof Update) {
               Update up = (Update) serverAnswer;
@@ -143,7 +146,7 @@ public class MetrixClient {
             }
 
             /*
-             *	Exceptions
+             * Exceptions
              */
             if (serverAnswer instanceof EmptyResultSetCollection) {
               System.out.println(serverAnswer.toString());
@@ -163,7 +166,7 @@ public class MetrixClient {
           }
         }
         catch (IOException Ex) {
-          //	System.out.println("Error" + Ex);
+          // System.out.println("Error" + Ex);
         }
       }
     }

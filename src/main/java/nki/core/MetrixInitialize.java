@@ -1,11 +1,11 @@
 package nki.core;
 // Metrix - A server / client interface for Illumina Sequencing Metrics.
+
 // Copyright (C) 2014 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
-
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -47,61 +47,63 @@ public class MetrixInitialize {
 
     int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
     String host = configFile.getProperty("HOST", "localhost");
-    
-    try{
-        SocketChannel sChannel = SocketChannel.open();
-        sChannel.configureBlocking(true);
 
-        if (sChannel.connect(new InetSocketAddress(host, port))) {
-            // Create OutputStream for sending objects.
-            ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
+    try {
+      SocketChannel sChannel = SocketChannel.open();
+      sChannel.configureBlocking(true);
 
-            // Cteate Inputstream for receiving objects.
-            ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
-            String prevUpdate = "";
+      if (sChannel.connect(new InetSocketAddress(host, port))) {
+        // Create OutputStream for sending objects.
+        ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
 
-            Command cmd = new Command();
-            cmd.setRetType(Constants.COM_INITIALIZE);
+        // Cteate Inputstream for receiving objects.
+        ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
+        String prevUpdate = "";
 
-            // Send command
-            oos.writeObject(cmd);
-            oos.flush();
-            
-            Object srvResp = new Object();
-            
-            while(ois != null ){
-                srvResp = ois.readObject();
-                // Process expected response
-            
-                if (srvResp instanceof String) {
-                    String ans = (String) srvResp;
-                    System.out.println("Server responded: " + ans);
-                }              
+        Command cmd = new Command();
+        cmd.setRetType(Constants.COM_INITIALIZE);
 
-                /*
-                 *	Exceptions
-                 */
-                if (srvResp instanceof EmptyResultSetCollection) {
-                  System.out.println(srvResp.toString());
-                }
+        // Send command
+        oos.writeObject(cmd);
+        oos.flush();
 
-                if (srvResp instanceof InvalidCredentialsException) {
-                  System.out.println(srvResp.toString());
-                }
+        Object srvResp = new Object();
 
-                if (srvResp instanceof MissingCommandDetailException) {
-                  System.out.println(srvResp.toString());
-                }
+        while (ois != null) {
+          srvResp = ois.readObject();
+          // Process expected response
 
-                if (srvResp instanceof UnimplementedCommandException) {
-                  System.out.println(srvResp.toString());
-                }            
-            }
+          if (srvResp instanceof String) {
+            String ans = (String) srvResp;
+            System.out.println("Server responded: " + ans);
+          }
+
+          /*
+           * Exceptions
+           */
+          if (srvResp instanceof EmptyResultSetCollection) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof InvalidCredentialsException) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof MissingCommandDetailException) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof UnimplementedCommandException) {
+            System.out.println(srvResp.toString());
+          }
         }
-    }catch(EOFException EOF){
-    
-    }catch(Exception Ex){
-        Ex.printStackTrace();
+      }
+    }
+    catch (EOFException EOF) {
+
+    }
+    catch (Exception Ex) {
+      Ex.printStackTrace();
     }
   }
 }

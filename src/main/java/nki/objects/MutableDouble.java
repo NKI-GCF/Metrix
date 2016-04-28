@@ -31,7 +31,7 @@ public class MutableDouble implements Serializable {
     return val;
   }
 
-  //	public void avg(int numTiles){
+  // public void avg(int numTiles){
   public void avg() {
     this.val = val / numTiles;
   }

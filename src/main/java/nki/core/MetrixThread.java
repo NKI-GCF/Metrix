@@ -28,7 +28,6 @@ public class MetrixThread extends Thread {
   // Server logging of client connections and interactions.
   private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
 
-
   public MetrixThread(SocketChannel sChannel) {
     super("MetrixThread");
     this.sChannel = sChannel;
@@ -58,17 +57,20 @@ public class MetrixThread extends Thread {
             commandClient = (Command) clientMsg;
 
             try {
-                //LoggerWrapper.log.log(Level.FINE, "[SERVER] Received command [{0}]: Fetch run(s) with state: {1} ({2}) in format {3}", new Object[]{sChannel.socket().getInetAddress().getHostAddress(), commandClient.getState(), commandClient.getRetType(), commandClient.getFormat()});
-                LoggerWrapper.log.log(Level.INFO, "[SERVER] Calling Command processor.");
-                CommandProcessor cp = new CommandProcessor(commandClient, oos, ds);
+              // LoggerWrapper.log.log(Level.FINE, "[SERVER] Received command
+              // [{0}]: Fetch run(s) with state: {1} ({2}) in format {3}", new
+              // Object[]{sChannel.socket().getInetAddress().getHostAddress(),
+              // commandClient.getState(), commandClient.getRetType(),
+              // commandClient.getFormat()});
+              LoggerWrapper.log.log(Level.INFO, "[SERVER] Calling Command processor.");
+              CommandProcessor cp = new CommandProcessor(commandClient, oos, ds);
             }
             catch (CommandValidityException CVE) {
               metrixLogger.log.warning("Command Validity Exception! " + CVE);
             }
             catch (InvalidCredentialsException ICE) {
               metrixLogger.log.warning("Invalid Credentials Exception! " + ICE);
-            }
-            finally {
+            } finally {
               // Close all channels and client streams.
               ds = null;
               sChannel.socket().close();
@@ -91,7 +93,7 @@ public class MetrixThread extends Thread {
         CNFE.printStackTrace();
       }
       catch (Exception Ex) {
-        //	metrixLogger.log.info( "Disconnect from client. ");
+        // metrixLogger.log.info( "Disconnect from client. ");
       }
 
     }
@@ -100,5 +102,4 @@ public class MetrixThread extends Thread {
     }
 
   }
-}	
-
+}

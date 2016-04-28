@@ -42,8 +42,10 @@ public class MetrixLive {
     // Set a value for command
     sendCommand.setFormat(Constants.COM_FORMAT_OBJ);
     sendCommand.setRunId("");
-    sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of the available Constants here
-    
+    sendCommand.setType(Constants.COM_TYPE_SIMPLE); // You can also make use of
+                                                    // the available Constants
+                                                    // here
+
     try (InputStream fin = new FileInputStream(new File(absFile))) {
       configFile.load(fin);
     }
@@ -80,7 +82,8 @@ public class MetrixLive {
 
           while (ois.available() > 1) {
             serverAnswer = ois.readObject();
-            if (serverAnswer instanceof Command) {  // Answer is a Command with info message.
+            if (serverAnswer instanceof Command) { // Answer is a Command with
+                                                   // info message.
               nki.objects.Command commandIn = (nki.objects.Command) serverAnswer;
             }
 
@@ -90,22 +93,24 @@ public class MetrixLive {
             if (serverAnswer instanceof SummaryCollection) {
               SummaryCollection sc = (SummaryCollection) serverAnswer;
               for (Summary sum : sc.getSummaryCollection()) {
-                if(sum.getState() == Constants.STATE_INIT){
-                    System.out.println("Run " + sum.getRunId() + " is in the initialization phase.");
-                }else if(sum.getState() == Constants.STATE_RUNNING){
-                    System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
+                if (sum.getState() == Constants.STATE_INIT) {
+                  System.out.println("Run " + sum.getRunId() + " is in the initialization phase.");
+                }
+                else if (sum.getState() == Constants.STATE_RUNNING) {
+                  System.out.println(sum.getRunId() + " - Current Cycle: " + sum.getCurrentCycle() + "/" + sum.getTotalCycles());
                 }
               }
             }
 
-            if (serverAnswer instanceof String) {      // Server returned a XML String with results.
+            if (serverAnswer instanceof String) { // Server returned a XML
+                                                  // String with results.
               String srvResp = (String) serverAnswer;
               System.out.println("RESPONSE " + srvResp);
             }
 
             /*
-            * Update
-            */
+             * Update
+             */
             if (serverAnswer instanceof Update) {
               Update up = (Update) serverAnswer;
               if (!up.getChecksum().toString().equals(prevUpdate)) {
@@ -115,7 +120,7 @@ public class MetrixLive {
             }
 
             /*
-             *	Exceptions
+             * Exceptions
              */
             if (serverAnswer instanceof EmptyResultSetCollection) {
               System.out.println(serverAnswer.toString());
@@ -135,7 +140,7 @@ public class MetrixLive {
           }
         }
         catch (IOException Ex) {
-          
+
         }
       }
     }

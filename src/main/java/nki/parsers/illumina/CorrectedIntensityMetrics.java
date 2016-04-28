@@ -35,26 +35,21 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
     return iScores;
   }
 
-    /*
-     * Binary structure:
-     * 	byte 0: file version number (2)
-     *	byte 1: length of each record
-     *	bytes (N * 48 + 2) - (N *48 + 49): record:
-     *	2 bytes: lane number (uint16)
-     *	2 bytes: tile number (uint16)
-     *	2 bytes: cycle number (uint16)
-     *	2 bytes: average intensity (uint16)
-     *	2 bytes: average corrected int for channel A (uint16)
-     *	2 bytes: average corrected int for channel C (uint16)
-     *	2 bytes: average corrected int for channel G (uint16)
-     *	2 bytes: average corrected int for channel T (uint16)
-     *	2 bytes: average corrected int for called clusters for base A (uint16)
-     *	2 bytes: average corrected int for called clusters for base C (uint16)
-     *	2 bytes: average corrected int for called clusters for base G (uint16)
-     *	2 bytes: average corrected int for called clusters for base T (uint16)
-     *	20 bytes: number of base calls (float) for No Call and channel [A, C, G, T] respectively
-     *	4 bytes: signal to noise ratio (float)
-     */
+  /*
+   * Binary structure: byte 0: file version number (2) byte 1: length of each
+   * record bytes (N * 48 + 2) - (N *48 + 49): record: 2 bytes: lane number
+   * (uint16) 2 bytes: tile number (uint16) 2 bytes: cycle number (uint16) 2
+   * bytes: average intensity (uint16) 2 bytes: average corrected int for
+   * channel A (uint16) 2 bytes: average corrected int for channel C (uint16) 2
+   * bytes: average corrected int for channel G (uint16) 2 bytes: average
+   * corrected int for channel T (uint16) 2 bytes: average corrected int for
+   * called clusters for base A (uint16) 2 bytes: average corrected int for
+   * called clusters for base C (uint16) 2 bytes: average corrected int for
+   * called clusters for base G (uint16) 2 bytes: average corrected int for
+   * called clusters for base T (uint16) 20 bytes: number of base calls (float)
+   * for No Call and channel [A, C, G, T] respectively 4 bytes: signal to noise
+   * ratio (float)
+   */
 
   public IntensityScores digestData() {
     iScores = new IntensityScores();
@@ -95,49 +90,49 @@ public class CorrectedIntensityMetrics extends GenericIlluminaParser {
         }
 
         // Avg Corrected Int
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI, (double) leis.readUnsignedShort());
 
-        //-- Avg Corrected Int A
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_A, (double)leis.readUnsignedShort());
+        // -- Avg Corrected Int A
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_A, (double) leis.readUnsignedShort());
 
         // Avg Corrected Int C
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_C, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_C, (double) leis.readUnsignedShort());
 
         // Avg Corrected Int G
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_G, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_G, (double) leis.readUnsignedShort());
 
         // Avg Corrected Int T
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_T, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACI_T, (double) leis.readUnsignedShort());
 
-        //-- Avg Corrected Int Called Clusters A
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_A, (double)leis.readUnsignedShort());
+        // -- Avg Corrected Int Called Clusters A
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_A, (double) leis.readUnsignedShort());
 
         // Avg Corrected Int Called Clusters C
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_C, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_C, (double) leis.readUnsignedShort());
 
         // Avg Corrected Int Called Clusters G
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_G, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_G, (double) leis.readUnsignedShort());
 
         // Avg Corrected Int Called Clusters T
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_T, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_ACICC_T, (double) leis.readUnsignedShort());
 
-        //-- Num of base calls for No Call (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_NC, (double)leis.readFloat());
+        // -- Num of base calls for No Call (Float)
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_NC, (double) leis.readFloat());
 
         // Num of base calls for A (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_A, (double)leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_A, (double) leis.readFloat());
 
         // Num of base calls for C (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_C, (double)leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_C, (double) leis.readFloat());
 
         // Num of base calls for G (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_G, (double)leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_G, (double) leis.readFloat());
 
         // Num of base calls for T (Float)
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_T, (double)leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_BCS_T, (double) leis.readFloat());
 
         // Signal to noise ratio
-        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_SIGNOISE, (double)leis.readFloat());
+        iMap.addMapping(tileNr, Constants.METRIC_VAR_NUM_SIGNOISE, (double) leis.readFloat());
 
         cycleMap.put(cycleNr, iMap);
         iScores.setLane(cycleMap, laneNr);

@@ -34,7 +34,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
   public ExtractionMetrics(String source, int state) {
     super(ExtractionMetrics.class, source, state);
   }
-  
+
   public IntensityScores getIntensityScores() {
     if (iScores == null) {
       digestData();
@@ -48,20 +48,16 @@ public class ExtractionMetrics extends GenericIlluminaParser {
     }
     return fScores;
   }
-  
-    /*
-     * Binary structure:
-     *	byte 0: file version number (2)
-     *	byte 1: length of each record
-     *	bytes (N * 38 + 2) - (N *38 + 39): record:
-     *	2 bytes: lane number (uint16)
-     *	2 bytes: tile number (uint16)
-     *	2 bytes: cycle number (uint16)
-     *	4 x 4 bytes: fwhm scores (float) for channel [A, C, G, T] respectively
-     *	2 x 4 bytes: intensities (uint16) for channel [A, C, G, T] respectively
-     *	8 bytes: date/time of CIF creation
-     *
-     */
+
+  /*
+   * Binary structure: byte 0: file version number (2) byte 1: length of each
+   * record bytes (N * 38 + 2) - (N *38 + 39): record: 2 bytes: lane number
+   * (uint16) 2 bytes: tile number (uint16) 2 bytes: cycle number (uint16) 4 x 4
+   * bytes: fwhm scores (float) for channel [A, C, G, T] respectively 2 x 4
+   * bytes: intensities (uint16) for channel [A, C, G, T] respectively 8 bytes:
+   * date/time of CIF creation
+   *
+   */
 
   public void digestData() {
     iScores = new IntensityScores();
@@ -78,7 +74,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
       this.recordLength = leis.readByte();
       iScores.setRecordLength(this.recordLength);
       fScores.setRecordLength(this.recordLength);
-    
+
       iScores.setSource(this.getSource());
       fScores.setSource(this.getSource());
     }
@@ -91,7 +87,7 @@ public class ExtractionMetrics extends GenericIlluminaParser {
       Map<Integer, FWHMMap> cycleFWHMMap;
       IntensityMap iMap;
       FWHMMap fMap;
-      
+
       while (leis.available() > 40) {
         int laneNr = leis.readUnsignedShort();
         int tileNr = leis.readUnsignedShort();
@@ -109,8 +105,8 @@ public class ExtractionMetrics extends GenericIlluminaParser {
         }
         else {
           cycleFWHMMap = new HashMap<>();
-        }        
-        
+        }
+
         if (cycleMap.containsKey(cycleNr)) {
           iMap = cycleMap.get(cycleNr);
         }
@@ -123,41 +119,42 @@ public class ExtractionMetrics extends GenericIlluminaParser {
         }
         else {
           fMap = new FWHMMap();
-        }        
-        
-        //-- FWHM Score A
+        }
+
+        // -- FWHM Score A
         fMap.addMapping(tileNr, Constants.METRIC_VAR_FWHM_A, (double) leis.readFloat());
-        
-        //-- FWHM Score C
+
+        // -- FWHM Score C
         fMap.addMapping(tileNr, Constants.METRIC_VAR_FWHM_C, (double) leis.readFloat());
-        
-        //-- FWHM Score G
+
+        // -- FWHM Score G
         fMap.addMapping(tileNr, Constants.METRIC_VAR_FWHM_G, (double) leis.readFloat());
-        
-        //-- FWHM Score T
+
+        // -- FWHM Score T
         fMap.addMapping(tileNr, Constants.METRIC_VAR_FWHM_T, (double) leis.readFloat());
 
-        //-- Raw Int A
-        iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_A, (double)leis.readUnsignedShort());
+        // -- Raw Int A
+        iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_A, (double) leis.readUnsignedShort());
 
         // Raw Int C
-        iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_C, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_C, (double) leis.readUnsignedShort());
 
         // Raw Int G
-        iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_G, (double)leis.readUnsignedShort());
+        iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_G, (double) leis.readUnsignedShort());
 
         // Raw Int T
-        iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_T, (double)leis.readUnsignedShort());
-        
+        iMap.addMapping(tileNr, Constants.METRIC_EX_RAWINT_T, (double) leis.readUnsignedShort());
+
         long dateTime = leis.readLong();
-        
+
         cycleMap.put(cycleNr, iMap);
         cycleFWHMMap.put(cycleNr, fMap);
-        
+
         iScores.setLane(cycleMap, laneNr);
         fScores.setLane(cycleFWHMMap, laneNr);
       }
-    }catch (EOFException eof) {
+    }
+    catch (EOFException eof) {
       // Reached end of file
       // Lazy EOF - Ignore checking.
     }

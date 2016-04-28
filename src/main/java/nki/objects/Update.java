@@ -33,8 +33,7 @@ public class Update implements Serializable {
       }
       catch (Exception ex) {
 
-      }
-      finally {
+      } finally {
         out.close();
         bos.close();
       }
@@ -72,4 +71,3 @@ public class Update implements Serializable {
     return this.totalProcessing;
   }
 }
-

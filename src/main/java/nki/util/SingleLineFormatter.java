@@ -13,18 +13,12 @@ public final class SingleLineFormatter extends Formatter {
   @Override
   public String format(LogRecord record) {
     Date dateObj = new Date(record.getMillis());
-    //formatting Date with time information
+    // formatting Date with time information
     SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("E dd-MM-yyyy HH:mm:ss");
     String date = DATE_FORMAT.format(dateObj);
 
     StringBuilder sb = new StringBuilder();
-    sb.append("[" + record.getLevel().getLocalizedName() + "] ")
-        .append("[" + date)
-        .append("] ")
-        .append("[" + record.getSourceClassName() + "]")
-        .append(" : ")
-        .append(formatMessage(record))
-        .append(LINE_SEPARATOR);
+    sb.append("[" + record.getLevel().getLocalizedName() + "] ").append("[" + date).append("] ").append("[" + record.getSourceClassName() + "]").append(" : ").append(formatMessage(record)).append(LINE_SEPARATOR);
 
     if (record.getThrown() != null) {
       try {
