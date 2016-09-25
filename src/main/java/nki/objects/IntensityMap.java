@@ -36,7 +36,8 @@ public class IntensityMap implements Serializable {
     return sMap.size();
   }
 
-  // Calculate the average intensity for this cycle for each metric constant [A, C, G, T]
+  // Calculate the average intensity for this cycle for each metric constant [A,
+  // C, G, T]
   public Map<String, MutableInt> getCycleAverageInt() {
     Map<String, MutableInt> avgOverTiles = new HashMap<>();
 
@@ -67,7 +68,8 @@ public class IntensityMap implements Serializable {
     return avgOverTiles;
   }
 
-  // Calculate the average intensity of called clusters for this cycle for each metric constant [A, C, G, T]
+  // Calculate the average intensity of called clusters for this cycle for each
+  // metric constant [A, C, G, T]
   public Map<String, MutableInt> getCycleAverageCCInt() {
     Map<String, MutableInt> avgOverTiles = new HashMap<>();
 
@@ -98,7 +100,8 @@ public class IntensityMap implements Serializable {
     return avgOverTiles;
   }
 
-    // Calculate the average raw intensity for this cycle for each metric constant [A, C, G, T]
+  // Calculate the average raw intensity for this cycle for each metric constant
+  // [A, C, G, T]
   public Map<String, MutableInt> getCycleAverageRawInt() {
     Map<String, MutableInt> avgOverTiles = new HashMap<>();
 
@@ -128,15 +131,15 @@ public class IntensityMap implements Serializable {
 
     return avgOverTiles;
   }
-  
+
   // Return the number of called bases foreach channel [NC, A, C, G, T]
   public void getNumberCalledBases() {
-    //public HashMap<String, float> getNumberCalledBases(){
+    // public HashMap<String, float> getNumberCalledBases(){
 
   }
 
   // Calculate average Signal To Noise Ratio for this cycle
-//	public float getAverageSTNRatio(){
+  // public float getAverageSTNRatio(){
   public void getAverageSTNRatio() {
 
   }

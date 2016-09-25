@@ -1,11 +1,11 @@
 package nki.core;
 // Metrix - A server / client interface for Illumina Sequencing Metrics.
+
 // Copyright (C) 2014 Bernd van der Veen
 
 // This program comes with ABSOLUTELY NO WARRANTY;
 // This is free software, and you are welcome to redistribute it
 // under certain conditions; for more information please see LICENSE.txt
-
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -55,8 +55,8 @@ public class MetrixGCFdb {
     String searchTerm = "";
 
     if (args.length == 0) {
-        System.err.println("Invalid number of arguments.");
-        System.exit(1);
+      System.err.println("Invalid number of arguments.");
+      System.exit(1);
     }
     else if (args.length == 1) {
       searchTerm = args[0];
@@ -73,69 +73,70 @@ public class MetrixGCFdb {
 
     int port = Integer.parseInt(configFile.getProperty("PORT", "10000"));
     String host = configFile.getProperty("HOST", "localhost");
-    
-       
-    try{
-        SocketChannel sChannel = SocketChannel.open();
-        sChannel.configureBlocking(true);
 
-        if (sChannel.connect(new InetSocketAddress(host, port))) {
-            // Create OutputStream for sending objects.
-            ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
+    try {
+      SocketChannel sChannel = SocketChannel.open();
+      sChannel.configureBlocking(true);
 
-            // Cteate Inputstream for receiving objects.
-            ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
-            String prevUpdate = "";
+      if (sChannel.connect(new InetSocketAddress(host, port))) {
+        // Create OutputStream for sending objects.
+        ObjectOutputStream oos = new ObjectOutputStream(sChannel.socket().getOutputStream());
 
-            Command cmd = new Command();
-            cmd.setFormat(Constants.COM_FORMAT_OBJ);
-            cmd.setRunIdSearch(searchTerm);
-            cmd.setRetType(Constants.COM_SEARCH);
-            
-            oos.writeObject(cmd);
-            oos.flush();
-            
-            Object srvResp = new Object();
-            
-            while(ois != null ){
-                srvResp = ois.readObject();
-                // Process expected response
-                if (srvResp instanceof Summary) {
-                    Summary sum = (Summary) srvResp;
-                    System.out.println("Got my run: " + sum.getRunId());
-                    processResult(sum);
-                }
-                
-                if (srvResp instanceof SummaryCollection) {
-                    SummaryCollection sc = (SummaryCollection) srvResp;
-                    Summary sum = sc.getSummaryCollection().get(0);
-                    processResult(sum);
-                }
+        // Cteate Inputstream for receiving objects.
+        ObjectInputStream ois = new ObjectInputStream(sChannel.socket().getInputStream());
+        String prevUpdate = "";
 
-                /*
-                 *	Exceptions
-                 */
-                if (srvResp instanceof EmptyResultSetCollection) {
-                  System.out.println(srvResp.toString());
-                }
+        Command cmd = new Command();
+        cmd.setFormat(Constants.COM_FORMAT_OBJ);
+        cmd.setRunIdSearch(searchTerm);
+        cmd.setRetType(Constants.COM_SEARCH);
 
-                if (srvResp instanceof InvalidCredentialsException) {
-                  System.out.println(srvResp.toString());
-                }
+        oos.writeObject(cmd);
+        oos.flush();
 
-                if (srvResp instanceof MissingCommandDetailException) {
-                  System.out.println(srvResp.toString());
-                }
+        Object srvResp = new Object();
 
-                if (srvResp instanceof UnimplementedCommandException) {
-                  System.out.println(srvResp.toString());
-                }            
-            }
+        while (ois != null) {
+          srvResp = ois.readObject();
+          // Process expected response
+          if (srvResp instanceof Summary) {
+            Summary sum = (Summary) srvResp;
+            System.out.println("Got my run: " + sum.getRunId());
+            processResult(sum);
+          }
+
+          if (srvResp instanceof SummaryCollection) {
+            SummaryCollection sc = (SummaryCollection) srvResp;
+            Summary sum = sc.getSummaryCollection().get(0);
+            processResult(sum);
+          }
+
+          /*
+           * Exceptions
+           */
+          if (srvResp instanceof EmptyResultSetCollection) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof InvalidCredentialsException) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof MissingCommandDetailException) {
+            System.out.println(srvResp.toString());
+          }
+
+          if (srvResp instanceof UnimplementedCommandException) {
+            System.out.println(srvResp.toString());
+          }
         }
-    }catch(EOFException EOF){
-    
-    }catch(Exception Ex){
-        Ex.printStackTrace();
+      }
+    }
+    catch (EOFException EOF) {
+
+    }
+    catch (Exception Ex) {
+      Ex.printStackTrace();
     }
   }
 
@@ -151,9 +152,9 @@ public class MetrixGCFdb {
 
   public static void processResult(Summary sum) {
     boolean isRemote = true;
-    
+
     MetrixContainer mc = new MetrixContainer(sum, isRemote);
-    
+
     JSONObject allOut = new MetrixContainerDecorator(mc, isRemote).toJSON();
     System.out.print(allOut.toString());
   }

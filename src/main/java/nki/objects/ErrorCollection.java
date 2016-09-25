@@ -54,7 +54,7 @@ public class ErrorCollection implements Serializable {
     if (cycleMap == null) {
       eScores.put(lanenr, content);
     }
-    else {  // Merge maps
+    else { // Merge maps
       Map<Integer, ErrorMap> tmpMap = new HashMap<>(content);
       tmpMap.keySet().removeAll(cycleMap.keySet());
       cycleMap.putAll(content);
@@ -79,10 +79,10 @@ public class ErrorCollection implements Serializable {
           for (int numErrors : emetricMap.keySet()) {
             double numReads = emetricMap.get(numErrors);
 
-            if (numErrors == -1) {    // Error rate
+            if (numErrors == -1) { // Error rate
               eDist.setRunDistScore(lane, numReads);
             }
-            else {            // Number of reads with num errors
+            else { // Number of reads with num errors
               eDist.setRunDistScoreByCycle(cycle, numErrors, numReads);
               eDist.setRunDistScoreByLane(lane, numErrors, numReads);
             }

@@ -18,11 +18,14 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.logging.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Properties;
 import java.util.concurrent.*;
 
 import nki.io.DataStore;
-import nki.util.LoggerWrapper;
 
 public class MetrixServer {
 
@@ -30,7 +33,7 @@ public class MetrixServer {
 
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
   // Instantiate Logger
-  private LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(MetrixLive.class);
 
   public void run() throws IOException {
     // Use external properties file, outside of jar location.
@@ -50,11 +53,11 @@ public class MetrixServer {
       fin.close();
     }
     catch (FileNotFoundException FNFE) {
-      metrixLogger.log.severe("[ERROR] Properties file not found.");
+      log.error("Properties file not found.", FNFE);
       System.exit(1);
     }
     catch (IOException Ex) {
-      metrixLogger.log.severe("[ERROR] Reading properties file. " + Ex.toString());
+      log.error("Reading properties file.", Ex);
       System.exit(1);
     }
 
@@ -70,30 +73,32 @@ public class MetrixServer {
       System.out.println("under certain conditions; for more information please see LICENSE.txt\n");
     }
 
-    metrixLogger.log.info("Metrix Server initializing...");
+    log.info("Metrix Server initializing...");
 
     try {
       // Initialize datastore for sequence run summary data.
       DataStore ds = new DataStore();
       if (ds.conn == null) {
-        metrixLogger.log.severe("Cannot establish MySQL connection.");
+        log.error("Cannot establish MySQL connection.");
         System.exit(1);
       }
 
-      metrixLogger.log.info("Initializing Directory Watcher Service with directory: " + runDir);
+      log.info("Initializing Directory Watcher Service with directory: " + runDir);
       // Start Watcher service
       final MetrixWatch mw = new MetrixWatch(runDir, false, ds);
       mw.start();
 
-      metrixLogger.log.info("Directory Watcher Service started - Monitoring.");
+      log.info("Directory Watcher Service started - Monitoring.");
 
       // Configure Server
       ServerSocketChannel ssChannel = ServerSocketChannel.open();
       ssChannel.configureBlocking(true);
-      ssChannel.socket().bind(new InetSocketAddress(port));  // Call server / Bind socket and port.
+      ssChannel.socket().bind(new InetSocketAddress(port)); // Call server /
+                                                            // Bind socket and
+                                                            // port.
 
-      metrixLogger.log.info("Metrix communication thread initialized.");
-      metrixLogger.log.info("Metrix backlog service initializing...");
+      log.info("Metrix communication thread initialized.");
+      log.info("Metrix backlog service initializing...");
       final Runnable backlog = new Runnable() {
         @Override
         public void run() {
@@ -117,7 +122,7 @@ public class MetrixServer {
       }
     }
     catch (IOException Ex) {
-      LoggerWrapper.log.log(Level.SEVERE, "IOException initializing server. {0}", Ex.toString());
+      log.error("IOException initializing server.", Ex);
       System.exit(1);
     }
   }

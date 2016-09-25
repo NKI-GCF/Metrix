@@ -17,29 +17,32 @@ public class LittleEndianInputStream extends FilterInputStream {
   }
 
   public ArrayList<Byte> readByteArray(int n) throws IOException {
-      ArrayList<Byte> arr = new ArrayList<>();
-      for (int i = 0; i < n; i++) {
-        arr.add((byte) in.read());
-      }
-      
-      return arr;
+    ArrayList<Byte> arr = new ArrayList<>();
+    for (int i = 0; i < n; i++) {
+      arr.add((byte) in.read());
+    }
+
+    return arr;
   }
-  
+
   public boolean readBoolean() throws IOException {
     int bool = in.read();
-    if (bool == -1) throw new EOFException();
+    if (bool == -1)
+      throw new EOFException();
     return (bool != 0);
   }
 
   public byte readByte() throws IOException {
     int temp = in.read();
-    if (temp == -1) throw new EOFException();
+    if (temp == -1)
+      throw new EOFException();
     return (byte) temp;
   }
 
   public int readUnsignedByte() throws IOException {
     int temp = in.read();
-    if (temp == -1) throw new EOFException();
+    if (temp == -1)
+      throw new EOFException();
     return temp;
   }
 
@@ -48,21 +51,24 @@ public class LittleEndianInputStream extends FilterInputStream {
     int byte2 = in.read();
     // only need to test last byte read
     // if byte1 is -1 so is byte2
-    if (byte2 == -1) throw new EOFException();
+    if (byte2 == -1)
+      throw new EOFException();
     return (short) (((byte2 << 24) >>> 16) + (byte1 << 24) >>> 24);
   }
 
   public int readUnsignedShort() throws IOException {
     int byte1 = in.read();
     int byte2 = in.read();
-    if (byte2 == -1) throw new EOFException();
+    if (byte2 == -1)
+      throw new EOFException();
     return ((byte2 << 24) >>> 16) + ((byte1 << 24) >>> 24);
   }
 
   public char readChar() throws IOException {
     int byte1 = in.read();
     int byte2 = in.read();
-    if (byte2 == -1) throw new EOFException();
+    if (byte2 == -1)
+      throw new EOFException();
     return (char) (((byte2 << 24) >>> 16) + ((byte1 << 24) >>> 24));
   }
 
@@ -74,13 +80,10 @@ public class LittleEndianInputStream extends FilterInputStream {
     if (byte4 == -1) {
       throw new EOFException();
     }
-    return (byte4 << 24)
-           + ((byte3 << 24) >>> 8)
-           + ((byte2 << 24) >>> 16)
-           + ((byte1 << 24) >>> 24);
+    return (byte4 << 24) + ((byte3 << 24) >>> 8) + ((byte2 << 24) >>> 16) + ((byte1 << 24) >>> 24);
   }
 
-  //TODO testing for IndexMetrics num clusters
+  // TODO testing for IndexMetrics num clusters
   public long readUint32() throws IOException {
     long byte1 = in.read();
     long byte2 = in.read();
@@ -90,10 +93,7 @@ public class LittleEndianInputStream extends FilterInputStream {
       throw new EOFException();
     }
 
-    return (byte1&0XFF << 24) |
-           (byte2&0XFF << 16) |
-           (byte3&0XFF << 8)  |
-           (byte4&0xFF);
+    return (byte1 & 0XFF << 24) | (byte2 & 0XFF << 16) | (byte3 & 0XFF << 8) | (byte4 & 0xFF);
   }
 
   public long readLong() throws IOException {
@@ -108,14 +108,7 @@ public class LittleEndianInputStream extends FilterInputStream {
     if (byte8 == -1) {
       throw new EOFException();
     }
-    return (byte8 << 56)
-           + ((byte7 << 56) >>> 8)
-           + ((byte6 << 56) >>> 16)
-           + ((byte5 << 56) >>> 24)
-           + ((byte4 << 56) >>> 32)
-           + ((byte3 << 56) >>> 40)
-           + ((byte2 << 56) >>> 48)
-           + ((byte1 << 56) >>> 56);
+    return (byte8 << 56) + ((byte7 << 56) >>> 8) + ((byte6 << 56) >>> 16) + ((byte5 << 56) >>> 24) + ((byte4 << 56) >>> 32) + ((byte3 << 56) >>> 40) + ((byte2 << 56) >>> 48) + ((byte1 << 56) >>> 56);
   }
 
   public final String readUTF8String(int numBytes) throws IOException {
@@ -137,7 +130,8 @@ public class LittleEndianInputStream extends FilterInputStream {
   }
 
   public final int skipBytes(int n) throws IOException {
-    for (int i = 0; i < n; i += (int) skip(n - i)) ;
+    for (int i = 0; i < n; i += (int) skip(n - i))
+      ;
     return n;
   }
 }

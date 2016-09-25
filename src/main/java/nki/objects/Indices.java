@@ -42,7 +42,7 @@ public class Indices implements Serializable {
         sampleMap = setSample(readNr, laneNr, numClusters, idx);
         project.put(sampName, sampleMap);
       }
-      else {  // Update num clusters.
+      else { // Update num clusters.
         sampleMap.setNumClusters(sampleMap.getNumClusters() + numClusters);
       }
 

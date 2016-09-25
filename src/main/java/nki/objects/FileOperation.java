@@ -19,11 +19,11 @@ import org.w3c.dom.NodeList;
 public class FileOperation extends PostProcess {
 
   public static final long serialVersionUID = 42L;
-  private String processType;  // Copy or Symlink
-  private String globbing;    // Globbing string
-  private String source;      // Source path for operation
-  private String destination;  // Destination path for operation
-  private String overwrite;    //
+  private String processType; // Copy or Symlink
+  private String globbing; // Globbing string
+  private String source; // Source path for operation
+  private String destination; // Destination path for operation
+  private String overwrite; //
 
   public FileOperation(Node parentNode, Node childNode) {
     NamedNodeMap parentAttr = parentNode.getAttributes();
@@ -118,8 +118,7 @@ public class FileOperation extends PostProcess {
   }
 
   public boolean isValid() {
-    if (source != null && !source.equals("") &&
-        destination != null && !destination.equals("")) {
+    if (source != null && !source.equals("") && destination != null && !destination.equals("")) {
       return true;
     }
     else {
@@ -127,4 +126,3 @@ public class FileOperation extends PostProcess {
     }
   }
 }
-

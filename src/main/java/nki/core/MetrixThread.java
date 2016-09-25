@@ -8,26 +8,25 @@ package nki.core;
 // under certain conditions; for more information please see LICENSE.txt
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Level;
 
-import nki.objects.Command;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nki.exceptions.CommandValidityException;
 import nki.exceptions.InvalidCredentialsException;
 import nki.io.DataStore;
+import nki.objects.Command;
 import nki.parsers.metrix.CommandProcessor;
-import nki.constants.Constants;
-import nki.util.LoggerWrapper;
 
 public class MetrixThread extends Thread {
   private SocketChannel sChannel = null;
   private boolean timedBool = false;
 
   // Server logging of client connections and interactions.
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
-
+  protected static final Logger log = LoggerFactory.getLogger(MetrixThread.class);
 
   public MetrixThread(SocketChannel sChannel) {
     super("MetrixThread");
@@ -58,17 +57,20 @@ public class MetrixThread extends Thread {
             commandClient = (Command) clientMsg;
 
             try {
-                //LoggerWrapper.log.log(Level.FINE, "[SERVER] Received command [{0}]: Fetch run(s) with state: {1} ({2}) in format {3}", new Object[]{sChannel.socket().getInetAddress().getHostAddress(), commandClient.getState(), commandClient.getRetType(), commandClient.getFormat()});
-                LoggerWrapper.log.log(Level.INFO, "[SERVER] Calling Command processor.");
-                CommandProcessor cp = new CommandProcessor(commandClient, oos, ds);
+              // LoggerWrapper.log.log(Level.FINE, "[SERVER] Received command
+              // [{0}]: Fetch run(s) with state: {1} ({2}) in format {3}", new
+              // Object[]{sChannel.socket().getInetAddress().getHostAddress(),
+              // commandClient.getState(), commandClient.getRetType(),
+              // commandClient.getFormat()});
+              log.info("[SERVER] Calling Command processor.");
+              CommandProcessor cp = new CommandProcessor(commandClient, oos, ds);
             }
             catch (CommandValidityException CVE) {
-              metrixLogger.log.warning("Command Validity Exception! " + CVE);
+              log.warn("Command Validity Exception! ", CVE);
             }
             catch (InvalidCredentialsException ICE) {
-              metrixLogger.log.warning("Invalid Credentials Exception! " + ICE);
-            }
-            finally {
+              log.warn("Invalid Credentials Exception! ", ICE);
+            } finally {
               // Close all channels and client streams.
               ds = null;
               sChannel.socket().close();
@@ -78,27 +80,26 @@ public class MetrixThread extends Thread {
             }
           }
           else if (clientMsg instanceof String) {
-            LoggerWrapper.log.log(Level.INFO, "[SERVER] Received command via socket. " + clientMsg);
+            log.info("[SERVER] Received command via socket. " + clientMsg);
           }
           else {
-            metrixLogger.log.warning("[SERVER] Command not understood [" + clientMsg + "]");
+            log.warn("[SERVER] Command not understood [" + clientMsg + "]");
           }
 
-          metrixLogger.log.info("[SERVER] Finished processing command");
+          log.info("[SERVER] Finished processing command");
         }
       }
       catch (ClassNotFoundException CNFE) {
         CNFE.printStackTrace();
       }
       catch (Exception Ex) {
-        //	metrixLogger.log.info( "Disconnect from client. ");
+        log.info("Disconnect from client. ", Ex);
       }
 
     }
     catch (IOException Ex) {
-      metrixLogger.log.warning("[Log] Client disconnected or IOException " + Ex.toString());
+      log.warn("[Log] Client disconnected.", Ex);
     }
 
   }
-}	
-
+}

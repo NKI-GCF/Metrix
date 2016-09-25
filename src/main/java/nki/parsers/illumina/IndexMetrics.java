@@ -8,18 +8,17 @@
 package nki.parsers.illumina;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nki.objects.Indices;
-import nki.util.LoggerWrapper;
 
 public class IndexMetrics extends GenericIlluminaParser {
   private Indices indices;
 
   // Instantiate Logger
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
+  protected static final Logger log = LoggerFactory.getLogger(IndexMetrics.class);
 
   public IndexMetrics(String source, int state) {
     super(IndexMetrics.class, source, state);
@@ -32,21 +31,16 @@ public class IndexMetrics extends GenericIlluminaParser {
     return indices;
   }
 
-   /*
-   * Binary structure
-	 * byte 0: file version number (1)
-	 * bytes (variable length): record:
-	 * 2 bytes: lane number (uint16)
-	 * 2 bytes: tile number (uint16)
-	 * 2 bytes: read number (uint16)
-	 * 2 bytes: number of bytes Y for index sequence (uint16)
-	 * Y bytes: index sequence (string encoded in UTF-8)
-	 * 4 bytes: number of clusters identified as index (uint32)
-	 * 2 bytes: number of bytes V for sample name (uint16)
-	 * V bytes: sample name string (string encoded in UTF-8)
-	 * 2 bytes: number of bytes W for sample project name (uint16)
-	 * W bytes: sample project name string (string encoded in UTF-8
-	 */
+  /*
+   * Binary structure byte 0: file version number (1) bytes (variable length):
+   * record: 2 bytes: lane number (uint16) 2 bytes: tile number (uint16) 2
+   * bytes: read number (uint16) 2 bytes: number of bytes Y for index sequence
+   * (uint16) Y bytes: index sequence (string encoded in UTF-8) 4 bytes: number
+   * of clusters identified as index (uint32) 2 bytes: number of bytes V for
+   * sample name (uint16) V bytes: sample name string (string encoded in UTF-8)
+   * 2 bytes: number of bytes W for sample project name (uint16) W bytes: sample
+   * project name string (string encoded in UTF-8
+   */
 
   public Indices digestData() {
     indices = new Indices();
@@ -56,10 +50,10 @@ public class IndexMetrics extends GenericIlluminaParser {
 
     // First catch version of metrics file.
     try {
-      setVersion(leis.readByte());    // Set Version
+      setVersion(leis.readByte()); // Set Version
     }
     catch (IOException Ex) {
-      LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordlength: {0}", Ex.toString());
+      log.error("Error in parsing version number and recordlength.", Ex);
     }
 
     boolean readBool = true;
@@ -74,7 +68,7 @@ public class IndexMetrics extends GenericIlluminaParser {
 
         String indexSeq = leis.readUTF8String(numBytesIdx);
 
-        long numClustersIdx = (long)leis.readInt();
+        long numClustersIdx = (long) leis.readInt();
         int numBytesSample = leis.readUnsignedShort();
 
         String sampleSeq = leis.readUTF8String(numBytesSample);
@@ -93,4 +87,4 @@ public class IndexMetrics extends GenericIlluminaParser {
     return indices;
   }
 
-}	
+}

@@ -21,7 +21,7 @@ public class FileOperations {
     this.source = source;
     this.destination = destination;
     this.options = options;
-    //	exclusions = new ArrayList<Path>(source.listFiles());
+    // exclusions = new ArrayList<Path>(source.listFiles());
   }
 
   public FileOperations(Path source, String pattern) {
@@ -31,9 +31,7 @@ public class FileOperations {
   }
 
   public boolean recursiveCopy() throws IOException {
-    if (source == null ||
-        destination == null ||
-        options == null) {
+    if (source == null || destination == null || options == null) {
       return false;
     }
 

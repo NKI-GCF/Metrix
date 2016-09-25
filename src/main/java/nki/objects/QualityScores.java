@@ -56,7 +56,7 @@ public class QualityScores implements Serializable {
     if (cycleMap == null) {
       qScores.put(lanenr, content);
     }
-    else {  // Merge maps and replace existing entries
+    else { // Merge maps and replace existing entries
       Map<Integer, QualityMap> tmpMap = new HashMap<>(content);
       tmpMap.keySet().removeAll(cycleMap.keySet());
       cycleMap.putAll(content);
@@ -85,7 +85,8 @@ public class QualityScores implements Serializable {
           Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
           for (Integer qScore : qmetricMap.keySet()) {
             long metric = Long.valueOf(qmetricMap.get(qScore));
-            qScoreDist.setScore(qScore, metric);  // Set the metric in the QScore Distribution
+            qScoreDist.setScore(qScore, metric); // Set the metric in the QScore
+                                                 // Distribution
           }
         }
       }
@@ -105,7 +106,8 @@ public class QualityScores implements Serializable {
           Map<Integer, Integer> qmetricMap = qmap.getMappings().get(tile);
           for (Integer qScore : qmetricMap.keySet()) {
             long metric = Long.valueOf(qmetricMap.get(qScore));
-            qScoreDistLane.setScore(qScore, metric);  // Set the metric in the QScore Distribution
+            qScoreDistLane.setScore(qScore, metric); // Set the metric in the
+                                                     // QScore Distribution
           }
         }
       }

@@ -11,20 +11,19 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import nki.core.MetrixLogic;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nki.objects.QualityScores;
 import nki.objects.QualityMap;
-import nki.objects.Reads;
-import nki.util.LoggerWrapper;
 
 public class QualityMetrics extends GenericIlluminaParser {
   QualityScores qScores;
 
   // Instantiate Logger
-  private static final LoggerWrapper metrixLogger = LoggerWrapper.getInstance();
-  
+  protected static final Logger log = LoggerFactory.getLogger(QualityMetrics.class);
+
   public QualityMetrics(String source, int state) {
     super(QualityMetrics.class, source, state);
   }
@@ -36,16 +35,12 @@ public class QualityMetrics extends GenericIlluminaParser {
     return qScores;
   }
 
-	/*
-   * Binary structure:
-	 *	byte 0: file version number (4)
-	 *	byte 1: length of each record
-	 *	bytes (N * 206 + 2) - (N *206 + 207): record:
-	 *	2 bytes: lane number (uint16)
-	 *	2 bytes: tile number (uint16)
-	 *	2 bytes: cycle number (uint16)
-	 *	4 x 50 bytes: number of clusters assigned score (uint32) Q1 through Q50
-	 */
+  /*
+   * Binary structure: byte 0: file version number (4) byte 1: length of each
+   * record bytes (N * 206 + 2) - (N *206 + 207): record: 2 bytes: lane number
+   * (uint16) 2 bytes: tile number (uint16) 2 bytes: cycle number (uint16) 4 x
+   * 50 bytes: number of clusters assigned score (uint32) Q1 through Q50
+   */
 
   public QualityScores digestData() {
     qScores = new QualityScores();
@@ -58,7 +53,7 @@ public class QualityMetrics extends GenericIlluminaParser {
       setRecordLength(leis.readByte());
     }
     catch (IOException Ex) {
-      LoggerWrapper.log.log(Level.SEVERE, "Error in parsing version number and recordLength: {0}", Ex.toString());
+      log.error("Error in parsing version number and recordLength", Ex);
     }
 
     try {
@@ -69,19 +64,22 @@ public class QualityMetrics extends GenericIlluminaParser {
       qScores.setRecordLength(this.getRecordLength());
 
       // Has QScore Binning been applied? (Only for V5)
-      if(this.getVersion() == 5){
+      if (this.getVersion() == 5) {
         byte qsBinning = leis.readByte();
-        if(qsBinning == 1){
-              // QScoreBinning has been applied. Skip next 22 bytes where Qbins are described.
-            LoggerWrapper.log.log(Level.FINE, "QScoreBinning has been applied.");
-            leis.readByteArray(22);
-        }else{
-            LoggerWrapper.log.log(Level.FINE, "No QScoreBinning has been applied.");
+        if (qsBinning == 1) {
+          // QScoreBinning has been applied. Skip next 22 bytes where Qbins are
+          // described.
+          log.debug("QScoreBinning has been applied.");
+          leis.readByteArray(22);
         }
-      }else{
-            LoggerWrapper.log.log(Level.FINE, "Version different: " + this.getVersion());
+        else {
+          log.debug("No QScoreBinning has been applied.");
+        }
       }
-      
+      else {
+        log.debug("Version different: " + this.getVersion());
+      }
+
       boolean qcFlag;
       QualityMap qMap;
       while (true) {
@@ -111,11 +109,11 @@ public class QualityMetrics extends GenericIlluminaParser {
           if (qcRecord == 50) {
             qcFlag = false;
           }
-          //if(!rds.cycleIsIndex(cycleNr)){
+          // if(!rds.cycleIsIndex(cycleNr)){
           qMap.addMapping(tileNr, qcRecord, leis.readInt());
-          //}else{
-          //	leis.readInt();
-          //}
+          // }else{
+          // leis.readInt();
+          // }
           qcRecord++;
         }
         cycleMap.put(cycleNr, qMap);
@@ -126,7 +124,7 @@ public class QualityMetrics extends GenericIlluminaParser {
       // Reached end of file
     }
     catch (IOException Ex) {
-      LoggerWrapper.log.severe("IO Error in parsing Quality Metrics");
+      log.error("Error in parsing Quality Metrics", Ex);
     }
 
     // Return the qualityScores object.

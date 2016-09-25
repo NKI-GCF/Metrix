@@ -57,8 +57,8 @@ public class MetrixPostProcess {
     String procResult = runDir;
     int arrIdx = 0;
     // If run string argumented : Search in rundir
-    //	1  result 	: Parse and print
-    //	>2 results 	: Print and prompt user for selection
+    // 1 result : Parse and print
+    // >2 results : Print and prompt user for selection
 
     System.out.println("Metrix Illumina Sequencing Run Demultiplexing.\n");
 
@@ -100,12 +100,12 @@ public class MetrixPostProcess {
     System.out.println("Searching for: " + searchTerm);
     File dir = new File(runDir);
     File[] files = dir.listFiles();
-    
-    if(files == null){
+
+    if (files == null) {
       System.out.println("[Error] Reading Illumina run directory path.");
       System.exit(1);
     }
-    
+
     for (File file : files) {
       if (file.isFile()) {
         continue;

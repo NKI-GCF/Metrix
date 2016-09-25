@@ -70,17 +70,13 @@ public class ErrorDist implements Serializable {
   public void setRunDistScoreByCycle(int cycle, int numErrors, double score) {
     if (eScoreDistCycle.containsKey(cycle)) {
 
-		/*
-			if((eScoreDistCycle.get(cycle)).containsKey(numErrors)){
-				((eScoreDistCycle.get(cycle)).get(numErrors)).add(score);
-			}else{
-				HashMap<Integer, List<Float>> eMap = eScoreDistCycle.get(cycle);
-				List<Float> l = new ArrayList<Float>();
-				l.add(score);
-				eMap.put(numErrors, l);
-				eScoreDistCycle.put(cycle, eMap);
-			}
-		*/
+      /*
+       * if((eScoreDistCycle.get(cycle)).containsKey(numErrors)){
+       * ((eScoreDistCycle.get(cycle)).get(numErrors)).add(score); }else{
+       * HashMap<Integer, List<Float>> eMap = eScoreDistCycle.get(cycle);
+       * List<Float> l = new ArrayList<Float>(); l.add(score);
+       * eMap.put(numErrors, l); eScoreDistCycle.put(cycle, eMap); }
+       */
       Map<Integer, List<Double>> eMap = eScoreDistCycle.get(cycle);
 
       List<Double> l;

@@ -16,7 +16,8 @@ import nki.objects.Reads;
 
 public class RunInfoHandler {
 
-  public static Summary parseAll(Document doc, Summary sum) { // Also argument Summary file.
+  public static Summary parseAll(Document doc, Summary sum) { // Also argument
+                                                              // Summary file.
     Element root = doc.getDocumentElement();
     // Run -id -Number
     Node runNode = doc.getElementsByTagName("Run").item(0);
@@ -25,19 +26,19 @@ public class RunInfoHandler {
 
     String[] spl = runID.split("_");
     switch (spl[3].substring(0, 1)) {
-      case "A":
-        sum.setSide("A");
-        sum.setInstrumentType("HiSeq");
-        break;
-      case "B":
-        sum.setSide("B");
-        sum.setInstrumentType("HiSeq");
-        break;
-      default:
-        // Instrument type is MiSeq - No Side
-        sum.setSide("");
-        sum.setInstrumentType("MiSeq");
-        break;
+    case "A":
+      sum.setSide("A");
+      sum.setInstrumentType("HiSeq");
+      break;
+    case "B":
+      sum.setSide("B");
+      sum.setInstrumentType("HiSeq");
+      break;
+    default:
+      // Instrument type is MiSeq - No Side
+      sum.setSide("");
+      sum.setInstrumentType("MiSeq");
+      break;
     }
 
     if (spl.length > 4) {
@@ -48,7 +49,7 @@ public class RunInfoHandler {
     sum.setInstrumentRunNumber(runInstrumentNr);
 
     // Flowcell
-    String flowCell = "XXXXXXXXXX";  // Default empty flowcell ID
+    String flowCell = "XXXXXXXXXX"; // Default empty flowcell ID
     if (doc.getElementsByTagName("Flowcell").getLength() != 0) {
       flowCell = doc.getElementsByTagName("Flowcell").item(0).getTextContent();
     }
@@ -70,7 +71,7 @@ public class RunInfoHandler {
     Reads rd = new Reads();
     int totalCycles = 0;
     for (int i = 0; i < readNodes.getLength(); i++) {
-      // Read  -Number -NumCycles -IsIndexedRead
+      // Read -Number -NumCycles -IsIndexedRead
       Node readNode = readNodes.item(i);
       String readNumber = "";
       if (readNode.getAttributes().getLength() >= 3) {
@@ -99,46 +100,54 @@ public class RunInfoHandler {
     if (readNodes.getLength() == 1) {
       sum.setRunType("Single Read");
       sum.setIsIndexed(false);
-    }else if(readNodes.getLength() == 2){
-        if(readNodes.item(1).hasChildNodes()){
-            // Support legacy RunInfo formatting.
-            if(readNodes.item(1).getChildNodes().item(0).getNodeName() == "Index"){
-                sum.setRunType("Single Read");
-                sum.setIsIndexed(true);
-            }
-        }else{
-            if(readNodes.item(1).getAttributes().getLength() > 2){
-                if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
-                    sum.setRunType("Paired End");
-                    sum.setIsIndexed(false);
-                 }else{
-                    sum.setRunType("Single Read");
-                    sum.setIsIndexed(true);           
-                }
-            }else{
-                if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead") != null){
-                    if(readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")){
-                        sum.setRunType("Paired End");
-                        sum.setIsIndexed(false);
-                     }else{
-                        sum.setRunType("Single Read");
-                        sum.setIsIndexed(true);           
-                    }                    
-                }else{
-                    sum.setRunType("Paired End");
-                    sum.setIsIndexed(false);
-                }
-            }
+    }
+    else if (readNodes.getLength() == 2) {
+      if (readNodes.item(1).hasChildNodes()) {
+        // Support legacy RunInfo formatting.
+        if (readNodes.item(1).getChildNodes().item(0).getNodeName() == "Index") {
+          sum.setRunType("Single Read");
+          sum.setIsIndexed(true);
         }
-    }else if(readNodes.getLength() == 3) {    // Run Type = Paired End Run
+      }
+      else {
+        if (readNodes.item(1).getAttributes().getLength() > 2) {
+          if (readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")) {
+            sum.setRunType("Paired End");
+            sum.setIsIndexed(false);
+          }
+          else {
+            sum.setRunType("Single Read");
+            sum.setIsIndexed(true);
+          }
+        }
+        else {
+          if (readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead") != null) {
+            if (readNodes.item(1).getAttributes().getNamedItem("IsIndexedRead").getTextContent().equalsIgnoreCase("N")) {
+              sum.setRunType("Paired End");
+              sum.setIsIndexed(false);
+            }
+            else {
+              sum.setRunType("Single Read");
+              sum.setIsIndexed(true);
+            }
+          }
+          else {
+            sum.setRunType("Paired End");
+            sum.setIsIndexed(false);
+          }
+        }
+      }
+    }
+    else if (readNodes.getLength() == 3) { // Run Type = Paired End Run
       sum.setRunType("Paired End");
       sum.setIsIndexed(true);
-    }else if(readNodes.getLength() == 4) {    // Run Type = Nextera Run
+    }
+    else if (readNodes.getLength() == 4) { // Run Type = Nextera Run
       sum.setRunType("Nextera");
       sum.setIsIndexed(true);
     }
 
-    sum.setReads(rd);  // Store in Summary object
+    sum.setReads(rd); // Store in Summary object
 
     // FlowcellLayout -LaneCount -SurfaceCount -SwathCount -TileCount
     Node fcLayout;

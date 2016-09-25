@@ -16,7 +16,6 @@ import java.util.Map;
 
 import org.w3c.dom.*;
 
-
 public class ClusterDensity implements Serializable {
 
   public static final long serialVersionUID = 42L;
@@ -147,6 +146,5 @@ public class ClusterDensity implements Serializable {
   public String getType() {
     return type;
   }
-
 
 }

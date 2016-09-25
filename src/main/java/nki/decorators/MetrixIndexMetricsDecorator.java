@@ -11,7 +11,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
+ * Decorator to output objects contained within a MetrixContainer to TSV, CSV
+ * and JSON
  *
  * @author Rob Davey
  * @date 07/04/14
@@ -27,11 +28,12 @@ public class MetrixIndexMetricsDecorator {
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
     Map<String, Map<String, SampleInfo>> indexMap = null;
-    if(indices != null){
-        indexMap = indices.getIndices();
-    }else{
-        json.put("NoDistFound", "[NoIndexDist]");
-        return json;
+    if (indices != null) {
+      indexMap = indices.getIndices();
+    }
+    else {
+      json.put("NoDistFound", "[NoIndexDist]");
+      return json;
     }
 
     for (String projectName : indexMap.keySet()) {
@@ -55,8 +57,8 @@ public class MetrixIndexMetricsDecorator {
 
     return json;
   }
-  
-   public Element toXML() {
+
+  public Element toXML() {
     Document xmlDoc = null;
     Element root = null;
     try {
@@ -65,7 +67,7 @@ public class MetrixIndexMetricsDecorator {
       DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
       xmlDoc = docBuilder.newDocument();
       Element idxStats = xmlDoc.createElement("Indices");
-      
+
       for (String projectName : indices.getIndices().keySet()) {
         Element projEle = xmlDoc.createElement("Project");
         projEle.setAttribute("name", projectName);
@@ -83,12 +85,13 @@ public class MetrixIndexMetricsDecorator {
           projEle.appendChild(sampleEle);
         }
         idxStats.appendChild(projEle);
-       }
-       return idxStats;
-    }catch(Exception Ex){
-        
+      }
+      return idxStats;
     }
-    
+    catch (Exception Ex) {
+
+    }
+
     return root;
-   }
+  }
 }

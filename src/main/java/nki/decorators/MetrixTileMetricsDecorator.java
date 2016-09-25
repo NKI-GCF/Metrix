@@ -9,7 +9,8 @@ import nki.objects.*;
 import nki.parsers.illumina.TileMetrics;
 
 /**
- * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
+ * Decorator to output objects contained within a MetrixContainer to TSV, CSV
+ * and JSON
  *
  * @author Rob Davey
  * @date 07/04/14
@@ -26,45 +27,42 @@ public class MetrixTileMetricsDecorator {
   private ClusterDensity clusterDensityPassingFilter;
   private PhasingCollection phasingMap;
   private PhasingCollection prephasingMap;
-  
+
   public MetrixTileMetricsDecorator(TileMetrics tileMetrics, Reads reads) {
     this.tileMetrics = tileMetrics;
     this.reads = reads;
   }
 
-  public MetrixTileMetricsDecorator(ClusterDensity clusterDensity, 
-                                    ClusterDensity clusterDensityPassingFilter, 
-                                    PhasingCollection phasingMap,
-                                    PhasingCollection prephasingMap,
-                                    Reads reads){
-      this.clusterDensity = clusterDensity;
-      this.clusterDensityPassingFilter = clusterDensityPassingFilter;
-      this.phasingMap = phasingMap;
-      this.prephasingMap = prephasingMap;
-      this.reads = reads;
+  public MetrixTileMetricsDecorator(ClusterDensity clusterDensity, ClusterDensity clusterDensityPassingFilter, PhasingCollection phasingMap, PhasingCollection prephasingMap, Reads reads) {
+    this.clusterDensity = clusterDensity;
+    this.clusterDensityPassingFilter = clusterDensityPassingFilter;
+    this.phasingMap = phasingMap;
+    this.prephasingMap = prephasingMap;
+    this.reads = reads;
   }
-  
-    public MetrixTileMetricsDecorator(Summary sum){
-      this.clusterDensity = sum.getClusterDensity();
-      this.clusterDensityPassingFilter = sum.getClusterDensityPF();
-      this.phasingMap = sum.getPhasingMap();
-      this.prephasingMap = sum.getPrephasingMap();
-      this.reads = sum.getReads();
+
+  public MetrixTileMetricsDecorator(Summary sum) {
+    this.clusterDensity = sum.getClusterDensity();
+    this.clusterDensityPassingFilter = sum.getClusterDensityPF();
+    this.phasingMap = sum.getPhasingMap();
+    this.prephasingMap = sum.getPrephasingMap();
+    this.reads = sum.getReads();
   }
-  
+
   public JSONObject toJSON() {
     JSONObject json = new JSONObject();
 
-    if(clusterDensity == null || clusterDensityPassingFilter == null){
-        if(tileMetrics != null){
-            clusterDensity = tileMetrics.getCDmap();
-            clusterDensityPassingFilter = tileMetrics.getCDpfMap();
-        }else{
-            json.put("clusterDensities", "[NoDistAvailable]");
-            return json;
-        }
+    if (clusterDensity == null || clusterDensityPassingFilter == null) {
+      if (tileMetrics != null) {
+        clusterDensity = tileMetrics.getCDmap();
+        clusterDensityPassingFilter = tileMetrics.getCDpfMap();
+      }
+      else {
+        json.put("clusterDensities", "[NoDistAvailable]");
+        return json;
+      }
     }
-    
+
     JSONArray clusterDensities = new JSONArray();
     for (int lane : clusterDensity.toObj().keySet()) {
       JSONObject cdLane = new JSONObject();
@@ -89,17 +87,18 @@ public class MetrixTileMetricsDecorator {
         clusterDensities.add(cdLane);
       }
     }
-    if(clusterDensity != null){
-        json.put("clusterDensities", clusterDensities);
-    }else{
-        json.put("clusterDensities", "[NoDistAvailable]");
+    if (clusterDensity != null) {
+      json.put("clusterDensities", clusterDensities);
+    }
+    else {
+      json.put("clusterDensities", "[NoDistAvailable]");
     }
 
-    if(phasingMap == null || prephasingMap == null){
-        phasingMap = tileMetrics.getPhasingMap();
-        prephasingMap = tileMetrics.getPrephasingMap();
+    if (phasingMap == null || prephasingMap == null) {
+      phasingMap = tileMetrics.getPhasingMap();
+      prephasingMap = tileMetrics.getPrephasingMap();
     }
-        
+
     JSONArray phasingMetrics = new JSONArray();
     for (int lane : phasingMap.toObj().keySet()) {
       JSONObject pLane = new JSONObject();
@@ -119,15 +118,14 @@ public class MetrixTileMetricsDecorator {
 
       phasingMetrics.add(pLane);
     }
-    if(phasingMap != null){
-        json.put("phasingMetrics", phasingMetrics);
-    }else{
-        json.put("phasingMetrics", "NoDistAvailable");
+    if (phasingMap != null) {
+      json.put("phasingMetrics", phasingMetrics);
+    }
+    else {
+      json.put("phasingMetrics", "NoDistAvailable");
     }
 
     return json;
   }
-  
-  
-  
+
 }

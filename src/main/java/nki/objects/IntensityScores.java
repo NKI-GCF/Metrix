@@ -53,7 +53,7 @@ public class IntensityScores implements Serializable {
     if (cycleMap == null) {
       iScores.put(lanenr, content);
     }
-    else {  // Merge maps and replace existing entries
+    else { // Merge maps and replace existing entries
       Map<Integer, IntensityMap> tmpMap = new HashMap<>(content);
       tmpMap.keySet().removeAll(cycleMap.keySet());
       cycleMap.putAll(content);
@@ -106,8 +106,8 @@ public class IntensityScores implements Serializable {
 
     return iDistAvgCC;
   }
-  
-  public IntensityDist getRawIntensityDist(){
+
+  public IntensityDist getRawIntensityDist() {
     IntensityDist iDistRaw = new IntensityDist();
 
     // Lane -> CycleMap

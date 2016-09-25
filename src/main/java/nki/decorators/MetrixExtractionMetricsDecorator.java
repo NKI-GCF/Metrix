@@ -14,11 +14,14 @@ import nki.objects.MutableInt;
 import nki.parsers.illumina.ExtractionMetrics;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Decorator to output objects contained within a MetrixContainer to TSV, CSV and JSON
+ * Decorator to output objects contained within a MetrixContainer to TSV, CSV
+ * and JSON
  *
  * @author Bernd van der Veen
  * @date 14/07/14
@@ -26,38 +29,41 @@ import org.w3c.dom.Element;
  */
 public class MetrixExtractionMetricsDecorator {
   private ExtractionMetrics extractionMetrics;
-  private IntensityDist riDist;
-  private FWHMDist fwhmDist;
+  private final IntensityDist riDist;
+  private final FWHMDist fwhmDist;
+  protected static final Logger log = LoggerFactory.getLogger(MetrixExtractionMetricsDecorator.class);
 
   public MetrixExtractionMetricsDecorator(ExtractionMetrics extractionMetrics) {
     this.extractionMetrics = extractionMetrics;
     this.riDist = extractionMetrics.getIntensityScores().getRawIntensityDist();
     this.fwhmDist = extractionMetrics.getFWHMScores().getAverageFWHMDist();
   }
-  
-  public MetrixExtractionMetricsDecorator(IntensityDist iDist, FWHMDist fwhmDist){
-      this.riDist = iDist;
-      this.fwhmDist = fwhmDist;
+
+  public MetrixExtractionMetricsDecorator(IntensityDist iDist, FWHMDist fwhmDist) {
+    this.riDist = iDist;
+    this.fwhmDist = fwhmDist;
   }
 
-public JSONObject toJSON() {
+  public JSONObject toJSON() {
     JSONObject jsonCombined = new JSONObject();
-    if(riDist != null){
-        jsonCombined.put("rawIntensities", generateJSON(riDist));
-    }else{
-        jsonCombined.put("rawIntensities", "NoDistAvailable");
+    if (riDist != null) {
+      jsonCombined.put("rawIntensities", generateJSON(riDist));
     }
-    
-    if(fwhmDist != null){
-        jsonCombined.put("fwhmDistribution", generateFWHMJSON(fwhmDist));
-    }else{
-        jsonCombined.put("fwhmDistribution", "NoDistAvailable");
+    else {
+      jsonCombined.put("rawIntensities", "NoDistAvailable");
     }
-    
+
+    if (fwhmDist != null) {
+      jsonCombined.put("fwhmDistribution", generateFWHMJSON(fwhmDist));
+    }
+    else {
+      jsonCombined.put("fwhmDistribution", "NoDistAvailable");
+    }
+
     return jsonCombined;
   }
-  
-  private JSONArray generateJSON(IntensityDist id){
+
+  private JSONArray generateJSON(IntensityDist id) {
     JSONArray averages = new JSONArray();
 
     for (int lane : id.getIntensities().keySet()) {
@@ -94,10 +100,10 @@ public JSONObject toJSON() {
       l.put("intG", cyclesG);
       averages.add(l);
     }
-      return averages;
+    return averages;
   }
 
-    private JSONArray generateFWHMJSON(FWHMDist fd){
+  private JSONArray generateFWHMJSON(FWHMDist fd) {
     JSONArray averages = new JSONArray();
 
     for (int lane : fd.getFWHMvalues().keySet()) {
@@ -134,9 +140,9 @@ public JSONObject toJSON() {
       l.put("fwhmG", cyclesG);
       averages.add(l);
     }
-      return averages;
+    return averages;
   }
-  
+
   public Element toXML() {
     Document xmlDoc = null;
     Element root = null;
@@ -148,27 +154,27 @@ public JSONObject toJSON() {
 
       root = xmlDoc.createElement("RawIntensityDistribution");
       xmlDoc.appendChild(root);
-      
-      // Generate as XML and add: 
+
+      // Generate as XML and add:
       // - rawIntensities from extraction metrics
       Element sumXml = xmlDoc.createElement("rawIntensity");
       sumXml = generateXML(sumXml, xmlDoc, riDist);
       root.appendChild(sumXml);
     }
     catch (Exception ex) {
-      ex.printStackTrace();
+      log.error("Building XML document", ex);
     }
-    
+
     return root;
   }
-    
+
   @SuppressWarnings("unchecked")
   public Element generateXML(Element sumXml, Document xmlDoc, IntensityDist id) {
     Iterator lit = id.getIntensities().entrySet().iterator();
     /*
-    * Key   = Lane	- Integer
-    * Value = CycleMap 	- HashMap<Integer, HashMap<String, Object>>
-    */
+     * Key = Lane - Integer Value = CycleMap - HashMap<Integer, HashMap<String,
+     * Object>>
+     */
     while (lit.hasNext()) {
       Element laneEle = xmlDoc.createElement("Lane");
       Map.Entry lanePairs = (Map.Entry) lit.next();
@@ -178,7 +184,7 @@ public JSONObject toJSON() {
       HashMap<Integer, HashMap<String, MutableInt>> cycleContent;
       cycleContent = (HashMap<Integer, HashMap<String, MutableInt>>) lanePairs.getValue();
       // Cycle Iterator
-      Iterator cit = (Iterator) cycleContent.entrySet().iterator();
+      Iterator cit = cycleContent.entrySet().iterator();
 
       while (cit.hasNext()) {
         Element cycleEle = xmlDoc.createElement("Cycle");
@@ -189,7 +195,7 @@ public JSONObject toJSON() {
         // Nested Intensities HashMap
         HashMap<String, MutableInt> cycleInt = (HashMap<String, MutableInt>) cycleEntries.getValue();
 
-        Iterator iit = (Iterator) cycleInt.entrySet().iterator();
+        Iterator iit = cycleInt.entrySet().iterator();
 
         Element intEle = xmlDoc.createElement("RawIntensities");
         while (iit.hasNext()) {
@@ -198,7 +204,7 @@ public JSONObject toJSON() {
           MutableInt intValue = (MutableInt) intensityPairs.getValue();
 
           if (intValue instanceof MutableInt) {
-            MutableInt in = (MutableInt) intValue;
+            MutableInt in = intValue;
             intEle.setAttribute(constName, Integer.toString(in.get()));
           }
 
@@ -212,14 +218,14 @@ public JSONObject toJSON() {
     return sumXml;
   }
 
-  public String toTab(){
-      String allTab = "Raw Intensities: \n";
-      // Add the average Corrected Intensities
-      allTab += generateTab(riDist);
-      
-      return allTab;
+  public String toTab() {
+    String allTab = "Raw Intensities: \n";
+    // Add the average Corrected Intensities
+    allTab += generateTab(riDist);
+
+    return allTab;
   }
-  
+
   @SuppressWarnings("unchecked")
   public String generateTab(IntensityDist id) {
     String out = "";
